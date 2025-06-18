@@ -528,43 +528,14 @@ export default function StoryEditPage() {
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-center">
                     <CardTitle className="text-xl">Node Library</CardTitle>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        onClick={() => handleCreateNode("question")}
-                        size="sm"
-                        className="shadow-sm"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Question
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateNode("end")}
-                        variant="outline"
-                        size="sm"
-                        className="shadow-sm"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        End
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateNode("callout")}
-                        variant="outline"
-                        size="sm"
-                        className="shadow-sm"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Callout
-                      </Button>
-                      <Button
-                        onClick={() => handleCreateNode("infocard")}
-                        variant="outline"
-                        size="sm"
-                        className="shadow-sm"
-                      >
-                        <Plus className="h-4 w-4 mr-2" />
-                        Info
-                      </Button>
-                    </div>
+                    <Button
+                      onClick={() => handleCreateNode("question")}
+                      size="sm"
+                      className="shadow-sm"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add new node
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardContent className="pt-0">
