@@ -9,8 +9,8 @@ import {
   migrateLegacyData,
 } from "../../lib/storage";
 import GameCard from "../../components/GameCard";
+import StoryProgressBar from "../../components/StoryProgressBar";
 import { Button } from "../../components/ui/button";
-import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
 
 export default function StoryPage() {
@@ -22,6 +22,32 @@ export default function StoryPage() {
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
   const [loopAnimation, setLoopAnimation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Calculate actual story progress - only count unique question nodes visited
+  const calculateCurrentProgress = (): number => {
+    if (!playerState || !currentStory?.flowData?.nodes) return 0;
+
+    // Get all unique question nodes visited (from history + current)
+    const allVisited = [...playerState.history, playerState.currentNodeId];
+    const uniqueQuestionNodes = new Set(
+      allVisited.filter((nodeId) => {
+        const node = currentStory.flowData.nodes[nodeId];
+        return node?.type === "question";
+      })
+    );
+
+    return uniqueQuestionNodes.size;
+  };
+
+  // Calculate total question nodes in story (actual progression steps)
+  const calculateTotalSteps = (
+    story: StoriesData["stories"][string]
+  ): number => {
+    if (!story?.flowData?.nodes) return 0;
+    const nodes = Object.values(story.flowData.nodes);
+    // Only count question nodes as real progression
+    return nodes.filter((node: Node) => node.type === "question").length;
+  };
 
   useEffect(() => {
     console.log("StoryPage: Loading story with ID:", storyId);
@@ -163,25 +189,29 @@ export default function StoryPage() {
   return (
     <div
       className={cn(
-        "min-h-screen",
-        "transition-all duration-500",
+        "min-h-screen transition-all duration-500",
         loopAnimation && "animate-pulse"
       )}
     >
-      {/* Progress indicator - simplified and moved */}
-      <div className="fixed top-16 right-4 z-50 flex items-center gap-3">
-        <Badge
-          variant="secondary"
-          className="bg-white/90 backdrop-blur-sm shadow-lg px-4 py-2 text-sm font-medium"
-        >
-          Step {playerState.history.length + 1}
-        </Badge>
-        <Badge
-          variant="outline"
-          className="bg-white/80 backdrop-blur-sm shadow-sm px-3 py-1 text-xs text-muted-foreground"
-        >
-          {currentStory.name}
-        </Badge>
+      {/* Header with Progress Bar */}
+      <div className="bg-white border-b border-gray-200">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <div className="flex justify-between items-center">
+            <h1 className="text-xl font-semibold text-gray-900">
+              {currentStory.name}
+            </h1>
+            <Button onClick={handleRestart} variant="outline" size="sm">
+              Restart
+            </Button>
+          </div>
+        </div>
+
+        {/* Progress Bar */}
+        <StoryProgressBar
+          currentStep={calculateCurrentProgress()}
+          totalSteps={calculateTotalSteps(currentStory)}
+          currentNodeType={currentNode.type}
+        />
       </div>
 
       {/* Story content area */}
