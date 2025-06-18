@@ -9,11 +9,6 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  // Don't show navbar on story play pages for immersion
-  if (pathname.startsWith("/story/")) {
-    return null;
-  }
-
   const isAdmin = pathname.startsWith("/admin");
   const isHome = pathname === "/";
 

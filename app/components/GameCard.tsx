@@ -130,11 +130,6 @@ export default function GameCard({
   if (node.type === "question") {
     return (
       <div className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100">
-        {/* TEST TEXT - DELETE ME */}
-        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white p-4 rounded text-2xl font-bold">
-          🚨 MODIFIED GAMECARD IS WORKING! 🚨
-        </div>
-
         {/* Background overlays for swipe feedback */}
         <motion.div
           className="fixed inset-0 bg-rose-100 flex items-center justify-start pl-20"

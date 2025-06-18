@@ -12,7 +12,6 @@ import GameCard from "../../components/GameCard";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
-import { ArrowLeft, Settings } from "lucide-react";
 
 export default function StoryPage() {
   const params = useParams();
@@ -169,48 +168,23 @@ export default function StoryPage() {
         loopAnimation && "animate-pulse"
       )}
     >
-      {/* Fixed UI Elements - Made more subtle */}
-      <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between p-4 bg-black/10 backdrop-blur-sm">
-        {/* Progress indicator with story name */}
-        <div className="flex items-center gap-3">
-          <Badge
-            variant="secondary"
-            className="bg-white/90 backdrop-blur-sm shadow-lg px-4 py-2 text-sm font-medium"
-          >
-            Step {playerState.history.length + 1}
-          </Badge>
-          <Badge
-            variant="outline"
-            className="bg-white/80 backdrop-blur-sm shadow-sm px-3 py-1 text-xs text-muted-foreground"
-          >
-            {currentStory.name}
-          </Badge>
-        </div>
-
-        {/* Navigation buttons */}
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={() => router.push("/")}
-            variant="outline"
-            size="sm"
-            className="bg-white/90 backdrop-blur-sm shadow-sm"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Stories
-          </Button>
-          <Button
-            onClick={() => router.push("/admin")}
-            variant="outline"
-            size="sm"
-            className="bg-white/90 backdrop-blur-sm shadow-sm"
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Admin
-          </Button>
-        </div>
+      {/* Progress indicator - simplified and moved */}
+      <div className="fixed top-16 right-4 z-50 flex items-center gap-3">
+        <Badge
+          variant="secondary"
+          className="bg-white/90 backdrop-blur-sm shadow-lg px-4 py-2 text-sm font-medium"
+        >
+          Step {playerState.history.length + 1}
+        </Badge>
+        <Badge
+          variant="outline"
+          className="bg-white/80 backdrop-blur-sm shadow-sm px-3 py-1 text-xs text-muted-foreground"
+        >
+          {currentStory.name}
+        </Badge>
       </div>
 
-      {/* Story content area - Remove constraining padding */}
+      {/* Story content area */}
       <div
         className={cn(
           "transition-all duration-300",
