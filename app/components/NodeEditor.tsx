@@ -286,6 +286,10 @@ export default function NodeEditor({
 
   // Handle dialog confirmation
   const handleCreateConfirm = (nodeType: string, nodeName: string) => {
+    // Auto-save current changes before creating new connected node
+    if (hasUnsavedChanges) {
+      onSave(editedNode);
+    }
     onCreateAndConnect?.(nodeType, nodeName, createDialog.currentField);
   };
 

@@ -223,7 +223,7 @@ export default function StoryEditPage() {
   ) => {
     if (!flowData || !editingNode) return;
 
-    // First, save the current editing node to persist any changes
+    // Use the current editing node (should already be saved by NodeEditor)
     const currentNodeWithChanges = editingNode;
     const updatedFlowData = {
       ...flowData,
