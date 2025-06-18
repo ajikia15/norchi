@@ -1,0 +1,14 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Norchi - Girchi Party Ideological Challenge System
+This is a Next.js 15 application built for Girchi, a libertarian political party from Georgia. The system creates interactive "ideological trap" dialogues that challenge users' beliefs through branching conversations, designed to expose contradictions in thinking or reinforce libertarian principles of individual freedom, personal responsibility, and minimal government interference.
+Tech Stack:
+Next.js 15 with TypeScript and React 19
+Tailwind CSS 4 with shadcn/ui components
+ReactFlow for visual flow graphs
+Lucide React icons
+
+Philosophy: Challenge populist/authoritarian thinking through structured debates on controversial topics like drug legalization, military service, and personal freedoms. Guide users through logical sequences that either expose belief contradictions or strengthen libertarian convictions.
