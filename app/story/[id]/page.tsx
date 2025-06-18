@@ -2,16 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PlayerState, StoriesData } from "../../types";
+import { PlayerState, StoriesData, Node } from "../../types";
 import {
   loadStoriesData,
   getDefaultStoriesData,
   migrateLegacyData,
 } from "../../lib/storage";
-import QuestionCard from "../../components/QuestionCard";
-import EndCard from "../../components/EndCard";
-import CalloutCard from "../../components/CalloutCard";
-import InfoCard from "../../components/InfoCard";
+import GameCard from "../../components/GameCard";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
 import { cn } from "../../lib/utils";
@@ -80,35 +77,24 @@ export default function StoryPage() {
   const currentStory = storiesData?.stories[storyId];
   const flowData = currentStory?.flowData;
 
-  const handleAnswer = (nextNodeId: string) => {
+  const handleAnswer = (nextNodeId: string, isChallenge: boolean = false) => {
     if (!flowData || !playerState) return;
 
-    // Check if this is a loop (staying on same node)
-    if (nextNodeId === playerState.currentNodeId) {
+    // Check if this is a loop (staying on same node) or challenge
+    if (nextNodeId === playerState.currentNodeId || isChallenge) {
       setLoopAnimation(true);
       setTimeout(() => setLoopAnimation(false), 500);
+
+      if (isChallenge) {
+        setPlayerState({
+          currentNodeId: nextNodeId,
+          history: playerState.history, // Don't add to history for challenges
+        });
+      }
       return;
     }
 
     // Move to next node
-    setPlayerState({
-      currentNodeId: nextNodeId,
-      history: [...playerState.history, playerState.currentNodeId],
-    });
-  };
-
-  const handleCalloutReturn = (returnNodeId: string) => {
-    if (!flowData || !playerState) return;
-
-    setPlayerState({
-      currentNodeId: returnNodeId,
-      history: [...playerState.history, playerState.currentNodeId],
-    });
-  };
-
-  const handleInfoContinue = (nextNodeId: string) => {
-    if (!flowData || !playerState) return;
-
     setPlayerState({
       currentNodeId: nextNodeId,
       history: [...playerState.history, playerState.currentNodeId],
@@ -154,7 +140,7 @@ export default function StoryPage() {
     );
   }
 
-  const currentNode = flowData.nodes[playerState.currentNodeId];
+  const currentNode: Node = flowData.nodes[playerState.currentNodeId];
 
   if (!currentNode) {
     return (
@@ -178,13 +164,13 @@ export default function StoryPage() {
   return (
     <div
       className={cn(
-        "min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30",
+        "min-h-screen",
         "transition-all duration-500",
         loopAnimation && "animate-pulse"
       )}
     >
-      {/* Fixed UI Elements */}
-      <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between p-4">
+      {/* Fixed UI Elements - Made more subtle */}
+      <div className="fixed inset-x-0 top-0 z-50 flex items-center justify-between p-4 bg-black/10 backdrop-blur-sm">
         {/* Progress indicator with story name */}
         <div className="flex items-center gap-3">
           <Badge
@@ -224,32 +210,18 @@ export default function StoryPage() {
         </div>
       </div>
 
-      {/* Story content area */}
-      <div className="pt-20 pb-8 px-4">
-        <div className="max-w-2xl mx-auto">
-          <div
-            className={cn(
-              "transition-all duration-300",
-              loopAnimation && "scale-105"
-            )}
-          >
-            {currentNode.type === "question" && (
-              <QuestionCard node={currentNode} onAnswer={handleAnswer} />
-            )}
-
-            {currentNode.type === "end" && (
-              <EndCard node={currentNode} onRestart={handleRestart} />
-            )}
-
-            {currentNode.type === "callout" && (
-              <CalloutCard node={currentNode} onReturn={handleCalloutReturn} />
-            )}
-
-            {currentNode.type === "infocard" && (
-              <InfoCard node={currentNode} onContinue={handleInfoContinue} />
-            )}
-          </div>
-        </div>
+      {/* Story content area - Remove constraining padding */}
+      <div
+        className={cn(
+          "transition-all duration-300",
+          loopAnimation && "scale-105"
+        )}
+      >
+        <GameCard
+          node={currentNode}
+          onAnswer={handleAnswer}
+          isTransitioning={loopAnimation}
+        />
       </div>
     </div>
   );
