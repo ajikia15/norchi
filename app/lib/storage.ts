@@ -1,4 +1,6 @@
 import { FlowData, Story, StoriesData } from "../types";
+import wineWeedStoryData from "./wine_weed_story.json";
+import armyServiceStoryData from "./army_service_story.json";
 
 const STORIES_STORAGE_KEY = "norchi-stories-data";
 const LEGACY_STORAGE_KEY = "norchi-flow-data"; // For migration
@@ -24,89 +26,14 @@ export function loadStoriesData(): StoriesData | null {
 }
 
 export function getDefaultStoriesData(): StoriesData {
-  return {
-    currentStoryId: "wine-weed-story",
-    stories: {
-      "wine-weed-story": createDefaultWineWeedStory(),
-    },
-  };
-}
+  const wineWeedStory = wineWeedStoryData.story as Story;
+  const armyServiceStory = armyServiceStoryData.story as Story;
 
-export function createDefaultWineWeedStory(): Story {
   return {
-    id: "wine-weed-story",
-    name: "Wine & Weed: A Georgian Perspective",
-    description:
-      "A logical challenge exploring consistency in personal freedom beliefs through Georgian wine culture.",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-    flowData: {
-      startNodeId: "q1",
-      nodes: {
-        q1: {
-          id: "q1",
-          type: "question",
-          text: "Georgians take pride in their wine. Should people be free to drink wine, even if some abuse it?",
-          options: [
-            { label: "Yes, of course", nextNodeId: "q2" },
-            { label: "No, too much harm", nextNodeId: "callout1" },
-            { label: "Why ask about wine?", nextNodeId: "callout1" },
-          ],
-        },
-        callout1: {
-          id: "callout1",
-          type: "callout",
-          text: "Wine's our heritage. If you'd ban it, you're contradicting Georgia.",
-          returnToNodeId: "q1",
-          buttonLabel: "Try Again",
-        },
-        q2: {
-          id: "q2",
-          type: "question",
-          text: "If the government banned wine tomorrow, would you stop drinking it?",
-          options: [
-            { label: "No, I'd find a way", nextNodeId: "q3" },
-            { label: "Yes, I obey the law", nextNodeId: "infocard1" },
-            { label: "Sounds illegal", nextNodeId: "callout2" },
-          ],
-        },
-        infocard1: {
-          id: "infocard1",
-          type: "infocard",
-          text: "Historically, Prohibition in the U.S. led to more crime, not less.",
-          nextNodeId: "q3",
-          buttonLabel: "Continue",
-        },
-        callout2: {
-          id: "callout2",
-          type: "callout",
-          text: "Respecting law is fine—unless the law's wrong. Think again.",
-          returnToNodeId: "q2",
-          buttonLabel: "Try Again",
-        },
-        q3: {
-          id: "q3",
-          type: "question",
-          text: "So what makes weed different from wine?",
-          options: [
-            { label: "It's more dangerous", nextNodeId: "callout3" },
-            { label: "It's not different", nextNodeId: "end1" },
-            { label: "Sounds biased", nextNodeId: "callout3" },
-          ],
-        },
-        callout3: {
-          id: "callout3",
-          type: "callout",
-          text: "8,000 years of wine tradition, zero logic on weed. Reconsider.",
-          returnToNodeId: "q3",
-          buttonLabel: "Try Again",
-        },
-        end1: {
-          id: "end1",
-          type: "end",
-          text: "You just argued for personal freedom over tradition. Welcome to choice.",
-        },
-      },
+    currentStoryId: wineWeedStory.id,
+    stories: {
+      [wineWeedStory.id]: wineWeedStory,
+      [armyServiceStory.id]: armyServiceStory,
     },
   };
 }
@@ -251,5 +178,7 @@ export function loadFlowData(): FlowData | null {
 }
 
 export function getDefaultFlowData(): FlowData {
-  return createDefaultWineWeedStory().flowData;
+  const defaultStories = getDefaultStoriesData();
+  const currentStory = defaultStories.stories[defaultStories.currentStoryId];
+  return currentStory.flowData;
 }
