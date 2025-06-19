@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
@@ -15,6 +15,14 @@ export const metadata: Metadata = {
     "A modern, card-based logical challenge system that presents provocative statements to explore belief-based reasoning patterns.",
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -24,7 +32,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${outfit.variable} font-sans antialiased`}>
         <Navbar />
-        {children}
+        <main className="relative">{children}</main>
       </body>
     </html>
   );

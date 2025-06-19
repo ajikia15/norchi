@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { PlayerState, StoriesData, Node } from "../../types";
 import {
   loadStoriesData,
@@ -9,9 +10,6 @@ import {
   migrateLegacyData,
 } from "../../lib/storage";
 import GameCard from "../../components/GameCard";
-import StoryProgressBar from "../../components/StoryProgressBar";
-import { Button } from "../../components/ui/button";
-import { cn } from "../../lib/utils";
 
 export default function StoryPage() {
   const params = useParams();
@@ -22,6 +20,7 @@ export default function StoryPage() {
   const [playerState, setPlayerState] = useState<PlayerState | null>(null);
   const [loopAnimation, setLoopAnimation] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [cardKey, setCardKey] = useState(0); // For forcing card re-mount
 
   // Calculate actual story progress - only count unique question nodes visited
   const calculateCurrentProgress = (): number => {
@@ -119,114 +118,63 @@ export default function StoryPage() {
       return;
     }
 
-    // Move to next node
+    // Move to next node and increment card key for animation
+    setCardKey((prev) => prev + 1);
     setPlayerState({
       currentNodeId: nextNodeId,
       history: [...playerState.history, playerState.currentNodeId],
     });
   };
 
-  const handleRestart = () => {
-    if (!flowData) return;
-
-    setPlayerState({
-      currentNodeId: flowData.startNodeId,
-      history: [],
-    });
-  };
-
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
-        <div className="text-2xl font-semibold text-gray-600 animate-pulse">
-          Loading your journey...
-        </div>
-      </div>
+      <motion.div
+        className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+      >
+        <motion.div
+          className="text-center space-y-4"
+          animate={{
+            scale: [1, 1.05, 1],
+            opacity: [0.7, 1, 0.7],
+          }}
+          transition={{
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut",
+          }}
+        >
+          <div className="text-3xl font-bold text-gray-800 mb-2">
+            Loading your journey...
+          </div>
+          <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mx-auto animate-pulse" />
+        </motion.div>
+      </motion.div>
     );
   }
 
   if (!storiesData || !currentStory || !flowData || !playerState) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-gradient-to-br from-red-50 to-red-100">
-        <div className="bg-red-100 border-2 border-red-300 text-red-800 px-6 py-4 rounded-2xl mb-6 text-center max-w-md">
-          <h2 className="text-xl font-bold mb-2">Story Not Found</h2>
-          <p className="mb-4">
-            The story you&apos;re looking for doesn&apos;t exist or has no
-            content.
-          </p>
-          <div className="flex gap-3 justify-center">
-            <Button onClick={() => router.push("/")} variant="outline">
-              Back to Stories
-            </Button>
-            <Button onClick={() => router.push("/admin")}>Admin Panel</Button>
-          </div>
-        </div>
-      </div>
-    );
+    router.push("/");
+    return null;
   }
 
   const currentNode: Node = flowData.nodes[playerState.currentNodeId];
 
   if (!currentNode) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-8 bg-gradient-to-br from-red-50 to-red-100">
-        <div className="bg-red-100 border-2 border-red-300 text-red-800 px-6 py-4 rounded-2xl mb-6 text-center">
-          <h2 className="text-xl font-bold mb-2">Oops! Path Not Found</h2>
-          <p>Node ID: {playerState.currentNodeId}</p>
-        </div>
-        <Button
-          onClick={handleRestart}
-          variant="destructive"
-          size="lg"
-          className="rounded-2xl"
-        >
-          Return to Start
-        </Button>
-      </div>
-    );
+    router.push("/");
+    return null;
   }
 
   return (
-    <div
-      className={cn(
-        "min-h-screen transition-all duration-500",
-        loopAnimation && "animate-pulse"
-      )}
-    >
-      {/* Header with Progress Bar */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex justify-between items-center">
-            <h1 className="text-xl font-semibold text-gray-900">
-              {currentStory.name}
-            </h1>
-            <Button onClick={handleRestart} variant="outline" size="sm">
-              Restart
-            </Button>
-          </div>
-        </div>
-
-        {/* Progress Bar */}
-        <StoryProgressBar
-          currentStep={calculateCurrentProgress()}
-          totalSteps={calculateTotalSteps(currentStory)}
-          currentNodeType={currentNode.type}
-        />
-      </div>
-
-      {/* Story content area */}
-      <div
-        className={cn(
-          "transition-all duration-300",
-          loopAnimation && "scale-105"
-        )}
-      >
-        <GameCard
-          node={currentNode}
-          onAnswer={handleAnswer}
-          isTransitioning={loopAnimation}
-        />
-      </div>
-    </div>
+    <GameCard
+      key={`gamecard-${playerState.currentNodeId}-${cardKey}`}
+      node={currentNode}
+      onAnswer={handleAnswer}
+      isTransitioning={loopAnimation}
+      currentStep={calculateCurrentProgress()}
+      totalSteps={calculateTotalSteps(currentStory)}
+    />
   );
 }

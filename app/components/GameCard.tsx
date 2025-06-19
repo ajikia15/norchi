@@ -1,9 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { motion, PanInfo, useMotionValue, useTransform } from "framer-motion";
+import { useState, useCallback, useEffect } from "react";
+import {
+  motion,
+  PanInfo,
+  useMotionValue,
+  useTransform,
+  AnimatePresence,
+} from "framer-motion";
 import { Node } from "../types";
-import { Button } from "./ui/button";
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,63 +16,175 @@ import {
   CheckCircle,
   AlertTriangle,
   Info,
+  Sparkles,
 } from "lucide-react";
+import StoryProgressBar from "./StoryProgressBar";
 
 interface GameCardProps {
   node: Node;
   onAnswer: (nextNodeId: string, isChallenge?: boolean) => void;
   isTransitioning: boolean;
+  currentStep?: number;
+  totalSteps?: number;
 }
 
 export default function GameCard({
   node,
   onAnswer,
   isTransitioning,
+  currentStep = 1,
+  totalSteps = 10,
 }: GameCardProps) {
   const [isShaking, setIsShaking] = useState(false);
+  const [isExiting, setIsExiting] = useState(false);
+  const [hasReachedThreshold, setHasReachedThreshold] = useState(false);
 
-  // Framer Motion values for smooth animations
+  // Prevent scrolling when component mounts and restore when unmounts
+  useEffect(() => {
+    // Add classes to prevent scrolling
+    document.documentElement.classList.add("game-active");
+    document.body.classList.add("game-active");
+
+    // Cleanup function to restore scrolling
+    return () => {
+      // Delay removal to prevent flashing during transitions
+      setTimeout(() => {
+        document.documentElement.classList.remove("game-active");
+        document.body.classList.remove("game-active");
+      }, 100);
+    };
+  }, []);
+
+  // Enhanced Framer Motion values for smooth animations
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
-  // Transform values for rotation and opacity based on drag
-  const rotate = useTransform(x, [-300, 0, 300], [-30, 0, 30]);
+  // Improved thresholds based on dating app best practices
+  const SWIPE_CONFIDENCE_THRESHOLD = 300; // Increased from 150px - requires more deliberate action
+  const VISUAL_FEEDBACK_THRESHOLD = 120; // Visual feedback starts here
+  const QUICK_SWIPE_VELOCITY = 1200; // Increased from 800 - faster swipes need more intention
+  const QUICK_SWIPE_MIN_DISTANCE = 100; // Increased from 50px for quick swipes
+
+  // Enhanced transform values with better curves
+  const rotate = useTransform(x, [-400, 0, 400], [-25, 0, 25]);
   const opacity = useTransform(
     x,
-    [-300, -150, 0, 150, 300],
-    [0.5, 0.8, 1, 0.8, 0.5]
+    [-400, -VISUAL_FEEDBACK_THRESHOLD, 0, VISUAL_FEEDBACK_THRESHOLD, 400],
+    [0.4, 0.9, 1, 0.9, 0.4]
   );
 
-  // Background overlay colors for feedback
-  const leftOverlay = useTransform(x, [-300, -50], [0.8, 0]);
-  const rightOverlay = useTransform(x, [50, 300], [0, 0.8]);
+  // Improved overlay gradients with better visual feedback
+  const leftOverlay = useTransform(
+    x,
+    [-400, -VISUAL_FEEDBACK_THRESHOLD, 0],
+    [1, 0.7, 0]
+  );
+  const rightOverlay = useTransform(
+    x,
+    [0, VISUAL_FEEDBACK_THRESHOLD, 400],
+    [0, 0.7, 1]
+  );
 
-  const handleDragEnd = (_event: unknown, info: PanInfo) => {
-    const threshold = 200; // Increased threshold for more intentional swipes
-    const velocity = Math.abs(info.velocity.x);
-    const offset = info.offset.x;
+  // Dynamic card scaling with threshold-based feedback
+  const scale = useTransform(
+    x,
+    [-400, -VISUAL_FEEDBACK_THRESHOLD, 0, VISUAL_FEEDBACK_THRESHOLD, 400],
+    [0.85, 0.95, 1, 0.95, 0.85]
+  );
 
-    if (node.type !== "question") return;
+  // Enhanced glow effect with threshold awareness
+  const glowOpacity = useTransform(
+    x,
+    [-VISUAL_FEEDBACK_THRESHOLD, 0, VISUAL_FEEDBACK_THRESHOLD],
+    [0.4, 0, 0.4]
+  );
 
-    // Higher velocity threshold for quick swipes
-    const quickSwipe = velocity > 1000;
-    const significantDrag = Math.abs(offset) > threshold;
+  // Threshold-based visual feedback
+  const leftThresholdOpacity = useTransform(
+    x,
+    [-SWIPE_CONFIDENCE_THRESHOLD, -VISUAL_FEEDBACK_THRESHOLD, 0],
+    [1, 0.3, 0]
+  );
+  const rightThresholdOpacity = useTransform(
+    x,
+    [0, VISUAL_FEEDBACK_THRESHOLD, SWIPE_CONFIDENCE_THRESHOLD],
+    [0, 0.3, 1]
+  );
 
-    if ((quickSwipe && Math.abs(offset) > 50) || significantDrag) {
-      if (offset > 0) {
-        // Right swipe - select right option
-        if (node.options[1]?.nextNodeId) {
-          onAnswer(node.options[1].nextNodeId);
+  // Track threshold crossing for haptic feedback simulation
+  const handleDrag = useCallback(
+    (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+      const currentX = info.offset.x;
+      const reachedThreshold = Math.abs(currentX) >= SWIPE_CONFIDENCE_THRESHOLD;
+
+      if (reachedThreshold !== hasReachedThreshold) {
+        setHasReachedThreshold(reachedThreshold);
+        // In a real app, you'd trigger haptic feedback here
+        // navigator.vibrate?.(50);
+      }
+    },
+    [hasReachedThreshold, SWIPE_CONFIDENCE_THRESHOLD]
+  );
+
+  const handleDragEnd = useCallback(
+    (_event: unknown, info: PanInfo) => {
+      const offset = info.offset.x;
+      const velocity = Math.abs(info.velocity.x);
+
+      if (node.type !== "question") return;
+
+      // Reset threshold state
+      setHasReachedThreshold(false);
+
+      // Improved decision logic based on dating app best practices
+      let shouldSwipe = false;
+
+      // High confidence swipe: large distance
+      if (Math.abs(offset) >= SWIPE_CONFIDENCE_THRESHOLD) {
+        shouldSwipe = true;
+      }
+      // Quick flick: high velocity with reasonable distance
+      else if (
+        velocity >= QUICK_SWIPE_VELOCITY &&
+        Math.abs(offset) >= QUICK_SWIPE_MIN_DISTANCE
+      ) {
+        shouldSwipe = true;
+      }
+
+      if (shouldSwipe) {
+        // Set exiting state immediately to prevent snapping
+        setIsExiting(true);
+
+        // Consistent exit timing
+        const exitDelay = 250;
+
+        if (offset > 0) {
+          // Right swipe - select right option
+          if (node.options[1]?.nextNodeId) {
+            setTimeout(() => onAnswer(node.options[1].nextNodeId), exitDelay);
+          }
+        } else {
+          // Left swipe - select left option
+          if (node.options[0]?.nextNodeId) {
+            setTimeout(() => onAnswer(node.options[0].nextNodeId), exitDelay);
+          }
         }
       } else {
-        // Left swipe - select left option
-        if (node.options[0]?.nextNodeId) {
-          onAnswer(node.options[0].nextNodeId);
-        }
+        // Smoothly return to center without snapping
+        x.set(0);
+        y.set(0);
       }
-    }
-    // The card will automatically spring back due to dragSnapToOrigin
-  };
+    },
+    [
+      node,
+      onAnswer,
+      SWIPE_CONFIDENCE_THRESHOLD,
+      QUICK_SWIPE_VELOCITY,
+      QUICK_SWIPE_MIN_DISTANCE,
+      x,
+      y,
+    ]
+  );
 
   const handleOptionClick = (optionIndex: number) => {
     if (isTransitioning || node.type !== "question") return;
@@ -83,18 +200,22 @@ export default function GameCard({
       setTimeout(() => setIsShaking(false), 500);
       onAnswer(option.nextNodeId, true);
     } else {
-      onAnswer(option.nextNodeId);
+      setIsExiting(true);
+      setTimeout(() => onAnswer(option.nextNodeId), 200);
     }
   };
 
   const handleContinue = () => {
     if (isTransitioning) return;
 
-    if (node.type === "infocard" && node.nextNodeId) {
-      onAnswer(node.nextNodeId);
-    } else if (node.type === "callout" && node.returnToNodeId) {
-      onAnswer(node.returnToNodeId, true);
-    }
+    setIsExiting(true);
+    setTimeout(() => {
+      if (node.type === "infocard" && node.nextNodeId) {
+        onAnswer(node.nextNodeId);
+      } else if (node.type === "callout" && node.returnToNodeId) {
+        onAnswer(node.returnToNodeId, true);
+      }
+    }, 200);
   };
 
   const getNodeIcon = () => {
@@ -129,179 +250,373 @@ export default function GameCard({
 
   if (node.type === "question") {
     return (
-      <div className="relative min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100">
-        {/* Background overlays for swipe feedback */}
+      <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 z-50">
+        {/* Progress Bar - Fixed at top */}
+        <div className="absolute top-0 left-0 right-0 z-60 bg-gradient-to-b from-black/10 to-transparent pt-2 pb-4">
+          <div className="px-2 md:px-0">
+            <StoryProgressBar
+              currentStep={currentStep}
+              totalSteps={totalSteps}
+              currentNodeType={node.type}
+            />
+          </div>
+        </div>
+
+        {/* Enhanced background overlays with neutral feedback */}
         <motion.div
-          className="fixed inset-0 bg-rose-100 flex items-center justify-start pl-20"
+          className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-start pl-8 md:pl-20"
           style={{ opacity: leftOverlay }}
         >
-          <div className="flex flex-col items-center text-rose-600">
-            <ArrowLeft className="h-16 w-16 mb-2" />
-            <span className="text-2xl font-bold">
+          <motion.div
+            className="flex flex-col items-center text-white drop-shadow-lg"
+            animate={{
+              scale:
+                hasReachedThreshold && x.get() < -VISUAL_FEEDBACK_THRESHOLD
+                  ? [1, 1.2, 1]
+                  : 1,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <ArrowLeft className="h-12 w-12 md:h-20 md:w-20 mb-2 md:mb-4" />
+            <span className="text-xl md:text-3xl font-bold">
               {node.options[0]?.label || "Left"}
             </span>
-          </div>
+            <span className="text-sm md:text-lg opacity-90 mt-1 md:mt-2">
+              Swipe Left
+            </span>
+          </motion.div>
         </motion.div>
 
         <motion.div
-          className="fixed inset-0 bg-emerald-100 flex items-center justify-end pr-20"
+          className="absolute inset-0 bg-gradient-to-l from-purple-400 to-purple-600 flex items-center justify-end pr-8 md:pr-20"
           style={{ opacity: rightOverlay }}
         >
-          <div className="flex flex-col items-center text-emerald-600">
-            <ArrowRight className="h-16 w-16 mb-2" />
-            <span className="text-2xl font-bold">
+          <motion.div
+            className="flex flex-col items-center text-white drop-shadow-lg"
+            animate={{
+              scale:
+                hasReachedThreshold && x.get() > VISUAL_FEEDBACK_THRESHOLD
+                  ? [1, 1.2, 1]
+                  : 1,
+            }}
+            transition={{ duration: 0.3 }}
+          >
+            <ArrowRight className="h-12 w-12 md:h-20 md:w-20 mb-2 md:mb-4" />
+            <span className="text-xl md:text-3xl font-bold">
               {node.options[1]?.label || "Right"}
             </span>
-          </div>
+            <span className="text-sm md:text-lg opacity-90 mt-1 md:mt-2">
+              Swipe Right
+            </span>
+          </motion.div>
         </motion.div>
 
-        {/* Main Tinder-style Card */}
+        {/* Threshold indicators for better UX feedback */}
         <motion.div
-          className={`relative w-full max-w-sm h-[600px] bg-gradient-to-br ${getCardColor()} rounded-3xl shadow-2xl border-2 overflow-hidden cursor-grab active:cursor-grabbing`}
-          style={{ x, y, rotate, opacity }}
-          drag
-          dragSnapToOrigin
-          dragElastic={0.2}
-          dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
-          onDragEnd={handleDragEnd}
-          animate={
-            isShaking
-              ? {
-                  x: [-10, 10, -10, 10, 0],
-                }
-              : {}
-          }
-          transition={
-            isShaking
-              ? { duration: 0.5 }
-              : { type: "spring", stiffness: 300, damping: 30 }
-          }
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          whileDrag={{ scale: 1.05 }}
-        >
-          <div className="flex flex-col h-full">
-            {/* Card Content */}
-            <div className="flex-1 flex flex-col items-center justify-center p-8">
-              <div className="bg-white rounded-full p-6 shadow-lg mb-8">
-                {getNodeIcon()}
+          className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 w-1 md:w-2 h-16 md:h-24 bg-white/30 rounded-full"
+          style={{ opacity: leftThresholdOpacity }}
+        />
+        <motion.div
+          className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 w-1 md:w-2 h-16 md:h-24 bg-white/30 rounded-full"
+          style={{ opacity: rightThresholdOpacity }}
+        />
+
+        {/* Main Content Container */}
+        <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-6 pt-20 md:pt-24">
+          {/* Main Card with Enhanced Animations */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={node.id}
+              className={`relative w-full max-w-xs md:max-w-sm h-[50vh] md:h-[60vh] max-h-[500px] bg-gradient-to-br ${getCardColor()} rounded-3xl shadow-2xl border-2 overflow-hidden cursor-grab active:cursor-grabbing touch-none`}
+              style={{ x, y, rotate, opacity, scale }}
+              drag
+              dragSnapToOrigin
+              dragElastic={0.3}
+              dragMomentum={false}
+              dragTransition={{
+                bounceStiffness: 200,
+                bounceDamping: 20,
+                min: 0,
+                max: 0,
+              }}
+              dragConstraints={{ left: 0, right: 0, top: 0, bottom: 0 }}
+              onDrag={handleDrag}
+              onDragEnd={handleDragEnd}
+              initial={{ scale: 0.8, opacity: 0, y: 50 }}
+              animate={
+                isShaking
+                  ? {
+                      x: [-10, 10, -10, 10, 0],
+                      scale: 1,
+                      opacity: 1,
+                      y: 0,
+                    }
+                  : isExiting
+                  ? {
+                      scale: 0.8,
+                      opacity: 0,
+                      y: 50,
+                    }
+                  : {
+                      scale: 1,
+                      opacity: 1,
+                      y: 0,
+                    }
+              }
+              exit={{
+                scale: 0.8,
+                opacity: 0,
+                y: 50,
+                transition: { duration: 0.3 },
+              }}
+              transition={
+                isShaking
+                  ? { duration: 0.5 }
+                  : { type: "spring", stiffness: 200, damping: 25 }
+              }
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              whileDrag={{ scale: 1.03, zIndex: 10 }}
+            >
+              {/* Enhanced glow effect with threshold awareness */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"
+                style={{
+                  opacity: glowOpacity,
+                }}
+              />
+
+              {/* Threshold reached indicator */}
+              <motion.div
+                className="absolute inset-0 rounded-3xl border-4 border-white/50"
+                animate={{
+                  opacity: hasReachedThreshold ? [0, 1, 0] : 0,
+                }}
+                transition={{
+                  duration: 0.4,
+                  repeat: hasReachedThreshold ? Infinity : 0,
+                }}
+              />
+
+              <div className="flex flex-col h-full relative z-10">
+                {/* Card Content */}
+                <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+                  <motion.div
+                    className="bg-white rounded-full p-4 md:p-6 shadow-lg mb-4 md:mb-8"
+                    whileHover={{ rotate: 360 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {getNodeIcon()}
+                  </motion.div>
+                  <h2 className="text-lg md:text-2xl font-bold text-slate-800 text-center leading-relaxed px-2">
+                    {node.text}
+                  </h2>
+                </div>
               </div>
-              <h2 className="text-2xl font-bold text-slate-800 text-center leading-relaxed">
-                {node.text}
-              </h2>
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Elegant Pill-Style Choice Buttons */}
+          <motion.div
+            className="mt-4 md:mt-8 w-full max-w-xs md:max-w-2xl px-2 md:px-4 space-y-4 md:space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center justify-center gap-3 md:gap-6">
+              {/* Left Option - Elegant Pill Button */}
+              {node.options[0] && (
+                <motion.button
+                  onClick={() => {
+                    console.log("Left button clicked", node.options[0]);
+                    handleOptionClick(0);
+                  }}
+                  disabled={isTransitioning || !node.options[0].nextNodeId}
+                  className="flex-1 relative group cursor-pointer touch-manipulation"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <div className="relative bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-full px-4 py-3 md:px-6 md:py-4 transition-all duration-200">
+                    <div className="flex items-center justify-center gap-2 md:gap-3">
+                      <div className="bg-gray-100 group-hover:bg-gray-200 rounded-full p-1.5 md:p-2 transition-colors duration-200">
+                        <ArrowLeft className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+                      </div>
+                      <span className="font-medium text-gray-700 text-sm md:text-base">
+                        {node.options[0].label}
+                      </span>
+                    </div>
+                  </div>
+                </motion.button>
+              )}
+
+              {/* Challenge Button - Smaller Elegant Button */}
+              {node.options[2] && (
+                <motion.button
+                  onClick={() => {
+                    console.log("Challenge button clicked", node.options[2]);
+                    handleOptionClick(2);
+                  }}
+                  disabled={isTransitioning}
+                  className="relative group cursor-pointer touch-manipulation"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <div className="relative bg-amber-50 hover:bg-amber-100 border border-amber-300 hover:border-amber-400 rounded-full px-3 py-2.5 md:px-4 md:py-3 transition-all duration-200">
+                    <div className="flex items-center justify-center gap-1.5 md:gap-2">
+                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full p-1 md:p-1.5 transition-colors duration-200">
+                        <ArrowDown className="h-3 w-3 md:h-4 md:w-4 text-amber-600" />
+                      </div>
+                      <span className="font-medium text-amber-700 text-xs md:text-sm">
+                        {node.options[2].label}
+                      </span>
+                    </div>
+                  </div>
+                </motion.button>
+              )}
+
+              {/* Right Option - Elegant Pill Button */}
+              {node.options[1] && (
+                <motion.button
+                  onClick={() => {
+                    console.log("Right button clicked", node.options[1]);
+                    handleOptionClick(1);
+                  }}
+                  disabled={isTransitioning || !node.options[1].nextNodeId}
+                  className="flex-1 relative group cursor-pointer touch-manipulation"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                >
+                  <div className="relative bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-full px-4 py-3 md:px-6 md:py-4 transition-all duration-200">
+                    <div className="flex items-center justify-center gap-2 md:gap-3">
+                      <span className="font-medium text-gray-700 text-sm md:text-base">
+                        {node.options[1].label}
+                      </span>
+                      <div className="bg-gray-100 group-hover:bg-gray-200 rounded-full p-1.5 md:p-2 transition-colors duration-200">
+                        <ArrowRight className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+                      </div>
+                    </div>
+                  </div>
+                </motion.button>
+              )}
             </div>
-          </div>
-        </motion.div>
 
-        {/* Combined Controls Outside Card */}
-        <div className="mt-8 w-full max-w-md space-y-4">
-          <div className="flex items-center justify-between gap-4">
-            {/* Left Option */}
-            {node.options[0] && (
-              <motion.button
-                onClick={() => {
-                  console.log("Left button clicked", node.options[0]);
-                  handleOptionClick(0);
-                }}
-                disabled={isTransitioning || !node.options[0].nextNodeId}
-                className="flex-1 flex items-center justify-center gap-3 h-16 bg-gradient-to-r from-white to-slate-50 rounded-2xl shadow-lg border-2 border-slate-200 hover:shadow-xl hover:from-rose-50 hover:to-rose-100 hover:border-rose-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <ArrowLeft className="h-5 w-5 text-slate-500 group-hover:text-rose-600 transition-colors" />
-                <span className="font-semibold text-slate-700 group-hover:text-rose-700 text-sm text-center transition-colors">
-                  {node.options[0].label}
-                </span>
-              </motion.button>
-            )}
-
-            {/* Challenge Button (if exists) */}
-            {node.options[2] && (
-              <motion.button
-                onClick={() => {
-                  console.log("Challenge button clicked", node.options[2]);
-                  handleOptionClick(2);
-                }}
-                disabled={isTransitioning}
-                className="flex items-center justify-center gap-2 h-16 px-4 bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl shadow-lg border-2 border-amber-200 hover:shadow-xl hover:from-amber-100 hover:to-yellow-100 hover:border-amber-400 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                whileHover={{ scale: 1.05, y: -2 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <ArrowDown className="h-4 w-4 text-amber-600 group-hover:text-amber-700 transition-colors" />
-                <span className="font-semibold text-amber-700 group-hover:text-amber-800 text-xs text-center transition-colors">
-                  {node.options[2].label}
-                </span>
-              </motion.button>
-            )}
-
-            {/* Right Option */}
-            {node.options[1] && (
-              <motion.button
-                onClick={() => {
-                  console.log("Right button clicked", node.options[1]);
-                  handleOptionClick(1);
-                }}
-                disabled={isTransitioning || !node.options[1].nextNodeId}
-                className="flex-1 flex items-center justify-center gap-3 h-16 bg-gradient-to-r from-white to-slate-50 rounded-2xl shadow-lg border-2 border-slate-200 hover:shadow-xl hover:from-emerald-50 hover:to-emerald-100 hover:border-emerald-300 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-                whileHover={{ scale: 1.03, y: -2 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <span className="font-semibold text-slate-700 group-hover:text-emerald-700 text-sm text-center transition-colors">
-                  {node.options[1].label}
-                </span>
-                <ArrowRight className="h-5 w-5 text-slate-500 group-hover:text-emerald-600 transition-colors" />
-              </motion.button>
-            )}
-          </div>
-
-          {/* Enhanced instruction text */}
-          <div className="text-center space-y-2">
-            <p className="text-sm text-slate-500 font-medium">
-              Make your choice
-            </p>
-            <p className="text-xs text-slate-400">
-              Swipe the card or tap a button
-            </p>
-          </div>
+            {/* Enhanced instruction text with pulsing animation */}
+            <motion.div
+              className="text-center space-y-1 md:space-y-2"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <p className="text-xs md:text-sm text-slate-600 font-medium">
+                Make your choice
+              </p>
+              <p className="text-xs text-slate-400">
+                Swipe firmly to choose, or tap a button
+              </p>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     );
   }
 
-  // Non-question nodes (end, callout, infocard)
+  // Non-question nodes (end, callout, infocard) - Enhanced
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-slate-50 to-slate-100">
-      <motion.div
-        className={`w-full max-w-lg h-auto bg-gradient-to-br ${getCardColor()} rounded-3xl shadow-2xl border-2 overflow-hidden`}
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 0.5 }}
-      >
-        <div className="p-8 text-center">
-          <div className="flex items-center justify-center mb-6">
-            <div className="bg-white rounded-full p-6 shadow-lg">
-              {getNodeIcon()}
-            </div>
-          </div>
-          <h2 className="text-2xl font-bold text-slate-800 leading-relaxed mb-8">
-            {node.text}
-          </h2>
-
-          {node.type !== "end" && (
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button
-                onClick={handleContinue}
-                disabled={isTransitioning}
-                className="w-full h-14 bg-gradient-to-r from-slate-600 to-slate-700 hover:from-slate-700 hover:to-slate-800 text-white font-semibold rounded-2xl shadow-lg border-0"
-              >
-                {node.type === "callout"
-                  ? node.buttonLabel || "Try Again"
-                  : node.buttonLabel || "Continue"}
-              </Button>
-            </motion.div>
-          )}
+    <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 z-50">
+      {/* Progress Bar - Fixed at top */}
+      <div className="absolute top-0 left-0 right-0 z-60 bg-gradient-to-b from-black/10 to-transparent pt-2 pb-4">
+        <div className="px-2 md:px-0">
+          <StoryProgressBar
+            currentStep={currentStep}
+            totalSteps={totalSteps}
+            currentNodeType={node.type}
+          />
         </div>
-      </motion.div>
+      </div>
+
+      <div className="relative w-full h-full flex items-center justify-center p-4 md:p-6 pt-20 md:pt-24">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={node.id}
+            className={`w-full max-w-lg h-auto bg-gradient-to-br ${getCardColor()} rounded-3xl shadow-2xl border-2 overflow-hidden`}
+            initial={{ scale: 0.8, opacity: 0, y: 50 }}
+            animate={
+              isExiting
+                ? { scale: 0.8, opacity: 0, y: 50 }
+                : { scale: 1, opacity: 1, y: 0 }
+            }
+            exit={{ scale: 0.8, opacity: 0, y: 50 }}
+            transition={{
+              duration: 0.5,
+              type: "spring",
+              stiffness: 300,
+              damping: 30,
+            }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <div className="p-8 text-center">
+              <motion.div
+                className="flex items-center justify-center mb-6"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
+              >
+                <div className="bg-white rounded-full p-6 shadow-lg">
+                  {getNodeIcon()}
+                </div>
+              </motion.div>
+              <motion.h2
+                className="text-2xl font-bold text-slate-800 leading-relaxed mb-8"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                {node.text}
+              </motion.h2>
+
+              {node.type !== "end" && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <motion.button
+                    onClick={handleContinue}
+                    disabled={isTransitioning}
+                    className="relative overflow-hidden group w-full h-14 rounded-2xl shadow-lg border-0"
+                    whileHover={{ y: -2 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 group-hover:from-slate-700 group-hover:to-slate-800 transition-all duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <span className="relative z-10 text-white font-semibold">
+                      {node.type === "callout"
+                        ? node.buttonLabel || "Try Again"
+                        : node.buttonLabel || "Continue"}
+                    </span>
+                    <motion.div
+                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+                      initial={false}
+                      animate={{ rotate: [0, 360] }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: "linear",
+                      }}
+                    >
+                      <Sparkles className="h-4 w-4 text-white" />
+                    </motion.div>
+                  </motion.button>
+                </motion.div>
+              )}
+            </div>
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 }

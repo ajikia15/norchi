@@ -172,6 +172,33 @@ body {
   font-family: var(--font-sans);
 }
 
+/* Prevent any scrolling when game is active */
+html.game-active,
+body.game-active {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Game screen overflow prevention */
+.game-fullscreen {
+  overflow: hidden !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* Prevent scrolling on mobile when game is active */
+.no-scroll {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+}
+
 /* Line clamp utilities for text truncation */
 .line-clamp-1 {
   overflow: hidden;
