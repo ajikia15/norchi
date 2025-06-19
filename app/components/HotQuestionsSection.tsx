@@ -30,9 +30,14 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
     }
   };
 
-  const cardFlip = {
-    duration: 0.6,
-    ease: [0.4, 0.0, 0.2, 1] as const, // A smooth, standard easing
+  const cardFlipTransition = {
+    rotateY: { type: "spring" as const, stiffness: 120, damping: 15 },
+    rotateX: {
+      type: "tween" as const,
+      ease: "easeInOut" as const,
+      duration: 0.5,
+      times: [0, 0.2, 0.5, 0.8, 1],
+    },
   };
 
   return (
@@ -46,10 +51,18 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
       <motion.div
         className="relative w-full h-full cursor-pointer"
         style={{ transformStyle: "preserve-3d" }}
-        animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={cardFlip}
+        animate={{
+          rotateY: isFlipped ? 180 : 0,
+          rotateX: isFlipped ? [0, 25, -15, 5, 0] : 0,
+        }}
+        transition={cardFlipTransition}
         onClick={() => setIsFlipped(!isFlipped)}
-        whileHover={{ scale: 1.02 }}
+        whileHover={{
+          scale: 1.05,
+          rotateZ: "-3deg",
+          z: 20,
+          boxShadow: "0px 10px 30px rgba(0,0,0,0.2)",
+        }}
       >
         {/* Front Face */}
         <div
