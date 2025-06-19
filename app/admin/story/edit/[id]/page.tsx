@@ -328,8 +328,26 @@ export default function StoryEditPage() {
     if (!currentStory || !flowData) return;
 
     try {
+      // Ensure we have the latest flowData in the story
+      const storyToExport = {
+        ...currentStory,
+        flowData: flowData, // Use current flowData state, not the one in currentStory
+      };
+
+      console.log("Exporting story with flowData:", {
+        currentStoryNodes: Object.keys(currentStory.flowData?.nodes || {})
+          .length,
+        currentFlowDataNodes: Object.keys(flowData.nodes).length,
+        nodeIds: Object.keys(flowData.nodes),
+        allNodes: Object.values(flowData.nodes).map((n) => ({
+          id: n.id,
+          type: n.type,
+          text: n.text?.substring(0, 50) + "...",
+        })),
+      });
+
       const exportData = {
-        story: currentStory,
+        story: storyToExport,
         exportedAt: new Date().toISOString(),
         exportVersion: "1.0",
         metadata: {
@@ -392,8 +410,20 @@ export default function StoryEditPage() {
 
         const importedStory = importData.story;
 
+        console.log("Importing story:", {
+          storyName: importedStory.name,
+          importedNodes: Object.keys(importedStory.flowData?.nodes || {})
+            .length,
+          nodeIds: Object.keys(importedStory.flowData?.nodes || {}),
+          rawFlowData: importedStory.flowData,
+        });
+
         // Confirm import
-        const confirmMessage = `Import story "${importedStory.name}"?\n\nThis will replace the current story data. Make sure you've saved any changes you want to keep.`;
+        const confirmMessage = `Import story "${
+          importedStory.name
+        }"?\n\nNodes found: ${
+          Object.keys(importedStory.flowData?.nodes || {}).length
+        }\n\nThis will replace the current story data. Make sure you've saved any changes you want to keep.`;
 
         if (confirm(confirmMessage)) {
           // Update the story with imported data, keeping the current ID and timestamps
@@ -403,8 +433,14 @@ export default function StoryEditPage() {
             updatedAt: new Date().toISOString(),
           };
 
+          console.log("Setting imported data:", {
+            storyNodes: Object.keys(updatedStory.flowData?.nodes || {}).length,
+            flowDataNodes: Object.keys(importedStory.flowData?.nodes || {})
+              .length,
+          });
+
           setCurrentStory(updatedStory);
-          setFlowData(updatedStory.flowData);
+          setFlowData(importedStory.flowData);
           setHasUnsavedChanges(true);
 
           console.log("Story imported successfully:", updatedStory.name);
