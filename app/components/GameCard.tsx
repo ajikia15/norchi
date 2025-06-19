@@ -19,6 +19,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import StoryProgressBar from "./StoryProgressBar";
+import Logo from "./Logo";
 
 interface GameCardProps {
   node: Node;
@@ -251,14 +252,27 @@ export default function GameCard({
   if (node.type === "question") {
     return (
       <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 z-50">
-        {/* Progress Bar - Fixed at top */}
+        {/* Header with Logo and Progress Bar - Fixed at top */}
         <div className="absolute top-0 left-0 right-0 z-60 bg-gradient-to-b from-black/10 to-transparent pt-2 pb-4">
-          <div className="px-2 md:px-0">
-            <StoryProgressBar
-              currentStep={currentStep}
-              totalSteps={totalSteps}
-              currentNodeType={node.type}
-            />
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="flex items-center justify-between">
+              {/* Logo */}
+              <Logo
+                href="/"
+                size="sm"
+                showSubtitle={false}
+                className="text-white/90 drop-shadow-lg"
+              />
+
+              {/* Progress Bar */}
+              <div className="flex-1 mx-4">
+                <StoryProgressBar
+                  currentStep={currentStep}
+                  totalSteps={totalSteps}
+                  currentNodeType={node.type}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -517,14 +531,27 @@ export default function GameCard({
   // Non-question nodes (end, callout, infocard) - Enhanced
   return (
     <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 z-50">
-      {/* Progress Bar - Fixed at top */}
+      {/* Header with Logo and Progress Bar - Fixed at top */}
       <div className="absolute top-0 left-0 right-0 z-60 bg-gradient-to-b from-black/10 to-transparent pt-2 pb-4">
-        <div className="px-2 md:px-0">
-          <StoryProgressBar
-            currentStep={currentStep}
-            totalSteps={totalSteps}
-            currentNodeType={node.type}
-          />
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <Logo
+              href="/"
+              size="sm"
+              showSubtitle={false}
+              className="text-white/90 drop-shadow-lg"
+            />
+
+            {/* Progress Bar */}
+            <div className="flex-1 mx-4">
+              <StoryProgressBar
+                currentStep={currentStep}
+                totalSteps={totalSteps}
+                currentNodeType={node.type}
+              />
+            </div>
+          </div>
         </div>
       </div>
 

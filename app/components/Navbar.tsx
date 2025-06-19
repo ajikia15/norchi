@@ -3,7 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
-import { Home, Settings, BookOpen, Workflow, Users, Zap } from "lucide-react";
+import { Home, Settings, BookOpen, Workflow, Users } from "lucide-react";
+import Logo from "./Logo";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -17,20 +18,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo/Brand */}
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => router.push("/")}
-          >
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Zap className="h-5 w-5 text-white" />
-            </div>
-            <div>
-              <h1 className="font-bold text-xl text-gray-900">Norchi</h1>
-              <p className="text-xs text-muted-foreground">
-                Logical Challenges
-              </p>
-            </div>
-          </div>
+          <Logo href="/" size="sm" showSubtitle={false} />
 
           {/* Navigation Links */}
           <div className="flex items-center gap-6">
