@@ -57,3 +57,15 @@ export interface PlayerState {
   currentNodeId: string;
   history: string[];
 }
+
+export interface HotTopic {
+  id: string;
+  category: string;
+  title: string;
+  answer: string;
+  link?: string;
+}
+
+export interface HotTopicsData {
+  topics: Record<string, HotTopic>;
+}

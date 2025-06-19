@@ -37,7 +37,7 @@ export default function Navbar() {
               <Button
                 variant={isAdmin ? "default" : "ghost"}
                 size="sm"
-                onClick={() => router.push("/admin/story")}
+                onClick={() => router.push("/admin")}
                 className="gap-2"
               >
                 <Settings className="h-4 w-4" />
@@ -75,8 +75,10 @@ export default function Navbar() {
               <div className="flex items-center gap-2 pl-4 border-l border-gray-200">
                 <Badge variant="outline" className="text-xs">
                   {pathname === "/admin/story" && "Story Management"}
+                  {pathname === "/admin/hot-questions" && "Hot Questions"}
                   {pathname.includes("/admin/story/edit/") && "Story Editor"}
-                  {pathname === "/admin" && "Admin Panel"}
+                  {(pathname === "/admin" || pathname.includes("/admin?")) &&
+                    "Admin Panel"}
                 </Badge>
               </div>
             )}

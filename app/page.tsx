@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
+import HotQuestionsSection from "./components/HotQuestionsSection";
 
 export default function HomePage() {
   const [storiesData, setStoriesData] = useState<StoriesData | null>(null);
@@ -146,6 +147,9 @@ export default function HomePage() {
           </div>
         )}
       </div>
+
+      {/* Hot Questions Section */}
+      <HotQuestionsSection />
     </div>
   );
 }
