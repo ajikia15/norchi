@@ -40,6 +40,10 @@ function VisualEditorContent({
   const reactFlowInstance = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [editingNode, setEditingNode] = useState<Node | null>(null);
+  const [nodePositions, setNodePositions] = useState<
+    Record<string, { x: number; y: number }>
+  >({});
+  const [hasInitialLayout, setHasInitialLayout] = useState(false);
   const [connectionDialog, setConnectionDialog] = useState<{
     isOpen: boolean;
     sourceNodeId: string;
@@ -129,26 +133,39 @@ function VisualEditorContent({
       }
     }
 
-    // Position nodes
+    // Position nodes - use stored positions or auto-layout for new nodes
     const levelCounters: Record<number, number> = {};
     const nodeWidth = 250;
     const levelHeight = 200;
 
     nodeIds.forEach((nodeId) => {
       const node = flowData.nodes[nodeId];
-      const level = nodeLevel[nodeId] ?? 0;
-      const levelCount = levelWidth[level] || 1;
-      const position = levelCounters[level] || 0;
-      levelCounters[level] = position + 1;
+      let nodePosition: { x: number; y: number };
 
-      // Calculate x position to center nodes in each level
-      const x = (position - (levelCount - 1) / 2) * (nodeWidth + 100);
-      const y = level * levelHeight;
+      // Use stored position if available, otherwise calculate with auto-layout
+      if (nodePositions[nodeId]) {
+        nodePosition = nodePositions[nodeId];
+      } else {
+        const level = nodeLevel[nodeId] ?? 0;
+        const levelCount = levelWidth[level] || 1;
+        const position = levelCounters[level] || 0;
+        levelCounters[level] = position + 1;
+
+        // Calculate x position to center nodes in each level
+        const x = (position - (levelCount - 1) / 2) * (nodeWidth + 100);
+        const y = level * levelHeight;
+        nodePosition = { x, y };
+
+        // Store the initial position
+        if (!hasInitialLayout) {
+          setNodePositions((prev) => ({ ...prev, [nodeId]: nodePosition }));
+        }
+      }
 
       flowNodes.push({
         id: nodeId,
         type: "custom",
-        position: { x, y },
+        position: nodePosition,
         data: {
           node,
           isSelected: selectedNodeId === nodeId,
@@ -245,16 +262,40 @@ function VisualEditorContent({
     });
 
     return { nodes: flowNodes, edges: flowEdges };
-  }, [flowData, selectedNodeId, handleEditNode]);
+  }, [
+    flowData,
+    selectedNodeId,
+    handleEditNode,
+    nodePositions,
+    hasInitialLayout,
+  ]);
 
   const [reactFlowNodes, setNodes, onNodesChange] = useNodesState(nodes);
   const [reactFlowEdges, setEdges, onEdgesChange] = useEdgesState(edges);
+
+  // Set initial layout flag after first render
+  useMemo(() => {
+    if (Object.keys(flowData.nodes).length > 0 && !hasInitialLayout) {
+      setHasInitialLayout(true);
+    }
+  }, [flowData.nodes, hasInitialLayout]);
 
   // Update nodes when data changes
   useMemo(() => {
     setNodes(nodes);
     setEdges(edges);
   }, [nodes, edges, setNodes, setEdges]);
+
+  // Handle node drag end to store positions
+  const onNodeDragStop = useCallback(
+    (_event: React.MouseEvent, node: FlowNode) => {
+      setNodePositions((prev) => ({
+        ...prev,
+        [node.id]: node.position,
+      }));
+    },
+    []
+  );
 
   const onConnect = useCallback(
     (connection: Connection) => {
@@ -443,16 +484,16 @@ function VisualEditorContent({
   );
 
   return (
-    <div className="flex gap-6 h-[800px]">
+    <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[600px]">
       {/* Left Sidebar - Node Palette */}
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 w-64">
         <NodePalette />
       </div>
 
       {/* Main Canvas */}
-      <div className="flex-1 relative">
+      <div className="flex-1 relative min-w-0">
         <div
-          className="w-full h-full border border-gray-300 rounded-lg overflow-hidden"
+          className="w-full h-full border border-gray-300 rounded-lg overflow-hidden bg-gray-50"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
@@ -463,14 +504,17 @@ function VisualEditorContent({
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onSelectionChange={handleSelectionChange}
+            onNodeDragStop={onNodeDragStop}
             nodeTypes={nodeTypes}
             connectionMode={ConnectionMode.Loose}
             fitView
-            fitViewOptions={{ padding: 0.2 }}
+            fitViewOptions={{ padding: 0.1 }}
             nodesDraggable={true}
             nodesConnectable={true}
             elementsSelectable={true}
             attributionPosition="bottom-left"
+            minZoom={0.1}
+            maxZoom={2}
           >
             <Controls />
             <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
@@ -479,34 +523,36 @@ function VisualEditorContent({
       </div>
 
       {/* Right Sidebar - Node Editor */}
-      <div className="w-80 flex-shrink-0">
-        <Card className="h-full shadow-sm border-0 bg-white/60 backdrop-blur-sm">
-          <CardHeader className="pb-4">
+      <div className="w-96 flex-shrink-0">
+        <Card className="h-full shadow-sm border-0 bg-white/60 backdrop-blur-sm flex flex-col">
+          <CardHeader className="pb-4 flex-shrink-0">
             <CardTitle className="text-lg">
               {editingNode ? "Edit Node" : "Node Properties"}
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-0 h-[calc(100%-80px)] overflow-y-auto">
-            {editingNode ? (
-              <NodeEditor
-                node={editingNode}
-                allNodes={flowData.nodes}
-                onSave={handleSaveNode}
-                onCancel={handleCancelEdit}
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center py-12 text-center">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <span className="text-2xl">🎯</span>
+          <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
+            <div className="flex-1 overflow-y-auto pr-2">
+              {editingNode ? (
+                <NodeEditor
+                  node={editingNode}
+                  allNodes={flowData.nodes}
+                  onSave={handleSaveNode}
+                  onCancel={handleCancelEdit}
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <span className="text-2xl">🎯</span>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Select a node to edit
+                  </h3>
+                  <p className="text-muted-foreground text-sm">
+                    Click on any node or drag from the palette to start editing
+                  </p>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                  Select a node to edit
-                </h3>
-                <p className="text-muted-foreground text-sm">
-                  Click on any node or drag from the palette to start editing
-                </p>
-              </div>
-            )}
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>

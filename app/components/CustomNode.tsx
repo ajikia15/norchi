@@ -75,9 +75,11 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
 
   return (
     <div
-      className={`relative bg-white border-2 rounded-lg shadow-md min-w-[200px] max-w-[300px] ${
-        isSelected || selected ? "border-blue-500 shadow-lg" : "border-gray-300"
-      }`}
+      className={`relative bg-white border-2 rounded-lg shadow-md min-w-[220px] max-w-[320px] ${
+        isSelected || selected
+          ? "border-blue-500 shadow-lg ring-2 ring-blue-200"
+          : "border-gray-300 hover:border-gray-400"
+      } transition-all duration-150 cursor-pointer`}
       style={{ backgroundColor: getNodeColor() }}
       onDoubleClick={handleDoubleClick}
     >
@@ -85,14 +87,14 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
       <Handle
         type="target"
         position={Position.Top}
-        className="w-3 h-3 !bg-gray-600 border-2 border-white"
+        className="w-4 h-4 !bg-gray-600 border-2 border-white hover:!bg-blue-600 transition-colors"
       />
 
       {/* Node Header */}
-      <div className="p-3 text-white">
-        <div className="flex items-center justify-between mb-2">
+      <div className="p-4 text-white">
+        <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <span className="text-lg">{getNodeIcon()}</span>
+            <span className="text-xl">{getNodeIcon()}</span>
             <span className="font-semibold text-sm">
               {node.type.toUpperCase()}
             </span>
@@ -102,30 +104,30 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
               e.stopPropagation();
               onEdit(node);
             }}
-            className="p-1 hover:bg-white/20 rounded transition-colors"
+            className="p-1.5 hover:bg-white/20 rounded transition-colors"
             title="Edit node"
           >
-            <Edit2 className="w-3 h-3" />
+            <Edit2 className="w-4 h-4" />
           </button>
         </div>
 
         {/* Node Content */}
-        <div className="text-xs">
+        <div className="text-sm leading-relaxed">
           {isEditing ? (
             <textarea
               value={editText}
               onChange={(e) => setEditText(e.target.value)}
               onKeyDown={handleKeyDown}
               onBlur={handleEditSubmit}
-              className="w-full p-2 text-black rounded border-0 resize-none"
+              className="w-full p-2 text-black rounded border-0 resize-none text-sm"
               rows={3}
               autoFocus
               onClick={(e) => e.stopPropagation()}
             />
           ) : (
             <div className="break-words">
-              {node.text.length > 80
-                ? `${node.text.substring(0, 80)}...`
+              {node.text.length > 100
+                ? `${node.text.substring(0, 100)}...`
                 : node.text}
             </div>
           )}
@@ -134,10 +136,10 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
 
       {/* Question Options with Handles */}
       {node.type === "question" && (
-        <div className="px-3 pb-3">
+        <div className="px-4 pb-4">
           {node.options.map((option, index) => (
-            <div key={index} className="relative mb-2 last:mb-0">
-              <div className="bg-white/20 rounded p-2 text-xs text-white">
+            <div key={index} className="relative mb-3 last:mb-0">
+              <div className="bg-white/20 backdrop-blur-sm rounded-md p-3 text-sm text-white border border-white/10 hover:bg-white/30 transition-colors">
                 {option.label}
               </div>
               <Handle
@@ -145,10 +147,10 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
                 position={Position.Right}
                 id={`option-${index}`}
                 style={{
-                  top: `${50 + index * 40}px`,
-                  right: "-8px",
+                  top: `${55 + index * 45}px`,
+                  right: "-10px",
                 }}
-                className="w-3 h-3 !bg-white border-2 border-gray-600"
+                className="w-4 h-4 !bg-white border-2 border-gray-600 hover:!bg-blue-100 transition-colors"
                 title={`Connect "${option.label}"`}
               />
             </div>
@@ -161,7 +163,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
         <Handle
           type="source"
           position={Position.Bottom}
-          className="w-3 h-3 !bg-white border-2 border-gray-600"
+          className="w-4 h-4 !bg-white border-2 border-gray-600 hover:!bg-blue-100 transition-colors"
         />
       )}
 
@@ -172,10 +174,10 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
             e.stopPropagation();
             onAddConnection(node.id);
           }}
-          className="absolute -right-8 top-1/2 transform -translate-y-1/2 w-6 h-6 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-colors shadow-md"
+          className="absolute -right-10 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:scale-110 shadow-lg"
           title="Add new option"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-4 h-4" />
         </button>
       )}
     </div>
