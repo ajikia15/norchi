@@ -13,6 +13,7 @@ import {
 import NodeList from "../../../../components/NodeList";
 import NodeEditor from "../../../../components/NodeEditor";
 import FlowGraph from "../../../../components/FlowGraph";
+import VisualEditor from "../../../../components/VisualEditor";
 import { Button } from "../../../../components/ui/button";
 import {
   Tabs,
@@ -393,7 +394,7 @@ export default function StoryEditPage() {
       {/* Content */}
       <div className="max-w-7xl mx-auto px-6 py-8">
         <Tabs defaultValue="editor" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="h-4 w-4" />
               Story Settings
@@ -405,6 +406,10 @@ export default function StoryEditPage() {
             <TabsTrigger value="flowgraph" className="flex items-center gap-2">
               <Workflow className="h-4 w-4" />
               Flow Graph
+            </TabsTrigger>
+            <TabsTrigger value="visual" className="flex items-center gap-2">
+              <Play className="h-4 w-4" />
+              Visual Editor
             </TabsTrigger>
           </TabsList>
 
@@ -611,6 +616,17 @@ export default function StoryEditPage() {
             <Card>
               <CardContent className="p-6">
                 <FlowGraph flowData={flowData} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="visual">
+            <Card>
+              <CardContent className="p-6">
+                <VisualEditor
+                  flowData={flowData}
+                  onFlowDataChange={handleFlowDataChange}
+                />
               </CardContent>
             </Card>
           </TabsContent>
