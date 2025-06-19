@@ -51,6 +51,31 @@ function VisualEditorContent({
     targetNodeId: "",
   });
 
+  // Define callbacks first before using them in useMemo
+  const handleEditNode = useCallback((node: Node) => {
+    setEditingNode(node);
+    setSelectedNodeId(node.id);
+  }, []);
+
+  const handleSaveNode = useCallback(
+    (updatedNode: Node) => {
+      const updatedFlowData: FlowData = {
+        ...flowData,
+        nodes: {
+          ...flowData.nodes,
+          [updatedNode.id]: updatedNode,
+        },
+      };
+      onFlowDataChange(updatedFlowData);
+      setEditingNode(null);
+    },
+    [flowData, onFlowDataChange]
+  );
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingNode(null);
+  }, []);
+
   // Convert flow data to ReactFlow format
   const { nodes, edges } = useMemo(() => {
     const flowNodes: FlowNode[] = [];
@@ -220,7 +245,7 @@ function VisualEditorContent({
     });
 
     return { nodes: flowNodes, edges: flowEdges };
-  }, [flowData, selectedNodeId]);
+  }, [flowData, selectedNodeId, handleEditNode]);
 
   const [reactFlowNodes, setNodes, onNodesChange] = useNodesState(nodes);
   const [reactFlowEdges, setEdges, onEdgesChange] = useEdgesState(edges);
@@ -230,30 +255,6 @@ function VisualEditorContent({
     setNodes(nodes);
     setEdges(edges);
   }, [nodes, edges, setNodes, setEdges]);
-
-  const handleEditNode = useCallback((node: Node) => {
-    setEditingNode(node);
-    setSelectedNodeId(node.id);
-  }, []);
-
-  const handleSaveNode = useCallback(
-    (updatedNode: Node) => {
-      const updatedFlowData: FlowData = {
-        ...flowData,
-        nodes: {
-          ...flowData.nodes,
-          [updatedNode.id]: updatedNode,
-        },
-      };
-      onFlowDataChange(updatedFlowData);
-      setEditingNode(null);
-    },
-    [flowData, onFlowDataChange]
-  );
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingNode(null);
-  }, []);
 
   const onConnect = useCallback(
     (connection: Connection) => {
