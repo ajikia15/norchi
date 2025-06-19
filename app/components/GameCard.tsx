@@ -374,9 +374,7 @@ export default function GameCard({
                   ? { duration: 0.5 }
                   : { type: "spring", stiffness: 200, damping: 25 }
               }
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              whileDrag={{ scale: 1.03, zIndex: 10 }}
+              whileDrag={{ zIndex: 10 }}
             >
               {/* Enhanced glow effect with threshold awareness */}
               <motion.div
@@ -433,8 +431,6 @@ export default function GameCard({
                   }}
                   disabled={isTransitioning || !node.options[0].nextNodeId}
                   className="flex-1 relative group cursor-pointer touch-manipulation"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
                   <div className="relative bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-full px-4 py-3 md:px-6 md:py-4 transition-all duration-200">
@@ -459,8 +455,6 @@ export default function GameCard({
                   }}
                   disabled={isTransitioning}
                   className="relative group cursor-pointer touch-manipulation"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
                   <div className="relative bg-amber-50 hover:bg-amber-100 border border-amber-300 hover:border-amber-400 rounded-full px-3 py-2.5 md:px-4 md:py-3 transition-all duration-200">
@@ -485,8 +479,6 @@ export default function GameCard({
                   }}
                   disabled={isTransitioning || !node.options[1].nextNodeId}
                   className="flex-1 relative group cursor-pointer touch-manipulation"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
                   <div className="relative bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-full px-4 py-3 md:px-6 md:py-4 transition-all duration-200">
@@ -554,7 +546,6 @@ export default function GameCard({
               stiffness: 300,
               damping: 30,
             }}
-            whileHover={{ scale: 1.02 }}
           >
             <div className="p-8 text-center">
               <motion.div
@@ -581,8 +572,6 @@ export default function GameCard({
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
                 >
                   <motion.button
                     onClick={handleContinue}
