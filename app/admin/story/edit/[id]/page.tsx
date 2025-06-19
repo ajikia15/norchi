@@ -28,7 +28,16 @@ import {
   CardTitle,
 } from "../../../../components/ui/card";
 import { Badge } from "../../../../components/ui/badge";
-import { Play, Save, FileText, Workflow, Settings, Plus } from "lucide-react";
+import {
+  Play,
+  Save,
+  FileText,
+  Workflow,
+  Settings,
+  Plus,
+  Download,
+  Upload,
+} from "lucide-react";
 
 export default function StoryEditPage() {
   const params = useParams();
@@ -314,6 +323,105 @@ export default function StoryEditPage() {
     setIsCreating(true);
   };
 
+  // Export story as JSON
+  const handleExportJSON = () => {
+    if (!currentStory || !flowData) return;
+
+    try {
+      const exportData = {
+        story: currentStory,
+        exportedAt: new Date().toISOString(),
+        exportVersion: "1.0",
+        metadata: {
+          totalNodes: Object.keys(flowData.nodes).length,
+          nodeTypes: {
+            question: Object.values(flowData.nodes).filter(
+              (n) => n.type === "question"
+            ).length,
+            end: Object.values(flowData.nodes).filter((n) => n.type === "end")
+              .length,
+            callout: Object.values(flowData.nodes).filter(
+              (n) => n.type === "callout"
+            ).length,
+            infocard: Object.values(flowData.nodes).filter(
+              (n) => n.type === "infocard"
+            ).length,
+          },
+        },
+      };
+
+      const dataStr = JSON.stringify(exportData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: "application/json" });
+
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${currentStory.name
+        .replace(/[^a-z0-9]/gi, "_")
+        .toLowerCase()}_story.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+
+      console.log("Story exported successfully:", currentStory.name);
+    } catch (error) {
+      console.error("Error exporting story:", error);
+      alert("Error exporting story. Please try again.");
+    }
+  };
+
+  // Import story from JSON
+  const handleImportJSON = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const content = e.target?.result as string;
+        const importData = JSON.parse(content);
+
+        // Validate the imported data structure
+        if (!importData.story || !importData.story.flowData) {
+          alert(
+            "Invalid story file format. Please check that the file contains a valid story."
+          );
+          return;
+        }
+
+        const importedStory = importData.story;
+
+        // Confirm import
+        const confirmMessage = `Import story "${importedStory.name}"?\n\nThis will replace the current story data. Make sure you've saved any changes you want to keep.`;
+
+        if (confirm(confirmMessage)) {
+          // Update the story with imported data, keeping the current ID and timestamps
+          const updatedStory = {
+            ...importedStory,
+            id: storyId, // Keep current story ID
+            updatedAt: new Date().toISOString(),
+          };
+
+          setCurrentStory(updatedStory);
+          setFlowData(updatedStory.flowData);
+          setHasUnsavedChanges(true);
+
+          console.log("Story imported successfully:", updatedStory.name);
+        }
+      } catch (error) {
+        console.error("Error importing story:", error);
+        alert(
+          "Error reading the story file. Please check that the file is a valid JSON story export."
+        );
+      }
+    };
+
+    reader.readAsText(file);
+    // Reset file input
+    event.target.value = "";
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -517,6 +625,83 @@ export default function StoryEditPage() {
                         </div>
                         <div className="text-sm text-muted-foreground">
                           Info Cards
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-semibold mb-4">
+                      Import & Export
+                    </h3>
+                    <div className="space-y-4">
+                      <div className="flex flex-col sm:flex-row gap-4">
+                        {/* Export JSON */}
+                        <div className="flex-1">
+                          <Button
+                            onClick={handleExportJSON}
+                            variant="outline"
+                            className="w-full justify-center"
+                          >
+                            <Download className="h-4 w-4 mr-2" />
+                            Export as JSON
+                          </Button>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Download your story as a JSON file for backup or
+                            sharing
+                          </p>
+                        </div>
+
+                        {/* Import JSON */}
+                        <div className="flex-1">
+                          <div className="relative">
+                            <input
+                              type="file"
+                              accept=".json"
+                              onChange={handleImportJSON}
+                              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                              id="import-json"
+                            />
+                            <Button
+                              variant="outline"
+                              className="w-full justify-center"
+                              asChild
+                            >
+                              <label
+                                htmlFor="import-json"
+                                className="cursor-pointer"
+                              >
+                                <Upload className="h-4 w-4 mr-2" />
+                                Import from JSON
+                              </label>
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">
+                            Load a story from a previously exported JSON file
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                        <div className="flex items-start gap-2">
+                          <div className="text-amber-600 mt-0.5">⚠️</div>
+                          <div className="text-sm">
+                            <div className="font-medium text-amber-800 mb-1">
+                              Important:
+                            </div>
+                            <ul className="text-amber-700 space-y-1 text-xs">
+                              <li>
+                                • Importing will replace all current story data
+                              </li>
+                              <li>
+                                • Make sure to save your current work before
+                                importing
+                              </li>
+                              <li>
+                                • Only import JSON files exported from Norchi
+                              </li>
+                            </ul>
+                          </div>
                         </div>
                       </div>
                     </div>
