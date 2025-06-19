@@ -6,8 +6,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "./ui/dialog";
-import { Button } from "./ui/button";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { Node } from "../types";
 

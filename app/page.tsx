@@ -7,8 +7,8 @@ import {
   getDefaultStoriesData,
   migrateLegacyData,
 } from "./lib/storage";
-import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
-import { Button } from "./components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
 

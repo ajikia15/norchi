@@ -2,32 +2,22 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { StoriesData, Story, FlowData, Node } from "../../../../types";
+import { StoriesData, Story, FlowData, Node } from "@/app/types";
 import {
   loadStoriesData,
   saveStoriesData,
   getDefaultStoriesData,
   migrateLegacyData,
   updateStory,
-} from "../../../../lib/storage";
-import NodeList from "../../../../components/NodeList";
-import NodeEditor from "../../../../components/NodeEditor";
-import FlowGraph from "../../../../components/FlowGraph";
-import VisualEditor from "../../../../components/VisualEditor";
-import { Button } from "../../../../components/ui/button";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "../../../../components/ui/tabs";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "../../../../components/ui/card";
-import { Badge } from "../../../../components/ui/badge";
+} from "@/app/lib/storage";
+import NodeList from "@/app/components/NodeList";
+import NodeEditor from "@/app/components/NodeEditor";
+import FlowGraph from "@/app/components/FlowGraph";
+import VisualEditor from "@/app/components/VisualEditor";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import {
   Play,
   Save,
@@ -110,7 +100,7 @@ export default function StoryEditPage() {
 
   const handleFlowDataChange = (newFlowData: FlowData) => {
     setFlowData(newFlowData);
-    setCurrentStory((current) =>
+    setCurrentStory((current: Story | null) =>
       current ? { ...current, flowData: newFlowData } : null
     );
     setHasUnsavedChanges(true);
@@ -398,17 +388,16 @@ export default function StoryEditPage() {
     reader.onload = (e) => {
       try {
         const content = e.target?.result as string;
-        const importData = JSON.parse(content);
+        const jsonContent = JSON.parse(content);
+        const nodes = jsonContent.nodes || {};
+        // Basic validation
+        (Object.values(nodes) as Partial<Node>[]).forEach((n) => {
+          if (!n.id || !n.type || !n.text) {
+            throw new Error(`Invalid node data found: ${JSON.stringify(n)}`);
+          }
+        });
 
-        // Validate the imported data structure
-        if (!importData.story || !importData.story.flowData) {
-          alert(
-            "Invalid story file format. Please check that the file contains a valid story."
-          );
-          return;
-        }
-
-        const importedStory = importData.story;
+        const importedStory = jsonContent.story;
 
         console.log("Importing story:", {
           storyName: importedStory.name,

@@ -2,20 +2,20 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Node } from "../types";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Label } from "./ui/label";
-import { Badge } from "./ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { cn } from "../lib/utils";
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { Plus, Trash2, GripVertical, Save, X, ArrowRight } from "lucide-react";
 import CreateNodeDialog from "./CreateNodeDialog";
 

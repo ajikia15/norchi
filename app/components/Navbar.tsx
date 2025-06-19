@@ -1,8 +1,8 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Home, Settings, BookOpen, Workflow, Users } from "lucide-react";
 import Logo from "./Logo";
 

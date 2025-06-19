@@ -1,10 +1,10 @@
 "use client";
 
 import { Node } from "../types";
-import { Card, CardContent } from "./ui/card";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { cn } from "../lib/utils";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 import { Edit, Trash2, Crown } from "lucide-react";
 
 interface NodeListProps {
@@ -111,19 +111,28 @@ export default function NodeList({
     switch (relationship) {
       case "next":
         return (
-          <Badge variant="success" className="text-xs">
+          <Badge
+            variant="secondary"
+            className="text-xs bg-green-100 text-green-800 border-green-200"
+          >
             → Next
           </Badge>
         );
       case "return":
         return (
-          <Badge variant="info" className="text-xs">
+          <Badge
+            variant="secondary"
+            className="text-xs bg-blue-100 text-blue-800 border-blue-200"
+          >
             ↩ Return
           </Badge>
         );
       case "points-to":
         return (
-          <Badge variant="secondary" className="text-xs">
+          <Badge
+            variant="secondary"
+            className="text-xs bg-purple-100 text-purple-800 border-purple-200"
+          >
             ← Points Here
           </Badge>
         );
@@ -181,7 +190,10 @@ export default function NodeList({
                   </code>
 
                   {node.id === startNodeId && (
-                    <Badge variant="success" className="text-xs">
+                    <Badge
+                      variant="secondary"
+                      className="text-xs bg-green-100 text-green-800 border-green-200"
+                    >
                       <Crown className="h-3 w-3 mr-1" />
                       START
                     </Badge>
@@ -189,14 +201,18 @@ export default function NodeList({
 
                   <Badge
                     variant={
-                      getNodeTypeColor(node.type) as
-                        | "info"
-                        | "secondary"
-                        | "warning"
-                        | "success"
-                        | "outline"
+                      getNodeTypeColor(node.type) as "secondary" | "outline"
                     }
-                    className="text-xs"
+                    className={cn("text-xs", {
+                      "bg-blue-100 text-blue-800 border-blue-200":
+                        node.type === "question",
+                      "bg-purple-100 text-purple-800 border-purple-200":
+                        node.type === "end",
+                      "bg-yellow-100 text-yellow-800 border-yellow-200":
+                        node.type === "callout",
+                      "bg-green-100 text-green-800 border-green-200":
+                        node.type === "infocard",
+                    })}
                   >
                     {getNodeIcon(node.type)} {node.type.toUpperCase()}
                   </Badge>

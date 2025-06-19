@@ -23,7 +23,7 @@ import CustomNode from "./CustomNode";
 import ConnectionDialog from "./ConnectionDialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import NodeEditor from "./NodeEditor";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface VisualEditorProps {
   flowData: FlowData;

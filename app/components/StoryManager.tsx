@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { Story, StoriesData } from "../types";
 import { createNewStory } from "../lib/storage";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Textarea } from "./ui/textarea";
-import { Label } from "./ui/label";
-import { Badge } from "./ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
@@ -16,8 +16,8 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogFooter,
-} from "./ui/dialog";
-import { cn } from "../lib/utils";
+} from "@/components/ui/dialog";
+import { cn } from "@/lib/utils";
 import { Plus, Edit, Trash2, BookOpen, Calendar } from "lucide-react";
 
 interface StoryManagerProps {
