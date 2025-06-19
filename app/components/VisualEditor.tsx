@@ -21,6 +21,7 @@ import { FlowData, Node } from "../types";
 import NodePalette from "./NodePalette";
 import CustomNode from "./CustomNode";
 import ConnectionDialog from "./ConnectionDialog";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import NodeEditor from "./NodeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 
@@ -54,6 +55,13 @@ function VisualEditorContent({
     sourceNodeId: "",
     targetNodeId: "",
   });
+  const [deleteDialog, setDeleteDialog] = useState<{
+    isOpen: boolean;
+    nodeToDelete: Node | null;
+  }>({
+    isOpen: false,
+    nodeToDelete: null,
+  });
 
   // Define callbacks first before using them in useMemo
   const handleEditNode = useCallback((node: Node) => {
@@ -79,6 +87,79 @@ function VisualEditorContent({
   const handleCancelEdit = useCallback(() => {
     setEditingNode(null);
   }, []);
+
+  // Handle node deletion
+  const handleDeleteNode = useCallback(
+    (nodeId: string) => {
+      const nodeToDelete = flowData.nodes[nodeId];
+      if (!nodeToDelete) return;
+
+      setDeleteDialog({
+        isOpen: true,
+        nodeToDelete,
+      });
+    },
+    [flowData.nodes]
+  );
+
+  const confirmDeleteNode = useCallback(() => {
+    if (!deleteDialog.nodeToDelete) return;
+
+    const nodeId = deleteDialog.nodeToDelete.id;
+    const newNodes = { ...flowData.nodes };
+    delete newNodes[nodeId];
+
+    const updatedFlowData: FlowData = {
+      ...flowData,
+      nodes: newNodes,
+      // If we're deleting the start node, clear it
+      startNodeId: nodeId === flowData.startNodeId ? "" : flowData.startNodeId,
+    };
+
+    // Remove from stored positions
+    setNodePositions((prev) => {
+      const newPositions = { ...prev };
+      delete newPositions[nodeId];
+      return newPositions;
+    });
+
+    onFlowDataChange(updatedFlowData);
+
+    // Clear selection if we deleted the selected node
+    if (selectedNodeId === nodeId) {
+      setSelectedNodeId(null);
+      setEditingNode(null);
+    }
+
+    setDeleteDialog({ isOpen: false, nodeToDelete: null });
+  }, [deleteDialog.nodeToDelete, flowData, onFlowDataChange, selectedNodeId]);
+
+  // Handle keyboard shortcuts
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      // Only handle shortcuts when a node is selected and no dialog is open
+      if (!selectedNodeId || connectionDialog.isOpen || deleteDialog.isOpen)
+        return;
+
+      if (event.key === "Delete" || event.key === "Backspace") {
+        event.preventDefault();
+        handleDeleteNode(selectedNodeId);
+      }
+    },
+    [
+      selectedNodeId,
+      connectionDialog.isOpen,
+      deleteDialog.isOpen,
+      handleDeleteNode,
+    ]
+  );
+
+  // Add keyboard event listeners
+  useMemo(() => {
+    const handleKeyDownEvent = (event: KeyboardEvent) => handleKeyDown(event);
+    document.addEventListener("keydown", handleKeyDownEvent);
+    return () => document.removeEventListener("keydown", handleKeyDownEvent);
+  }, [handleKeyDown]);
 
   // Convert flow data to ReactFlow format
   const { nodes, edges } = useMemo(() => {
@@ -170,6 +251,7 @@ function VisualEditorContent({
           node,
           isSelected: selectedNodeId === nodeId,
           onEdit: handleEditNode,
+          onClick: handleEditNode, // Click to edit
           onAddConnection: () => {}, // Placeholder for future functionality
         },
         selected: selectedNodeId === nodeId,
@@ -547,9 +629,28 @@ function VisualEditorContent({
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     Select a node to edit
                   </h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-sm mb-3">
                     Click on any node or drag from the palette to start editing
                   </p>
+                  <div className="text-xs text-muted-foreground bg-gray-50 rounded-md p-2">
+                    <div className="font-medium mb-1">
+                      💡 Keyboard Shortcuts:
+                    </div>
+                    <div>
+                      •{" "}
+                      <kbd className="px-1 py-0.5 bg-white border rounded text-xs">
+                        Delete
+                      </kbd>{" "}
+                      - Delete selected node
+                    </div>
+                    <div>
+                      •{" "}
+                      <kbd className="px-1 py-0.5 bg-white border rounded text-xs">
+                        Double-click
+                      </kbd>{" "}
+                      - Edit node text
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -570,6 +671,14 @@ function VisualEditorContent({
         onConfirm={handleConnectionConfirm}
         sourceNodeId={connectionDialog.sourceNodeId}
         targetNodeId={connectionDialog.targetNodeId}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog
+        isOpen={deleteDialog.isOpen}
+        onClose={() => setDeleteDialog({ isOpen: false, nodeToDelete: null })}
+        onConfirm={confirmDeleteNode}
+        nodeToDelete={deleteDialog.nodeToDelete}
       />
     </div>
   );

@@ -9,11 +9,12 @@ interface CustomNodeData {
   node: Node;
   isSelected: boolean;
   onEdit: (node: Node) => void;
+  onClick?: (node: Node) => void;
   onAddConnection: (sourceNodeId: string, optionIndex?: number) => void;
 }
 
 function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
-  const { node, isSelected, onEdit, onAddConnection } = data;
+  const { node, isSelected, onEdit, onClick, onAddConnection } = data;
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(node.text);
 
@@ -73,6 +74,17 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
     }
   };
 
+  const handleClick = (e: React.MouseEvent) => {
+    // Don't trigger click when clicking edit button or handles
+    if (
+      e.target !== e.currentTarget &&
+      !(e.target as HTMLElement).closest(".node-content")
+    ) {
+      return;
+    }
+    onClick?.(node);
+  };
+
   return (
     <div
       className={`relative bg-white border-2 rounded-lg shadow-md min-w-[220px] max-w-[320px] ${
@@ -81,6 +93,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
           : "border-gray-300 hover:border-gray-400"
       } transition-all duration-150 cursor-pointer`}
       style={{ backgroundColor: getNodeColor() }}
+      onClick={handleClick}
       onDoubleClick={handleDoubleClick}
     >
       {/* Target Handle - Only show for all nodes (they can all be targets) */}
@@ -91,7 +104,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
       />
 
       {/* Node Header */}
-      <div className="p-4 text-white">
+      <div className="p-4 text-white node-content">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="text-xl">{getNodeIcon()}</span>
