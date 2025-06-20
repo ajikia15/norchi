@@ -13,7 +13,6 @@ import {
   BackgroundVariant,
   MarkerType,
   Connection,
-  useReactFlow,
   ReactFlowProvider,
 } from "reactflow";
 import "reactflow/dist/style.css";
@@ -38,7 +37,6 @@ function VisualEditorContent({
   flowData,
   onFlowDataChange,
 }: VisualEditorProps) {
-  const reactFlowInstance = useReactFlow();
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [editingNode, setEditingNode] = useState<Node | null>(null);
   const [nodePositions, setNodePositions] = useState<
@@ -379,27 +377,6 @@ function VisualEditorContent({
     []
   );
 
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      if (!connection.source || !connection.target) return;
-
-      const sourceNode = flowData.nodes[connection.source];
-      if (sourceNode && sourceNode.type === "question") {
-        // Show dialog to set option label
-        setConnectionDialog({
-          isOpen: true,
-          sourceNodeId: connection.source,
-          targetNodeId: connection.target,
-          sourceHandle: connection.sourceHandle || "",
-        });
-      } else {
-        // Direct connection for other node types
-        handleDirectConnection(connection);
-      }
-    },
-    [flowData.nodes]
-  );
-
   const handleDirectConnection = useCallback(
     (connection: Connection) => {
       if (!connection.source || !connection.target) return;
@@ -422,6 +399,27 @@ function VisualEditorContent({
       onFlowDataChange(updatedFlowData);
     },
     [flowData, onFlowDataChange]
+  );
+
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return;
+
+      const sourceNode = flowData.nodes[connection.source];
+      if (sourceNode && sourceNode.type === "question") {
+        // Show dialog to set option label
+        setConnectionDialog({
+          isOpen: true,
+          sourceNodeId: connection.source,
+          targetNodeId: connection.target,
+          sourceHandle: connection.sourceHandle || "",
+        });
+      } else {
+        // Direct connection for other node types
+        handleDirectConnection(connection);
+      }
+    },
+    [flowData.nodes]
   );
 
   const handleConnectionConfirm = useCallback(
@@ -545,7 +543,7 @@ function VisualEditorContent({
       setEditingNode(newNode);
       setSelectedNodeId(nodeId);
     },
-    [reactFlowInstance, flowData, onFlowDataChange]
+    [flowData, onFlowDataChange]
   );
 
   const handleDragOver = useCallback((event: DragEvent) => {

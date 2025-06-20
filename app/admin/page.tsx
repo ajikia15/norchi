@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StoriesData, Story, HotTopicsData, HotTopic } from "../types";
 import {
@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StoryManager from "../components/StoryManager";
 import HotQuestionsManager from "../components/HotQuestionsManager";
 
-export default function AdminPage() {
+function AdminContent() {
   const [storiesData, setStoriesData] = useState<StoriesData | null>(null);
   const [hotTopicsData, setHotTopicsData] = useState<HotTopicsData | null>(
     null
@@ -180,5 +180,21 @@ export default function AdminPage() {
         </Tabs>
       </div>
     </div>
+  );
+}
+
+export default function AdminPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
+          <div className="text-2xl font-semibold text-gray-600 animate-pulse">
+            Loading admin panel...
+          </div>
+        </div>
+      }
+    >
+      <AdminContent />
+    </Suspense>
   );
 }
