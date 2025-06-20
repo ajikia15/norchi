@@ -77,44 +77,8 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
           style={{ backfaceVisibility: "hidden" }}
         >
           {/* Corner Shadow - cast by the lifted corner */}
-          <motion.div
-            className="absolute pointer-events-none"
-            animate={{
-              opacity: isHovered && !isFlipped ? 1 : 0,
-            }}
-            transition={{
-              duration: 0.3,
-              ease: "easeOut",
-            }}
-            style={{
-              top: "8px",
-              left: "8px",
-              width: "32px",
-              height: "32px",
-              background:
-                "radial-gradient(ellipse at top left, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 50%, transparent 80%)",
-              borderRadius: "0 0 100% 0",
-            }}
-          />
 
           {/* Corner Mask - hides original corner border */}
-          <motion.div
-            className="absolute pointer-events-none bg-white"
-            animate={{
-              opacity: isHovered && !isFlipped ? 1 : 0,
-            }}
-            transition={{
-              duration: 0.3,
-              ease: "easeOut",
-            }}
-            style={{
-              top: "-1px",
-              left: "-1px",
-              width: "32px",
-              height: "32px",
-              borderRadius: "8px 0 0 0",
-            }}
-          />
 
           {/* Lifted Corner - slides diagonally into position */}
           <motion.div
