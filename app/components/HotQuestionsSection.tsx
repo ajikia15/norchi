@@ -102,7 +102,7 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
               width: "48px",
               height: "48px",
               background:
-                "linear-gradient(135deg, #ffffff 0%, #f8f9fa 30%, #e9ecef 70%, #dee2e6 100%)",
+                "linear-gradient(315deg, #ffffff 0%, #f8f9fa 30%, #e9ecef 65%, #d1d5dc 90%, #d1d5dc 100%)",
               border: "2px solid #d1d5db",
               borderRadius: "8px 0 0 0",
               transformOrigin: "0% 0%",
