@@ -17,6 +17,7 @@ interface HotQuestionCardProps {
 
 const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const router = useRouter();
 
   const handleLinkClick = (e: React.MouseEvent) => {
@@ -47,6 +48,8 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
       transition={{ delay: index * 0.05, duration: 0.3 }}
       className="relative w-full h-full"
       style={{ perspective: "1200px" }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
     >
       <motion.div
         className="relative w-full h-full cursor-pointer"
@@ -54,21 +57,99 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
         animate={{
           rotateY: isFlipped ? 180 : 0,
           rotateX: isFlipped ? [0, 25, -15, 5, 0] : 0,
+          scale: isHovered && !isFlipped ? 1.02 : 1,
         }}
         transition={cardFlipTransition}
         onClick={() => setIsFlipped(!isFlipped)}
-        whileHover={{
-          scale: 1.05,
-          rotateZ: "-3deg",
-          z: 20,
-          boxShadow: "0px 10px 30px rgba(0,0,0,0.2)",
-        }}
+        whileHover={
+          !isFlipped
+            ? {
+                rotateZ: "-1deg",
+                z: 20,
+                boxShadow: "0px 15px 35px rgba(0,0,0,0.15)",
+              }
+            : {}
+        }
       >
         {/* Front Face */}
         <div
-          className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col justify-between"
+          className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col justify-between overflow-hidden"
           style={{ backfaceVisibility: "hidden" }}
         >
+          {/* Corner Shadow - cast by the lifted corner */}
+          <motion.div
+            className="absolute pointer-events-none"
+            animate={{
+              opacity: isHovered && !isFlipped ? 1 : 0,
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut",
+            }}
+            style={{
+              top: "8px",
+              left: "8px",
+              width: "32px",
+              height: "32px",
+              background:
+                "radial-gradient(ellipse at top left, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.1) 50%, transparent 80%)",
+              borderRadius: "0 0 100% 0",
+            }}
+          />
+
+          {/* Corner Mask - hides original corner border */}
+          <motion.div
+            className="absolute pointer-events-none bg-white"
+            animate={{
+              opacity: isHovered && !isFlipped ? 1 : 0,
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeOut",
+            }}
+            style={{
+              top: "-1px",
+              left: "-1px",
+              width: "32px",
+              height: "32px",
+              borderRadius: "8px 0 0 0",
+            }}
+          />
+
+          {/* Lifted Corner - slides diagonally into position */}
+          <motion.div
+            className="absolute pointer-events-none"
+            animate={{
+              x: isHovered && !isFlipped ? 0 : -60,
+              y: isHovered && !isFlipped ? 0 : -60,
+              rotateX: isHovered && !isFlipped ? -35 : -15,
+              rotateY: isHovered && !isFlipped ? 25 : 10,
+              rotateZ: isHovered && !isFlipped ? 12 : 5,
+              z: isHovered && !isFlipped ? 15 : 0,
+              opacity: isHovered && !isFlipped ? 1 : 0,
+            }}
+            transition={{
+              duration: 0.5,
+              ease: "easeOut",
+            }}
+            style={{
+              top: "-2px",
+              left: "-2px",
+              width: "48px",
+              height: "48px",
+              background:
+                "linear-gradient(135deg, #ffffff 0%, #f8f9fa 30%, #e9ecef 70%, #dee2e6 100%)",
+              border: "2px solid #d1d5db",
+              borderRadius: "8px 0 0 0",
+              transformOrigin: "0% 0%",
+              transformStyle: "preserve-3d",
+              boxShadow:
+                isHovered && !isFlipped
+                  ? "4px 8px 16px rgba(0,0,0,0.15)"
+                  : "none",
+            }}
+          />
+
           <div>
             <div className="flex items-start justify-between gap-2 mb-3">
               <Badge
@@ -88,7 +169,7 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
 
         {/* Back Face */}
         <div
-          className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col"
+          className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col overflow-hidden"
           style={{
             backfaceVisibility: "hidden",
             transform: "rotateY(180deg)",
