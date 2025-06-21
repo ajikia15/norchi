@@ -9,6 +9,9 @@ import {
   createHotTopic,
   updateHotTopic as updateHotTopicAction,
   deleteHotTopic as deleteHotTopicAction,
+  createHotcardCategory,
+  updateHotcardCategory,
+  deleteHotcardCategory,
 } from "../lib/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StoryManagerClient from "../components/StoryManagerClient";
@@ -80,9 +83,66 @@ export default function AdminClient({
     });
   };
 
+  // Category handlers
+  const handleCategoryCreate = async (
+    id: string,
+    label: string,
+    emoji: string
+  ) => {
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("id", id);
+        formData.append("label", label);
+        formData.append("emoji", emoji);
+
+        const result = await createHotcardCategory(formData);
+        if (result.success) {
+          router.refresh();
+        }
+      } catch (error) {
+        console.error("AdminClient: Error creating category:", error);
+        alert("Failed to create category");
+      }
+    });
+  };
+
+  const handleCategoryUpdate = async (
+    categoryId: string,
+    label: string,
+    emoji: string
+  ) => {
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("label", label);
+        formData.append("emoji", emoji);
+
+        await updateHotcardCategory(categoryId, formData);
+        router.refresh();
+      } catch (error) {
+        console.error("AdminClient: Error updating category:", error);
+        alert("Failed to update category");
+      }
+    });
+  };
+
+  const handleCategoryDelete = async (categoryId: string) => {
+    startTransition(async () => {
+      try {
+        await deleteHotcardCategory(categoryId);
+        router.refresh();
+      } catch (error) {
+        console.error("AdminClient: Error deleting category:", error);
+        alert("Failed to delete category");
+      }
+    });
+  };
+
   // Hot topics handlers
   const handleTopicCreate = async (
-    category: string,
+    categoryId: string,
+    topicalTag: string,
     title: string,
     answer: string,
     link?: string
@@ -90,7 +150,8 @@ export default function AdminClient({
     startTransition(async () => {
       try {
         const formData = new FormData();
-        formData.append("category", category);
+        formData.append("categoryId", categoryId);
+        formData.append("topicalTag", topicalTag);
         formData.append("title", title);
         formData.append("answer", answer);
         if (link) {
@@ -111,7 +172,8 @@ export default function AdminClient({
 
   const handleTopicUpdate = async (
     topicId: string,
-    category: string,
+    categoryId: string,
+    topicalTag: string,
     title: string,
     answer: string,
     link?: string
@@ -119,7 +181,8 @@ export default function AdminClient({
     startTransition(async () => {
       try {
         const formData = new FormData();
-        formData.append("category", category);
+        formData.append("categoryId", categoryId);
+        formData.append("topicalTag", topicalTag);
         formData.append("title", title);
         formData.append("answer", answer);
         if (link) {
@@ -197,6 +260,9 @@ export default function AdminClient({
               onTopicCreate={handleTopicCreate}
               onTopicUpdate={handleTopicUpdate}
               onTopicDelete={handleTopicDelete}
+              onCategoryCreate={handleCategoryCreate}
+              onCategoryUpdate={handleCategoryUpdate}
+              onCategoryDelete={handleCategoryDelete}
               isLoading={isPending}
             />
           </TabsContent>

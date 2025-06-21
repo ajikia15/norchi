@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { HotTopic } from "../types";
+import { HotTopic, TOPICAL_TAGS } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight, CornerDownRight } from "lucide-react";
@@ -41,6 +41,11 @@ export default function HotQuestionCard({
       times: [0, 0.2, 0.5, 0.8, 1],
     },
   };
+
+  // Get topical tag data for styling
+  const topicalTagData = topic.topicalTag
+    ? TOPICAL_TAGS[topic.topicalTag]
+    : null;
 
   return (
     <motion.div
@@ -112,18 +117,43 @@ export default function HotQuestionCard({
 
           <div>
             <div className="flex items-start justify-between gap-2 mb-3">
-              <Badge
-                variant="secondary"
-                className="text-xs font-medium bg-primary/10 text-primary border-primary/20"
-              >
-                {topic.category}
-              </Badge>
+              <div className="flex flex-col gap-1">
+                {/* Category Badge (editable categories) */}
+                {topic.categoryData && (
+                  <Badge variant="secondary" className="text-xs font-medium">
+                    {topic.categoryData.label}
+                  </Badge>
+                )}
+                {/* Topical Tag Badge (hardcoded styling) */}
+                {topicalTagData && (
+                  <Badge
+                    variant={topicalTagData.badgeVariant}
+                    className="text-xs font-medium"
+                  >
+                    {topicalTagData.label}
+                  </Badge>
+                )}
+                {/* Fallback to legacy category */}
+                {!topic.categoryData && !topicalTagData && (
+                  <Badge variant="secondary" className="text-xs font-medium">
+                    {topic.category}
+                  </Badge>
+                )}
+              </div>
               <CornerDownRight className="h-4 w-4 text-gray-400" />
             </div>
             <h3 className="text-sm lg:text-base font-semibold text-gray-900 leading-tight">
               {topic.title}
             </h3>
           </div>
+
+          {/* Topical emoji in bottom-right (only from topical tags) */}
+          {topicalTagData?.emoji && (
+            <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
+              {topicalTagData.emoji}
+            </div>
+          )}
+
           <p className="text-xs text-gray-400 mt-4">Click to flip</p>
         </div>
 
@@ -156,6 +186,13 @@ export default function HotQuestionCard({
                 )}
               </span>
             </Button>
+          )}
+
+          {/* Topical emoji in bottom-right on back face too */}
+          {topicalTagData?.emoji && (
+            <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
+              {topicalTagData.emoji}
+            </div>
           )}
         </div>
       </motion.div>

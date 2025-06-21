@@ -58,14 +58,54 @@ export interface PlayerState {
   history: string[];
 }
 
+export type HotcardBadgeVariant =
+  | "default"
+  | "destructive"
+  | "secondary"
+  | "outline";
+
+export interface HotcardCategory {
+  id: string; // "economics", "education", etc.
+  label: string; // Badge label like "ეკონომიკა", "განათლება"
+  emoji: string; // e.g. "💵"
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Hardcoded topical tags with styling
+export type TopicalTag = "ragebait" | "popularDisinfo" | "latestHysteria";
+
+export const TOPICAL_TAGS = {
+  ragebait: {
+    label: "ცხელ-ცხელი ბომბა",
+    emoji: "💣",
+    badgeVariant: "destructive" as const,
+  },
+  popularDisinfo: {
+    label: "პოპულარული ტყუილი",
+    emoji: "🚫",
+    badgeVariant: "secondary" as const,
+  },
+  latestHysteria: {
+    label: "შოკი-პიკი-პანიკა",
+    emoji: "⚡",
+    badgeVariant: "outline" as const,
+  },
+} as const;
+
 export interface HotTopic {
   id: string;
-  category: string;
+  categoryId?: string; // References HotcardCategory.id (editable categories)
+  category: string; // Keep for backward compatibility
+  topicalTag?: TopicalTag | null; // Hardcoded topical styling
   title: string;
   answer: string;
   link?: string;
+  // Computed/joined fields when category is loaded
+  categoryData?: HotcardCategory;
 }
 
 export interface HotTopicsData {
   topics: Record<string, HotTopic>;
+  categories: Record<string, HotcardCategory>;
 }
