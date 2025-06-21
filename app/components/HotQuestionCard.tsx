@@ -124,15 +124,6 @@ export default function HotQuestionCard({
                     {topic.categoryData.label}
                   </Badge>
                 )}
-                {/* Topical Tag Badge (hardcoded styling) */}
-                {topicalTagData && (
-                  <Badge
-                    variant={topicalTagData.badgeVariant}
-                    className="text-xs font-medium"
-                  >
-                    {topicalTagData.label}
-                  </Badge>
-                )}
                 {/* Fallback to legacy category */}
                 {!topic.categoryData && !topicalTagData && (
                   <Badge variant="secondary" className="text-xs font-medium">

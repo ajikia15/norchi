@@ -30,6 +30,14 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   Plus,
   Edit,
   Trash2,
@@ -752,74 +760,86 @@ export default function HotQuestionsManagerClient({
               </Dialog>
             </div>
 
-            {/* Categories Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categories.map((category) => (
-                <Card
-                  key={category.id}
-                  className={`transition-all duration-200 hover:shadow-lg border-2 border-gray-200/50 hover:border-primary/50 ${
-                    isLoading ? "opacity-50 pointer-events-none" : ""
-                  }`}
-                >
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <Badge variant="secondary">{category.label}</Badge>
-                        </div>
-                        <CardTitle className="text-sm text-muted-foreground">
-                          ID: {category.id}
-                        </CardTitle>
-                      </div>
-
-                      <div className="flex gap-1 ml-2">
-                        <Button
-                          onClick={() => handleEditCategory(category)}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                          disabled={isLoading}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          onClick={() => handleDeleteCategory(category)}
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                          disabled={isLoading}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Category emoji in bottom-right */}
-                    <div className="absolute bottom-2 right-2 opacity-50 text-2xl">
-                      {category.emoji}
-                    </div>
-                  </CardHeader>
-                </Card>
-              ))}
-
-              {categories.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <div className="text-gray-400 mb-4">
-                    <Settings className="h-12 w-12 mx-auto mb-4" />
-                    <p className="text-lg font-medium">No categories yet</p>
-                    <p className="text-sm">Create your first category</p>
-                  </div>
-                  <Button
-                    onClick={() => setIsCategoryDialogOpen(true)}
-                    variant="outline"
-                    disabled={isLoading}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create First Category
-                  </Button>
+            {/* Categories Table */}
+            {categories.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-400 mb-4">
+                  <Settings className="h-12 w-12 mx-auto mb-4" />
+                  <p className="text-lg font-medium">No categories yet</p>
+                  <p className="text-sm">Create your first category</p>
                 </div>
-              )}
-            </div>
+                <Button
+                  onClick={() => setIsCategoryDialogOpen(true)}
+                  variant="outline"
+                  disabled={isLoading}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Create First Category
+                </Button>
+              </div>
+            ) : (
+              <div
+                className={`border rounded-md ${
+                  isLoading ? "opacity-50 pointer-events-none" : ""
+                }`}
+              >
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-16">Emoji</TableHead>
+                      <TableHead className="w-32">ID</TableHead>
+                      <TableHead>Label</TableHead>
+                      <TableHead className="text-right w-32">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {categories.map((category) => (
+                      <TableRow key={category.id}>
+                        <TableCell className="text-2xl">
+                          {category.emoji}
+                        </TableCell>
+                        <TableCell className="font-mono text-sm text-muted-foreground">
+                          {category.id}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">{category.label}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-1 justify-end">
+                            <Button
+                              onClick={() => handleEditCategory(category)}
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                              disabled={isLoading}
+                            >
+                              {isLoading ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Edit className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                            <Button
+                              onClick={() => handleDeleteCategory(category)}
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              disabled={isLoading}
+                            >
+                              {isLoading ? (
+                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="h-3.5 w-3.5" />
+                              )}
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
           </div>
         </TabsContent>
       </Tabs>
