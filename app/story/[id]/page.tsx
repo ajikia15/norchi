@@ -4,11 +4,11 @@ import { loadStoriesData } from "../../lib/storage";
 import StoryClient from "./StoryClient";
 
 interface PageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 async function StoryContent({ params }: PageProps) {
-  const storyId = params.id;
+  const { id: storyId } = await params;
 
   // Load data server-side
   const storiesData = await loadStoriesData();
