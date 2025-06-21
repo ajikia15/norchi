@@ -166,6 +166,18 @@
   --tracking-wide: calc(var(--tracking-normal) + 0.025em);
   --tracking-wider: calc(var(--tracking-normal) + 0.05em);
   --tracking-widest: calc(var(--tracking-normal) + 0.1em);
+
+  --color-primary-50: oklch(94.7% 0.083 156.56);
+  --color-primary-100: oklch(89.21% 0.186 156.29);
+  --color-primary-200: oklch(80.54% 0.194 156.3);
+  --color-primary-300: oklch(72.13% 0.175 156.13);
+  --color-primary-400: oklch(63.76% 0.155 156.03);
+  --color-primary-500: oklch(55.4% 0.134 156.05);
+  --color-primary-600: oklch(47.03% 0.113 156.26);
+  --color-primary-700: oklch(38.57% 0.093 156.2);
+  --color-primary-800: oklch(30.29% 0.074 155.89);
+  --color-primary-900: oklch(21.78% 0.053 155.73);
+  --color-primary-950: oklch(17.21% 0.042 156.2);
 }
 
 body {
