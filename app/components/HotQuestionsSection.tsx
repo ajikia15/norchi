@@ -76,10 +76,6 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
           className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col justify-between overflow-hidden"
           style={{ backfaceVisibility: "hidden" }}
         >
-          {/* Corner Shadow - cast by the lifted corner */}
-
-          {/* Corner Mask - hides original corner border */}
-
           {/* Lifted Corner - slides diagonally into position */}
           <motion.div
             className="absolute pointer-events-none"
@@ -101,8 +97,7 @@ const HotQuestionCard = ({ topic, index }: HotQuestionCardProps) => {
               left: "-2px",
               width: "48px",
               height: "48px",
-              background:
-                "linear-gradient(315deg, #ffffff 0%, #f8f9fa 30%, #e9ecef 65%, #d1d5dc 90%, #d1d5dc 100%)",
+              background: "linear-gradient(315deg, #ffffff 0%, #d1d5dc 100%)",
               border: "2px solid #d1d5db",
               borderRadius: "8px 0 0 0",
               transformOrigin: "0% 0%",
