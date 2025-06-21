@@ -43,6 +43,7 @@ export default function StoryEditPage() {
   const [isCreating, setIsCreating] = useState(false);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     console.log("StoryEditPage: Loading story with ID:", storyId);
@@ -215,6 +216,22 @@ export default function StoryEditPage() {
   const handleNodeHover = (nodeId: string | null) => {
     setHoveredNodeId(nodeId);
   };
+
+  const toggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
+  // Handle escape key to exit fullscreen
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && isFullscreen) {
+        setIsFullscreen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [isFullscreen]);
 
   const handleCreateAndConnect = (
     nodeType: string,
@@ -831,11 +848,26 @@ export default function StoryEditPage() {
           </TabsContent>
 
           <TabsContent value="visual">
-            <Card>
-              <CardContent className="p-6">
+            <Card
+              className={`transition-all duration-300 ${
+                isFullscreen
+                  ? "fixed inset-0 z-50 bg-white rounded-none border-0 shadow-2xl"
+                  : "shadow-sm"
+              }`}
+            >
+              <CardHeader className="pb-4">
+                <CardTitle className="text-xl">Visual Editor</CardTitle>
+              </CardHeader>
+              <CardContent
+                className={`${
+                  isFullscreen ? "p-6 h-[calc(100vh-80px)]" : "p-6"
+                }`}
+              >
                 <VisualEditor
                   flowData={flowData}
                   onFlowDataChange={handleFlowDataChange}
+                  isFullscreen={isFullscreen}
+                  onToggleFullscreen={toggleFullscreen}
                 />
               </CardContent>
             </Card>

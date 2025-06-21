@@ -23,10 +23,13 @@ import ConnectionDialog from "./ConnectionDialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import NodeEditor from "./NodeEditor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 interface VisualEditorProps {
   flowData: FlowData;
   onFlowDataChange: (newFlowData: FlowData) => void;
+  isFullscreen?: boolean;
+  onToggleFullscreen?: () => void;
 }
 
 const nodeTypes = {
@@ -36,6 +39,8 @@ const nodeTypes = {
 function VisualEditorContent({
   flowData,
   onFlowDataChange,
+  isFullscreen = false,
+  onToggleFullscreen,
 }: VisualEditorProps) {
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
   const [editingNode, setEditingNode] = useState<Node | null>(null);
@@ -564,10 +569,57 @@ function VisualEditorContent({
   );
 
   return (
-    <div className="flex gap-4 h-[calc(100vh-200px)] min-h-[600px]">
+    <div className="flex gap-4 h-full min-h-[600px]">
       {/* Left Sidebar - Node Palette */}
-      <div className="flex-shrink-0 w-64">
-        <NodePalette />
+      <div className="flex-shrink-0 w-64 flex flex-col">
+        <div className="flex-1">
+          <NodePalette />
+        </div>
+        {/* Fullscreen Button */}
+        {onToggleFullscreen && (
+          <div className="mt-4 px-2">
+            <Button
+              onClick={onToggleFullscreen}
+              variant="outline"
+              size="sm"
+              className="w-full justify-start gap-2 text-sm shadow-sm"
+              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            >
+              <div className="w-4 h-4 flex items-center justify-center">
+                {isFullscreen ? (
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 9V4.5M9 9H4.5M9 9L3.5 3.5M15 9h4.5M15 9V4.5M15 9l5.5-5.5M9 15v4.5M9 15H4.5M9 15l-5.5 5.5M15 15h4.5M15 15v4.5m0-4.5l5.5 5.5"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    className="w-3 h-3"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M3 7V4a1 1 0 011-1h3m0 0V1m0 2h2M7 21H4a1 1 0 01-1-1v-3m0 0H1m2 0v-2M21 7V4a1 1 0 00-1-1h-3m0 0V1m0 2h-2M17 21h3a1 1 0 001-1v-3m0 0h2m-2 0v-2"
+                    />
+                  </svg>
+                )}
+              </div>
+              <span>{isFullscreen ? "დააპატარავე" : "გაადიდე"}</span>
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Main Canvas */}
