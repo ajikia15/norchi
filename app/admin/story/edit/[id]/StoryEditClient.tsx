@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { StoriesData, Story, FlowData, Node } from "@/app/types";
+import { Story, FlowData, Node } from "@/app/types";
 import { updateStory } from "@/app/lib/actions";
 import NodeList from "@/app/components/NodeList";
 import NodeEditor from "@/app/components/NodeEditor";
@@ -27,13 +27,11 @@ import {
 interface StoryEditClientProps {
   storyId: string;
   initialStory: Story;
-  initialStoriesData: StoriesData;
 }
 
 export default function StoryEditClient({
   storyId,
   initialStory,
-  initialStoriesData,
 }: StoryEditClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

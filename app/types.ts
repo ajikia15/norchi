@@ -50,7 +50,7 @@ export interface Story {
 
 export interface StoriesData {
   stories: Record<string, Story>;
-  currentStoryId: string;
+  currentStoryId: string; // Legacy field - kept for compatibility but no longer used
 }
 
 export interface PlayerState {

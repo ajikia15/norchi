@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+
 import {
   Dialog,
   DialogContent,
@@ -161,10 +161,7 @@ export default function StoryManagerClient({
           <Card
             key={story.id}
             className={cn(
-              "transition-all duration-200 hover:shadow-lg cursor-pointer border-2",
-              story.id === storiesData.currentStoryId
-                ? "border-primary bg-primary/5"
-                : "border-gray-200/50 hover:border-primary/50",
+              "transition-all duration-200 hover:shadow-lg cursor-pointer border-2 border-gray-200/50 hover:border-primary/50",
               isLoading && "opacity-50 pointer-events-none"
             )}
             onClick={() => !isLoading && onStorySelect(story.id)}
@@ -175,11 +172,6 @@ export default function StoryManagerClient({
                   <CardTitle className="text-lg leading-tight line-clamp-2">
                     {story.name}
                   </CardTitle>
-                  {story.id === storiesData.currentStoryId && (
-                    <Badge variant="default" className="mt-2 text-xs">
-                      Active
-                    </Badge>
-                  )}
                 </div>
 
                 <div className="flex gap-1 ml-2">

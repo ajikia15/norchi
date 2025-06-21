@@ -19,13 +19,7 @@ async function StoryEditContent({ params }: PageProps) {
     notFound();
   }
 
-  return (
-    <StoryEditClient
-      storyId={storyId}
-      initialStory={story}
-      initialStoriesData={storiesData}
-    />
-  );
+  return <StoryEditClient storyId={storyId} initialStory={story} />;
 }
 
 export default function StoryEditPage({ params }: PageProps) {

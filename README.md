@@ -23,8 +23,8 @@ A non-quiz logical challenge system that presents provocative statements to expl
 
 ### Technical Features
 
-- **LocalStorage Persistence**: All data stored in browser localStorage
-- **Modular Storage Layer**: Easy to swap storage for API calls later
+- **Turso SQLite Database**: All data stored in production-ready SQLite database
+- **Server Actions**: Modern Next.js 15 server-side operations
 - **TypeScript**: Full type safety throughout the application
 - **Responsive Design**: Works on desktop and mobile devices
 
@@ -95,58 +95,58 @@ A non-quiz logical challenge system that presents provocative statements to expl
 ```
 app/
 ├── components/
-│   ├── Player.tsx          # Main game interface
-│   ├── QuestionCard.tsx    # Individual question display
-│   ├── EndCard.tsx         # Conclusion screens
-│   ├── Admin.tsx           # Admin panel with tabs
-│   ├── NodeList.tsx        # List of all nodes
-│   ├── NodeEditor.tsx      # Edit individual nodes
-│   └── FlowGraph.tsx       # React Flow visualization
+│   ├── StoryClient.tsx           # Story playing interface
+│   ├── AdminClient.tsx           # Admin panel client component
+│   ├── StoryManagerClient.tsx    # Story management interface
+│   ├── HotQuestionsManagerClient.tsx # Hot questions management
+│   ├── StoryEditClient.tsx       # Story editing interface
+│   ├── NodeList.tsx              # Node list component
+│   ├── NodeEditor.tsx            # Node editing component
+│   ├── FlowGraph.tsx             # React Flow visualization
+│   └── VisualEditor.tsx          # Visual flow editor
 ├── lib/
-│   └── storage.ts          # LocalStorage utilities
+│   ├── storage.ts          # Database utilities
+│   └── actions.ts          # Server actions for CRUD operations
 ├── types.ts                # TypeScript definitions
-└── page.tsx                # Main app with view switching
+├── page.tsx                # Main homepage
+├── admin/page.tsx          # Admin panel server component
+├── story/[id]/page.tsx     # Story playing server component
+└── story/edit/[id]/page.tsx # Story editing server component
 ```
 
-### Storage Layer
+### Database Architecture
 
-The storage layer is designed to be easily replaceable. Currently uses localStorage:
-
-```typescript
-// Current localStorage implementation
-export function saveFlowData(data: FlowData): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-}
-
-export function loadFlowData(): FlowData | null {
-  const stored = localStorage.getItem(STORAGE_KEY);
-  return stored ? JSON.parse(stored) : null;
-}
-```
-
-**To swap for API storage:**
-
-1. Update `app/lib/storage.ts` functions
-2. Replace localStorage calls with API endpoints
-3. Add error handling and loading states
-4. Consider adding authentication if needed
-
-Example API replacement:
+Modern Next.js 15 architecture with Turso SQLite and server actions:
 
 ```typescript
-export async function saveFlowData(data: FlowData): Promise<void> {
-  await fetch("/api/flows", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data),
+// Server-side database operations
+export async function loadStoriesData(): Promise<StoriesData> {
+  const result = await db.select().from(stories);
+  // Transform database results to application format
+  return { stories: storiesMap, currentStoryId: "" };
+}
+
+// Server actions for all mutations
+export async function createStory(formData: FormData) {
+  await db.insert(stories).values({
+    id: `story-${Date.now()}`,
+    name: formData.get("name"),
+    flowData: JSON.stringify({ startNodeId: "", nodes: {} }),
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
   });
-}
 
-export async function loadFlowData(): Promise<FlowData | null> {
-  const response = await fetch("/api/flows");
-  return response.ok ? response.json() : null;
+  revalidatePath("/admin");
+  return { success: true };
 }
 ```
+
+**Architecture Benefits:**
+
+1. **Server Components**: Initial data loaded server-side for better performance
+2. **Server Actions**: Type-safe mutations with automatic revalidation
+3. **Client Components**: Used only where interactivity is needed
+4. **Database-first**: No localStorage dependencies, production-ready persistence
 
 ## 🎨 Design Philosophy
 
@@ -178,7 +178,7 @@ export async function loadFlowData(): Promise<FlowData | null> {
 
 - [x] Basic player interface with question/answer flow
 - [x] Admin panel for creating and editing nodes
-- [x] LocalStorage persistence
+- [x] Turso SQLite database with server actions
 - [x] Option reordering with drag-and-drop
 - [x] Interactive graph visualization
 - [x] Export/import functionality

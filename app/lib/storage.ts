@@ -17,11 +17,8 @@ export async function loadStoriesData(): Promise<StoriesData> {
 
     // Transform database results to StoriesData format
     const storiesMap: Record<string, Story> = {};
-    let firstStoryId = "";
 
-    result.forEach((dbStory, index) => {
-      if (index === 0) firstStoryId = dbStory.id;
-
+    result.forEach((dbStory) => {
       storiesMap[dbStory.id] = {
         id: dbStory.id,
         name: dbStory.name,
@@ -34,7 +31,7 @@ export async function loadStoriesData(): Promise<StoriesData> {
 
     return {
       stories: storiesMap,
-      currentStoryId: firstStoryId,
+      currentStoryId: "", // Legacy field - no longer used
     };
   } catch (error) {
     console.error("Failed to load stories from database:", error);
