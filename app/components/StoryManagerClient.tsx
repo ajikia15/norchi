@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Story, StoriesData } from "../types";
-import { createNewStory } from "../lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,46 +17,48 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
-import { Plus, Edit, Trash2, BookOpen, Calendar } from "lucide-react";
+import { Plus, Trash2, BookOpen, Calendar, Loader2 } from "lucide-react";
 
-interface StoryManagerProps {
+interface StoryManagerClientProps {
   storiesData: StoriesData;
   onStorySelect: (storyId: string) => void;
-  onStoryCreate: (story: Story) => void;
-  onStoryDelete: (storyId: string) => void;
+  onStoryCreate: (name: string, description?: string) => Promise<void>;
+  onStoryDelete: (storyId: string) => Promise<void>;
+  isLoading: boolean;
 }
 
-export default function StoryManager({
+export default function StoryManagerClient({
   storiesData,
   onStorySelect,
   onStoryCreate,
   onStoryDelete,
-}: StoryManagerProps) {
+  isLoading,
+}: StoryManagerClientProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [formData, setFormData] = useState({ name: "", description: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const stories = Object.values(storiesData.stories);
 
-  const handleCreateStory = () => {
-    if (!formData.name.trim()) return;
+  const handleCreateStory = async () => {
+    if (!formData.name.trim() || isSubmitting) return;
 
-    const newStory = createNewStory(
-      formData.name.trim(),
-      formData.description.trim() || undefined
-    );
-    onStoryCreate(newStory);
-    setFormData({ name: "", description: "" });
-    setIsCreateDialogOpen(false);
+    setIsSubmitting(true);
+    try {
+      await onStoryCreate(
+        formData.name.trim(),
+        formData.description.trim() || undefined
+      );
+      setFormData({ name: "", description: "" });
+      setIsCreateDialogOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleDeleteStory = (story: Story) => {
-    if (
-      confirm(
-        `Are you sure you want to delete "${story.name}"? This action cannot be undone.`
-      )
-    ) {
-      onStoryDelete(story.id);
-    }
+  const handleDeleteStory = async (story: Story) => {
+    if (isLoading) return;
+    await onStoryDelete(story.id);
   };
 
   const formatDate = (dateString: string) => {
@@ -86,8 +87,12 @@ export default function StoryManager({
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="shadow-sm">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="shadow-sm" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
               New Story
             </Button>
           </DialogTrigger>
@@ -105,6 +110,7 @@ export default function StoryManager({
                     setFormData({ ...formData, name: e.target.value })
                   }
                   placeholder="e.g., Army Service Ethics, Economic Freedom..."
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -119,6 +125,7 @@ export default function StoryManager({
                   }
                   placeholder="Brief description of what this story explores..."
                   rows={3}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
@@ -126,14 +133,22 @@ export default function StoryManager({
               <Button
                 variant="outline"
                 onClick={() => setIsCreateDialogOpen(false)}
+                disabled={isSubmitting}
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleCreateStory}
-                disabled={!formData.name.trim()}
+                disabled={!formData.name.trim() || isSubmitting}
               >
-                Create Story
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Creating...
+                  </>
+                ) : (
+                  "Create Story"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -149,9 +164,10 @@ export default function StoryManager({
               "transition-all duration-200 hover:shadow-lg cursor-pointer border-2",
               story.id === storiesData.currentStoryId
                 ? "border-primary bg-primary/5"
-                : "border-gray-200/50 hover:border-primary/50"
+                : "border-gray-200/50 hover:border-primary/50",
+              isLoading && "opacity-50 pointer-events-none"
             )}
-            onClick={() => onStorySelect(story.id)}
+            onClick={() => !isLoading && onStorySelect(story.id)}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
@@ -175,8 +191,13 @@ export default function StoryManager({
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                    disabled={isLoading}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {isLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -200,45 +221,31 @@ export default function StoryManager({
                     <span>{formatDate(story.updatedAt)}</span>
                   </div>
                 </div>
-
-                <div className="pt-2 border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Edit className="h-3 w-3" />
-                      Click to edit story
-                    </div>
-                    {story.id === storiesData.currentStoryId && (
-                      <div className="flex items-center gap-1 text-xs text-primary font-medium">
-                        <div className="w-2 h-2 bg-primary rounded-full"></div>
-                        Active
-                      </div>
-                    )}
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
         ))}
-      </div>
 
-      {/* Empty State */}
-      {stories.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-            <BookOpen className="h-8 w-8 text-gray-400" />
+        {stories.length === 0 && (
+          <div className="col-span-full text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <BookOpen className="h-12 w-12 mx-auto mb-4" />
+              <p className="text-lg font-medium">No stories yet</p>
+              <p className="text-sm">
+                Create your first logical challenge story
+              </p>
+            </div>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              variant="outline"
+              disabled={isLoading}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create First Story
+            </Button>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No stories yet
-          </h3>
-          <p className="text-muted-foreground max-w-sm mb-4">
-            Create your first story to start building logical challenge flows
-          </p>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create First Story
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

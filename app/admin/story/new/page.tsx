@@ -1,3 +1,5 @@
+import { redirect } from "next/navigation";
+
 export default function NewStoryPage() {
-  return <div>New Story Page</div>;
+  redirect("/admin?tab=stories");
 }

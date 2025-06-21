@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { HotTopic, HotTopicsData } from "../types";
-import { createNewHotTopic } from "../lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,24 +16,41 @@ import {
   DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Edit, Trash2, ExternalLink, ArrowRight } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  ExternalLink,
+  ArrowRight,
+  Loader2,
+} from "lucide-react";
 
-interface HotQuestionsManagerProps {
+interface HotQuestionsManagerClientProps {
   hotTopicsData: HotTopicsData;
-  onTopicCreate: (topic: HotTopic) => void;
+  onTopicCreate: (
+    category: string,
+    title: string,
+    answer: string,
+    link?: string
+  ) => Promise<void>;
   onTopicUpdate: (
     topicId: string,
-    updates: Partial<Omit<HotTopic, "id">>
-  ) => void;
-  onTopicDelete: (topicId: string) => void;
+    category: string,
+    title: string,
+    answer: string,
+    link?: string
+  ) => Promise<void>;
+  onTopicDelete: (topicId: string) => Promise<void>;
+  isLoading: boolean;
 }
 
-export default function HotQuestionsManager({
+export default function HotQuestionsManagerClient({
   hotTopicsData,
   onTopicCreate,
   onTopicUpdate,
   onTopicDelete,
-}: HotQuestionsManagerProps) {
+  isLoading,
+}: HotQuestionsManagerClientProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<HotTopic | null>(null);
   const [formData, setFormData] = useState({
@@ -43,6 +59,7 @@ export default function HotQuestionsManager({
     answer: "",
     link: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const topics = Object.values(hotTopicsData.topics);
 
@@ -55,27 +72,34 @@ export default function HotQuestionsManager({
     });
   };
 
-  const handleCreateTopic = () => {
+  const handleCreateTopic = async () => {
     if (
       !formData.category.trim() ||
       !formData.title.trim() ||
-      !formData.answer.trim()
+      !formData.answer.trim() ||
+      isSubmitting
     ) {
       return;
     }
 
-    const newTopic = createNewHotTopic(
-      formData.category.trim(),
-      formData.title.trim(),
-      formData.answer.trim(),
-      formData.link.trim() || undefined
-    );
-    onTopicCreate(newTopic);
-    resetForm();
-    setIsCreateDialogOpen(false);
+    setIsSubmitting(true);
+    try {
+      await onTopicCreate(
+        formData.category.trim(),
+        formData.title.trim(),
+        formData.answer.trim(),
+        formData.link.trim() || undefined
+      );
+      resetForm();
+      setIsCreateDialogOpen(false);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleEditTopic = (topic: HotTopic) => {
+    if (isLoading) return;
+
     setEditingTopic(topic);
     setFormData({
       category: topic.category,
@@ -86,41 +110,58 @@ export default function HotQuestionsManager({
     setIsCreateDialogOpen(true);
   };
 
-  const handleUpdateTopic = () => {
+  const handleUpdateTopic = async () => {
     if (
       !editingTopic ||
       !formData.category.trim() ||
       !formData.title.trim() ||
-      !formData.answer.trim()
+      !formData.answer.trim() ||
+      isSubmitting
     ) {
       return;
     }
 
-    onTopicUpdate(editingTopic.id, {
-      category: formData.category.trim(),
-      title: formData.title.trim(),
-      answer: formData.answer.trim(),
-      link: formData.link.trim() || undefined,
-    });
-    resetForm();
-    setEditingTopic(null);
-    setIsCreateDialogOpen(false);
-  };
-
-  const handleDeleteTopic = (topic: HotTopic) => {
-    if (
-      confirm(
-        `Are you sure you want to delete the hot question about "${topic.title}"? This action cannot be undone.`
-      )
-    ) {
-      onTopicDelete(topic.id);
+    setIsSubmitting(true);
+    try {
+      await onTopicUpdate(
+        editingTopic.id,
+        formData.category.trim(),
+        formData.title.trim(),
+        formData.answer.trim(),
+        formData.link.trim() || undefined
+      );
+      resetForm();
+      setEditingTopic(null);
+      setIsCreateDialogOpen(false);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
+  const handleDeleteTopic = async (topic: HotTopic) => {
+    if (isLoading) return;
+    await onTopicDelete(topic.id);
+  };
+
   const handleDialogClose = () => {
+    if (isSubmitting) return;
     setIsCreateDialogOpen(false);
     setEditingTopic(null);
     resetForm();
+  };
+
+  const getCategoryColor = (category: string) => {
+    const colors = {
+      drugs: "bg-purple-100 text-purple-800",
+      property: "bg-green-100 text-green-800",
+      military: "bg-red-100 text-red-800",
+      economics: "bg-blue-100 text-blue-800",
+      freedom: "bg-yellow-100 text-yellow-800",
+    };
+    return (
+      colors[category.toLowerCase() as keyof typeof colors] ||
+      "bg-gray-100 text-gray-800"
+    );
   };
 
   return (
@@ -137,8 +178,12 @@ export default function HotQuestionsManager({
 
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="shadow-sm">
-              <Plus className="h-4 w-4 mr-2" />
+            <Button className="shadow-sm" disabled={isLoading}>
+              {isLoading ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Plus className="h-4 w-4 mr-2" />
+              )}
               New Hot Question
             </Button>
           </DialogTrigger>
@@ -159,6 +204,7 @@ export default function HotQuestionsManager({
                       setFormData({ ...formData, category: e.target.value })
                     }
                     placeholder="e.g., Drugs, Property, Military..."
+                    disabled={isSubmitting}
                   />
                 </div>
                 <div className="space-y-2">
@@ -170,6 +216,7 @@ export default function HotQuestionsManager({
                       setFormData({ ...formData, link: e.target.value })
                     }
                     placeholder="e.g., /story/wine-weed or https://..."
+                    disabled={isSubmitting}
                   />
                 </div>
               </div>
@@ -182,6 +229,7 @@ export default function HotQuestionsManager({
                     setFormData({ ...formData, title: e.target.value })
                   }
                   placeholder="e.g., Should marijuana be fully legalized?"
+                  disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
@@ -194,11 +242,16 @@ export default function HotQuestionsManager({
                   }
                   placeholder="Your libertarian perspective on this question..."
                   rows={4}
+                  disabled={isSubmitting}
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={handleDialogClose}>
+              <Button
+                variant="outline"
+                onClick={handleDialogClose}
+                disabled={isSubmitting}
+              >
                 Cancel
               </Button>
               <Button
@@ -206,10 +259,20 @@ export default function HotQuestionsManager({
                 disabled={
                   !formData.category.trim() ||
                   !formData.title.trim() ||
-                  !formData.answer.trim()
+                  !formData.answer.trim() ||
+                  isSubmitting
                 }
               >
-                {editingTopic ? "Update Question" : "Create Question"}
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {editingTopic ? "Updating..." : "Creating..."}
+                  </>
+                ) : editingTopic ? (
+                  "Update Question"
+                ) : (
+                  "Create Question"
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -221,27 +284,17 @@ export default function HotQuestionsManager({
         {topics.map((topic) => (
           <Card
             key={topic.id}
-            className="transition-all duration-200 hover:shadow-lg border-2 border-gray-200/50 hover:border-primary/50"
+            className={`transition-all duration-200 hover:shadow-lg border-2 border-gray-200/50 hover:border-primary/50 ${
+              isLoading ? "opacity-50 pointer-events-none" : ""
+            }`}
           >
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge
-                      variant="secondary"
-                      className="text-xs font-medium bg-primary/10 text-primary border-primary/20"
-                    >
+                    <Badge className={getCategoryColor(topic.category)}>
                       {topic.category}
                     </Badge>
-                    {topic.link && (
-                      <div className="text-xs text-muted-foreground">
-                        {topic.link.startsWith("/") ? (
-                          <ArrowRight className="h-3 w-3" />
-                        ) : (
-                          <ExternalLink className="h-3 w-3" />
-                        )}
-                      </div>
-                    )}
                   </div>
                   <CardTitle className="text-lg leading-tight line-clamp-2">
                     {topic.title}
@@ -254,48 +307,89 @@ export default function HotQuestionsManager({
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                    disabled={isLoading}
                   >
-                    <Edit className="h-3.5 w-3.5" />
+                    {isLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Edit className="h-3.5 w-3.5" />
+                    )}
                   </Button>
                   <Button
                     onClick={() => handleDeleteTopic(topic)}
                     variant="ghost"
                     size="sm"
                     className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                    disabled={isLoading}
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    {isLoading ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="h-3.5 w-3.5" />
+                    )}
                   </Button>
                 </div>
               </div>
             </CardHeader>
 
             <CardContent className="pt-0">
-              <p className="text-sm text-muted-foreground line-clamp-4 leading-relaxed">
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-4 leading-relaxed">
                 {topic.answer}
               </p>
+
+              {topic.link && (
+                <div className="flex items-center justify-between">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-xs"
+                    asChild
+                    disabled={isLoading}
+                  >
+                    <a
+                      href={topic.link}
+                      target={
+                        topic.link.startsWith("http") ? "_blank" : "_self"
+                      }
+                      rel={
+                        topic.link.startsWith("http")
+                          ? "noopener noreferrer"
+                          : undefined
+                      }
+                      className="flex items-center gap-1"
+                    >
+                      {topic.link.startsWith("http") ? (
+                        <ExternalLink className="h-3 w-3" />
+                      ) : (
+                        <ArrowRight className="h-3 w-3" />
+                      )}
+                      Explore
+                    </a>
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         ))}
-      </div>
 
-      {/* Empty State */}
-      {topics.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-            <span className="text-2xl">🔥</span>
+        {topics.length === 0 && (
+          <div className="col-span-full text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <Plus className="h-12 w-12 mx-auto mb-4" />
+              <p className="text-lg font-medium">No hot questions yet</p>
+              <p className="text-sm">Create your first provocative question</p>
+            </div>
+            <Button
+              onClick={() => setIsCreateDialogOpen(true)}
+              variant="outline"
+              disabled={isLoading}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Create First Question
+            </Button>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            No hot questions yet
-          </h3>
-          <p className="text-muted-foreground max-w-sm mb-4">
-            Create your first hot question to start challenging popular thinking
-          </p>
-          <Button onClick={() => setIsCreateDialogOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create First Hot Question
-          </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
