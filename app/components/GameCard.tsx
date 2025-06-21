@@ -440,7 +440,6 @@ export default function GameCard({
               {node.options[0] && (
                 <motion.button
                   onClick={() => {
-                    console.log("Left button clicked", node.options[0]);
                     handleOptionClick(0);
                   }}
                   disabled={isTransitioning || !node.options[0].nextNodeId}
@@ -464,7 +463,6 @@ export default function GameCard({
               {node.options[2] && (
                 <motion.button
                   onClick={() => {
-                    console.log("Challenge button clicked", node.options[2]);
                     handleOptionClick(2);
                   }}
                   disabled={isTransitioning}
@@ -488,7 +486,6 @@ export default function GameCard({
               {node.options[1] && (
                 <motion.button
                   onClick={() => {
-                    console.log("Right button clicked", node.options[1]);
                     handleOptionClick(1);
                   }}
                   disabled={isTransitioning || !node.options[1].nextNodeId}

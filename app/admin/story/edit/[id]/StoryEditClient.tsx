@@ -329,8 +329,6 @@ export default function StoryEditClient({
       link.click();
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
-
-      console.log("Story exported successfully:", currentStory.name);
     } catch (error) {
       console.error("Error exporting story:", error);
       alert("Error exporting story. Please try again.");
@@ -364,8 +362,6 @@ export default function StoryEditClient({
           setCurrentStory(updatedStory);
           setFlowData(importedStory.flowData);
           setHasUnsavedChanges(true);
-
-          console.log("Story imported successfully:", updatedStory.name);
         }
       } catch (error) {
         console.error("Error importing story:", error);

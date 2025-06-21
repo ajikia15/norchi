@@ -58,12 +58,6 @@ export interface PlayerState {
   history: string[];
 }
 
-export type HotcardBadgeVariant =
-  | "default"
-  | "destructive"
-  | "secondary"
-  | "outline";
-
 export interface HotcardCategory {
   id: string; // "economics", "education", etc.
   label: string; // Badge label like "ეკონომიკა", "განათლება"

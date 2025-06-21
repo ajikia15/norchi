@@ -43,20 +43,13 @@ export default function StoryClient({ storyId, story }: StoryClientProps) {
   };
 
   useEffect(() => {
-    console.log("StoryClient: Initializing story:", storyId);
-
     // Initialize player state with this story
     if (story.flowData && story.flowData.startNodeId) {
-      console.log(
-        "StoryClient: Setting player state with start node:",
-        story.flowData.startNodeId
-      );
       setPlayerState({
         currentNodeId: story.flowData.startNodeId,
         history: [],
       });
     } else {
-      console.error("StoryClient: Story has no valid flow data or start node");
       alert(
         "This story has no content yet. Please set it up in the admin panel."
       );

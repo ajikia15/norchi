@@ -37,7 +37,6 @@ export default function AdminClient({
 
   // Story handlers
   const handleStorySelect = (storyId: string) => {
-    console.log("AdminClient: Navigating to edit story:", storyId);
     router.push(`/admin/story/edit/${storyId}`);
   };
 
