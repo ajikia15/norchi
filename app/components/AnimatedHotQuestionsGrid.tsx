@@ -52,7 +52,7 @@ export default function AnimatedHotQuestionsGrid({
         const isEvenRow = rowIndex % 2 === 0;
 
         // Both rows start at the same time, but cards within each row follow the convoy effect
-        const dropDelay = positionInRow * 0.3; // Delay based on position within row, not overall index
+        const dropDelay = positionInRow * 0.15; // Delay based on position within row, not overall index
 
         const isOpen = openedCards.has(topic.id);
         const isLightOn = everOpenedCards.has(topic.id); // Light stays on once it's been turned on
@@ -80,9 +80,9 @@ export default function AnimatedHotQuestionsGrid({
             transition={{
               delay: dropDelay,
               type: "spring",
-              stiffness: 120,
-              damping: 20,
-              mass: 0.8,
+              stiffness: 200,
+              damping: 25,
+              mass: 0.6,
             }}
             style={{
               // Add shadow for better depth perception
@@ -241,7 +241,7 @@ export default function AnimatedHotQuestionsGrid({
                 rotateY: isOpen ? 120 : 0, // Open towards us (positive angle) when hinge is on right
               }}
               transition={{
-                duration: 0.8,
+                duration: 0.5,
                 ease: [0.25, 0.46, 0.45, 0.94], // Custom ease for door opening
               }}
               onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
