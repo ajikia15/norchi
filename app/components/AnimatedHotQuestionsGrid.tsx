@@ -23,6 +23,9 @@ export default function AnimatedHotQuestionsGrid({
   topics,
 }: AnimatedHotQuestionsGridProps) {
   const [openedCards, setOpenedCards] = useState<Set<string>>(new Set());
+  const [everOpenedCards, setEverOpenedCards] = useState<Set<string>>(
+    new Set()
+  );
 
   const toggleCard = (topicId: string) => {
     setOpenedCards((prev) => {
@@ -31,6 +34,8 @@ export default function AnimatedHotQuestionsGrid({
         newSet.delete(topicId);
       } else {
         newSet.add(topicId);
+        // Track that this card has been opened at least once
+        setEverOpenedCards((everPrev) => new Set(everPrev).add(topicId));
       }
       return newSet;
     });
@@ -41,7 +46,7 @@ export default function AnimatedHotQuestionsGrid({
       {topics.map((topic, index) => {
         const dropDelay = index * 0.3; // When each card drops from convoy
         const isOpen = openedCards.has(topic.id);
-        const isLightOn = isOpen; // Light turns on when door opens
+        const isLightOn = everOpenedCards.has(topic.id); // Light stays on once it's been turned on
 
         return (
           <motion.div
@@ -126,7 +131,7 @@ export default function AnimatedHotQuestionsGrid({
                   transition={{ delay: isOpen ? 0.5 : 0, duration: 0.4 }}
                 >
                   {/* Tags */}
-                  {topic.tagData && topic.tagData.length > 1 && (
+                  {topic.tagData && topic.tagData.length > 0 && (
                     <div
                       className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center min-h-0 relative flex-1"
                       style={{
@@ -137,7 +142,7 @@ export default function AnimatedHotQuestionsGrid({
                       }}
                     >
                       <div className="flex gap-1 w-max">
-                        {topic.tagData.slice(1).map((tag, tagIndex) => (
+                        {topic.tagData.map((tag, tagIndex) => (
                           <motion.div
                             key={tag.id}
                             initial={{ opacity: 0, scale: 0.8 }}
@@ -320,13 +325,12 @@ export default function AnimatedHotQuestionsGrid({
                 {topic.tagData && topic.tagData.length > 0 && (
                   <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
                     <Badge
-                      variant="default"
+                      variant="outline"
                       style={{
-                        backgroundColor: topic.tagData[0].color,
                         borderColor: topic.tagData[0].color,
-                        color: "white",
+                        color: topic.tagData[0].color,
                       }}
-                      className="text-xs"
+                      className="text-xs bg-transparent"
                     >
                       {topic.tagData[0].emoji} {topic.tagData[0].label}
                     </Badge>
