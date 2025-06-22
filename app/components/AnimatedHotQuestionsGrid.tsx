@@ -67,12 +67,41 @@ export default function AnimatedHotQuestionsGrid({
           >
             {/* Answer Content Behind Door */}
             <motion.div
-              className="absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300 p-4 lg:p-5 flex flex-col overflow-hidden shadow-inner"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: isOpen ? 1 : 0 }}
-              transition={{ duration: 0.3, delay: isOpen ? 0.4 : 0 }}
+              className={`absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300 p-4 lg:p-5 flex flex-col overflow-hidden shadow-inner ${
+                isOpen ? "cursor-pointer" : "pointer-events-none"
+              }`}
+              onClick={isOpen ? () => toggleCard(topic.id) : undefined}
             >
-              <div className="flex-grow overflow-hidden flex flex-col">
+              {/* Dynamic Shadow Overlay */}
+              <motion.div
+                className="absolute inset-0 bg-black rounded-lg pointer-events-none"
+                animate={{
+                  opacity: isOpen ? 0 : 0.7,
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+              />
+
+              {/* Door Edge Shadow */}
+              <motion.div
+                className="absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-black/50 to-transparent rounded-r-lg pointer-events-none"
+                animate={{
+                  opacity: isOpen ? 0 : 0.8,
+                  scaleX: isOpen ? 0 : 1,
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+                style={{
+                  transformOrigin: "right center",
+                }}
+              />
+
+              {/* Content above shadows */}
+              <div className="relative z-10 flex-grow flex flex-col">
                 <div className="flex-grow overflow-y-auto pr-2">
                   <div className="prose prose-sm max-w-none text-gray-700">
                     <ReactMarkdown>{topic.answer}</ReactMarkdown>
@@ -101,14 +130,16 @@ export default function AnimatedHotQuestionsGrid({
                 )}
               </div>
 
-              <p className="text-xs text-gray-400 mt-4 text-center">
+              <p className="relative z-10 text-xs text-gray-400 mt-4 text-center">
                 დააკლიკეთ კარის დასახურად
               </p>
             </motion.div>
 
             {/* Door */}
             <motion.div
-              className="absolute inset-0 cursor-pointer"
+              className={`absolute inset-0 z-20 ${
+                isOpen ? "pointer-events-none" : "cursor-pointer"
+              }`}
               style={{
                 transformStyle: "preserve-3d",
                 transformOrigin: "right center", // Door hinge on the right
@@ -120,7 +151,7 @@ export default function AnimatedHotQuestionsGrid({
                 duration: 0.8,
                 ease: [0.25, 0.46, 0.45, 0.94], // Custom ease for door opening
               }}
-              onClick={() => toggleCard(topic.id)}
+              onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
             >
               {/* Door Panel */}
               <motion.div
