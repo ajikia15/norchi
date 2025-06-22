@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight, CornerDownRight } from "lucide-react";
 import { useRouter } from "next/navigation";
+import ReactMarkdown from "react-markdown";
 
 interface HotQuestionCardProps {
   topic: HotTopic;
@@ -184,9 +185,9 @@ export default function HotQuestionCard({
           )}
 
           <div className="flex-grow overflow-auto">
-            <p className="text-sm text-gray-700 leading-relaxed">
-              {topic.answer}
-            </p>
+            <div className="prose prose-sm max-w-none text-gray-700">
+              <ReactMarkdown>{topic.answer}</ReactMarkdown>
+            </div>
           </div>
           {topic.link && (
             <Button

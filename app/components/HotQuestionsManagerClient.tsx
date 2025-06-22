@@ -5,9 +5,9 @@ import { HotTopic, HotTopicsData, Tag } from "../types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import MarkdownEditor from "./MarkdownEditor";
 import {
   Dialog,
   DialogContent,
@@ -333,116 +333,116 @@ export default function HotQuestionsManagerClient({
                       New Question
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-2xl">
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingTopic
-                          ? "Edit Hot Question"
-                          : "Create New Hot Question"}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label>Tags</Label>
-                        <div className="flex flex-wrap gap-2 p-3 border rounded-md min-h-[80px]">
-                          {allTags.map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant={
-                                topicFormData.selectedTags.includes(tag.id)
-                                  ? "default"
-                                  : "outline"
-                              }
-                              className="cursor-pointer"
-                              style={{
-                                backgroundColor:
+                  <DialogContent className="!max-w-[90vw] !w-[90vw] max-h-[85vh] overflow-y-auto p-0">
+                    <div className="p-6">
+                      <DialogHeader>
+                        <DialogTitle>
+                          {editingTopic
+                            ? "Edit Hot Question"
+                            : "Create New Hot Question"}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="space-y-4 py-4">
+                        <div className="space-y-2">
+                          <Label>Tags</Label>
+                          <div className="flex flex-wrap gap-2 p-3 border rounded-md ">
+                            {allTags.map((tag) => (
+                              <Badge
+                                key={tag.id}
+                                variant={
                                   topicFormData.selectedTags.includes(tag.id)
-                                    ? tag.color
-                                    : undefined,
-                                borderColor: tag.color,
-                              }}
-                              onClick={() => toggleTagSelection(tag.id)}
-                            >
-                              {tag.emoji} {tag.label}
-                            </Badge>
-                          ))}
-                          {allTags.length === 0 && (
-                            <p className="text-sm text-muted-foreground">
-                              No tags available. Create some tags first.
-                            </p>
-                          )}
+                                    ? "default"
+                                    : "outline"
+                                }
+                                className="cursor-pointer"
+                                style={{
+                                  backgroundColor:
+                                    topicFormData.selectedTags.includes(tag.id)
+                                      ? tag.color
+                                      : undefined,
+                                  borderColor: tag.color,
+                                }}
+                                onClick={() => toggleTagSelection(tag.id)}
+                              >
+                                {tag.emoji} {tag.label}
+                              </Badge>
+                            ))}
+                            {allTags.length === 0 && (
+                              <p className="text-sm text-muted-foreground">
+                                No tags available. Create some tags first.
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="topic-title">Title*</Label>
+                          <Input
+                            id="topic-title"
+                            value={topicFormData.title}
+                            onChange={(e) =>
+                              setTopicFormData({
+                                ...topicFormData,
+                                title: e.target.value,
+                              })
+                            }
+                            disabled={isSubmitting}
+                            placeholder="Enter question title"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="topic-answer">Answer*</Label>
+                          <MarkdownEditor
+                            value={topicFormData.answer}
+                            onChange={(value) =>
+                              setTopicFormData({
+                                ...topicFormData,
+                                answer: value,
+                              })
+                            }
+                            disabled={isSubmitting}
+                            placeholder="Enter the answer/response with markdown formatting"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <Label htmlFor="topic-link">Link (Optional)</Label>
+                          <Input
+                            id="topic-link"
+                            value={topicFormData.link}
+                            onChange={(e) =>
+                              setTopicFormData({
+                                ...topicFormData,
+                                link: e.target.value,
+                              })
+                            }
+                            disabled={isSubmitting}
+                            placeholder="https://example.com"
+                          />
                         </div>
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="topic-title">Title*</Label>
-                        <Input
-                          id="topic-title"
-                          value={topicFormData.title}
-                          onChange={(e) =>
-                            setTopicFormData({
-                              ...topicFormData,
-                              title: e.target.value,
-                            })
+                      <DialogFooter className="p-6 pt-0">
+                        <Button
+                          variant="outline"
+                          onClick={handleTopicDialogClose}
+                          disabled={isSubmitting}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          onClick={
+                            editingTopic ? handleUpdateTopic : handleCreateTopic
                           }
                           disabled={isSubmitting}
-                          placeholder="Enter question title"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="topic-answer">Answer*</Label>
-                        <Textarea
-                          id="topic-answer"
-                          value={topicFormData.answer}
-                          onChange={(e) =>
-                            setTopicFormData({
-                              ...topicFormData,
-                              answer: e.target.value,
-                            })
-                          }
-                          disabled={isSubmitting}
-                          placeholder="Enter the answer/response"
-                          rows={4}
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="topic-link">Link (Optional)</Label>
-                        <Input
-                          id="topic-link"
-                          value={topicFormData.link}
-                          onChange={(e) =>
-                            setTopicFormData({
-                              ...topicFormData,
-                              link: e.target.value,
-                            })
-                          }
-                          disabled={isSubmitting}
-                          placeholder="https://example.com"
-                        />
-                      </div>
+                        >
+                          {isSubmitting ? (
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          ) : null}
+                          {editingTopic ? "Update" : "Create"}
+                        </Button>
+                      </DialogFooter>
                     </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={handleTopicDialogClose}
-                        disabled={isSubmitting}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={
-                          editingTopic ? handleUpdateTopic : handleCreateTopic
-                        }
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : null}
-                        {editingTopic ? "Update" : "Create"}
-                      </Button>
-                    </DialogFooter>
                   </DialogContent>
                 </Dialog>
               </div>
