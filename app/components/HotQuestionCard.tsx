@@ -117,13 +117,13 @@ export default function HotQuestionCard({
                     {/* Show only first tag on front face */}
                     <Badge
                       key={topic.tagData[0].id}
-                      variant="outline"
-                      className="text-xs font-medium border-2 flex-shrink-0"
+                      variant="default"
                       style={{
+                        backgroundColor: topic.tagData[0].color,
                         borderColor: topic.tagData[0].color,
-                        color: topic.tagData[0].color,
-                        backgroundColor: `${topic.tagData[0].color}10`, // 10% opacity background
+                        color: "white",
                       }}
+                      className="text-xs"
                     >
                       {topic.tagData[0].emoji} {topic.tagData[0].label}
                     </Badge>
@@ -191,13 +191,13 @@ export default function HotQuestionCard({
                     {topic.tagData.map((tag) => (
                       <Badge
                         key={tag.id}
-                        variant="outline"
-                        className="text-xs font-medium border-2 flex-shrink-0"
+                        variant="default"
                         style={{
+                          backgroundColor: tag.color,
                           borderColor: tag.color,
-                          color: tag.color,
-                          backgroundColor: `${tag.color}10`, // 10% opacity background
+                          color: "white",
                         }}
+                        className="text-xs"
                       >
                         {tag.emoji} {tag.label}
                       </Badge>
