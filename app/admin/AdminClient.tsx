@@ -146,8 +146,7 @@ export default function AdminClient({
   const handleTopicCreate = async (
     selectedTags: string[],
     title: string,
-    answer: string,
-    link?: string
+    answer: string
   ) => {
     startTransition(async () => {
       try {
@@ -155,9 +154,6 @@ export default function AdminClient({
         formData.append("tags", JSON.stringify(selectedTags));
         formData.append("title", title);
         formData.append("answer", answer);
-        if (link) {
-          formData.append("link", link);
-        }
 
         const result = await createHotTopic(formData);
         if (result.success) {
@@ -175,8 +171,7 @@ export default function AdminClient({
     topicId: string,
     selectedTags: string[],
     title: string,
-    answer: string,
-    link?: string
+    answer: string
   ) => {
     startTransition(async () => {
       try {
@@ -184,9 +179,6 @@ export default function AdminClient({
         formData.append("tags", JSON.stringify(selectedTags));
         formData.append("title", title);
         formData.append("answer", answer);
-        if (link) {
-          formData.append("link", link);
-        }
 
         await updateHotTopicAction(topicId, formData);
         // Refresh the page to get updated data

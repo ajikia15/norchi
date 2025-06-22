@@ -5,8 +5,14 @@ import { motion } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, ArrowRight, CornerDownRight } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CornerDownRight, ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface HotQuestionCardProps {
@@ -20,18 +26,6 @@ export default function HotQuestionCard({
 }: HotQuestionCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const router = useRouter();
-
-  const handleLinkClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (topic.link) {
-      if (topic.link.startsWith("/")) {
-        router.push(topic.link);
-      } else {
-        window.open(topic.link, "_blank", "noopener,noreferrer");
-      }
-    }
-  };
 
   const cardFlipTransition = {
     rotateY: { type: "spring" as const, stiffness: 120, damping: 15 },
@@ -51,7 +45,7 @@ export default function HotQuestionCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="relative w-full h-full"
+      className="relative w-full h-80"
       style={{ perspective: "1200px" }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -139,7 +133,7 @@ export default function HotQuestionCard({
               </div>
               <CornerDownRight className="h-4 w-4 text-gray-400" />
             </div>
-            <h3 className="text-sm lg:text-base font-semibold text-gray-900 leading-tight">
+            <h3 className="text-sm lg:text-base font-semibold text-gray-900 leading-tight mb-6">
               {topic.title}
             </h3>
           </div>
@@ -184,35 +178,38 @@ export default function HotQuestionCard({
             </div>
           )}
 
-          <div className="flex-grow overflow-auto">
-            <div className="prose prose-sm max-w-none text-gray-700">
+          <div className="flex-grow overflow-hidden flex flex-col">
+            <div className="prose prose-sm max-w-none text-gray-700 line-clamp-8 flex-grow">
               <ReactMarkdown>{topic.answer}</ReactMarkdown>
             </div>
-          </div>
-          {topic.link && (
-            <Button
-              onClick={handleLinkClick}
-              variant="outline"
-              size="sm"
-              className="w-full mt-4 flex-shrink-0"
-            >
-              <span className="flex items-center gap-2">
-                Read more
-                {topic.link.startsWith("/") ? (
-                  <ArrowRight className="h-3 w-3" />
-                ) : (
-                  <ExternalLink className="h-3 w-3" />
-                )}
-              </span>
-            </Button>
-          )}
 
-          {/* Primary tag emoji in bottom-right on back face too */}
-          {primaryTag?.emoji && (
-            <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
-              {primaryTag.emoji}
-            </div>
-          )}
+            {/* Read button - only show if answer is longer than 400 characters */}
+            {topic.answer.length > 400 && (
+              <div className="flex justify-end mt-3">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      Read <ArrowRight className="h-3 w-3" />
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle className="text-left text-lg font-semibold">
+                        {topic.title}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="prose prose-sm max-w-none text-gray-700 mt-4">
+                      <ReactMarkdown>{topic.answer}</ReactMarkdown>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            )}
+          </div>
         </div>
       </motion.div>
     </motion.div>

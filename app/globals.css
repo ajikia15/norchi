@@ -243,6 +243,13 @@ body.game-active {
   -webkit-line-clamp: 4;
 }
 
+.line-clamp-12 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 12;
+}
+
 .line-clamp-none {
   overflow: visible;
   display: block;
@@ -265,5 +272,17 @@ body.game-active {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    background-image: none !important;
+  }
+
+  body {
+    background: white !important;
   }
 }

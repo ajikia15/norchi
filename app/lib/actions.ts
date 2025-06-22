@@ -150,7 +150,6 @@ export async function createHotTopic(formData: FormData) {
   const selectedTags = formData.get("tags") as string;
   const title = formData.get("title") as string;
   const answer = formData.get("answer") as string;
-  const link = formData.get("link") as string;
 
   if (!title || !answer) {
     throw new Error("Title and answer are required");
@@ -164,7 +163,6 @@ export async function createHotTopic(formData: FormData) {
     tags: selectedTags || "[]",
     title,
     answer,
-    link: link || null,
     createdAt: now,
     updatedAt: now,
   });
@@ -178,7 +176,6 @@ export async function updateHotTopic(id: string, formData: FormData) {
   const selectedTags = formData.get("tags") as string;
   const title = formData.get("title") as string;
   const answer = formData.get("answer") as string;
-  const link = formData.get("link") as string;
 
   if (!title || !answer) {
     throw new Error("Title and answer are required");
@@ -190,7 +187,6 @@ export async function updateHotTopic(id: string, formData: FormData) {
       tags: selectedTags || "[]",
       title,
       answer,
-      link: link || null,
       updatedAt: new Date().toISOString(),
     })
     .where(eq(hotTopics.id, id));

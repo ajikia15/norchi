@@ -25,29 +25,20 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Plus,
-  Edit,
-  Trash2,
-  ExternalLink,
-  Loader2,
-  Tag as TagIcon,
-} from "lucide-react";
+import { Plus, Edit, Trash2, Loader2, Tag as TagIcon } from "lucide-react";
 
 interface HotQuestionsManagerClientProps {
   hotTopicsData: HotTopicsData;
   onTopicCreate: (
     selectedTags: string[],
     title: string,
-    answer: string,
-    link?: string
+    answer: string
   ) => Promise<void>;
   onTopicUpdate: (
     topicId: string,
     selectedTags: string[],
     title: string,
-    answer: string,
-    link?: string
+    answer: string
   ) => Promise<void>;
   onTopicDelete: (topicId: string) => Promise<void>;
   onTagCreate: (
@@ -85,7 +76,6 @@ export default function HotQuestionsManagerClient({
     selectedTags: [] as string[],
     title: "",
     answer: "",
-    link: "",
   });
 
   const [tagFormData, setTagFormData] = useState({
@@ -105,7 +95,6 @@ export default function HotQuestionsManagerClient({
       selectedTags: [],
       title: "",
       answer: "",
-      link: "",
     });
   };
 
@@ -133,8 +122,7 @@ export default function HotQuestionsManagerClient({
       await onTopicCreate(
         topicFormData.selectedTags,
         topicFormData.title.trim(),
-        topicFormData.answer.trim(),
-        topicFormData.link.trim() || undefined
+        topicFormData.answer.trim()
       );
       resetTopicForm();
       setIsCreateTopicDialogOpen(false);
@@ -151,7 +139,6 @@ export default function HotQuestionsManagerClient({
       selectedTags: [...topic.tags],
       title: topic.title,
       answer: topic.answer,
-      link: topic.link || "",
     });
     setIsCreateTopicDialogOpen(true);
   };
@@ -172,8 +159,7 @@ export default function HotQuestionsManagerClient({
         editingTopic.id,
         topicFormData.selectedTags,
         topicFormData.title.trim(),
-        topicFormData.answer.trim(),
-        topicFormData.link.trim() || undefined
+        topicFormData.answer.trim()
       );
       resetTopicForm();
       setEditingTopic(null);
@@ -405,22 +391,6 @@ export default function HotQuestionsManagerClient({
                             placeholder="Enter the answer/response with markdown formatting"
                           />
                         </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="topic-link">Link (Optional)</Label>
-                          <Input
-                            id="topic-link"
-                            value={topicFormData.link}
-                            onChange={(e) =>
-                              setTopicFormData({
-                                ...topicFormData,
-                                link: e.target.value,
-                              })
-                            }
-                            disabled={isSubmitting}
-                            placeholder="https://example.com"
-                          />
-                        </div>
                       </div>
                       <DialogFooter className="p-6 pt-0">
                         <Button
@@ -454,7 +424,7 @@ export default function HotQuestionsManagerClient({
                     <TableHead>Title</TableHead>
                     <TableHead>Tags</TableHead>
                     <TableHead>Answer Preview</TableHead>
-                    <TableHead>Link</TableHead>
+
                     <TableHead className="w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -462,7 +432,7 @@ export default function HotQuestionsManagerClient({
                   {topics.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={4}
                         className="text-center text-muted-foreground"
                       >
                         No hot questions found. Create one to get started.
@@ -497,23 +467,7 @@ export default function HotQuestionsManagerClient({
                             {topic.answer}
                           </p>
                         </TableCell>
-                        <TableCell>
-                          {topic.link ? (
-                            <Button variant="ghost" size="sm" asChild>
-                              <a
-                                href={topic.link}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                              >
-                                <ExternalLink className="h-4 w-4" />
-                              </a>
-                            </Button>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">
-                              —
-                            </span>
-                          )}
-                        </TableCell>
+
                         <TableCell>
                           <div className="flex items-center gap-2">
                             <Button

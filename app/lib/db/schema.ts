@@ -23,7 +23,6 @@ export const hotTopics = sqliteTable("hot_topics", {
   tags: text("tags").notNull().default("[]"), // JSON array of tag IDs
   title: text("title").notNull(),
   answer: text("answer").notNull(),
-  link: text("link"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 });

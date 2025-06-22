@@ -72,7 +72,6 @@ export interface HotTopic {
   tags: string[]; // Array of tag IDs
   title: string;
   answer: string;
-  link?: string;
   createdAt: string;
   updatedAt: string;
   // Computed/joined fields when tags are loaded
