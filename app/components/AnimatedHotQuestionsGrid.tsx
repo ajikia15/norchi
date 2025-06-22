@@ -4,6 +4,15 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface AnimatedHotQuestionsGridProps {
@@ -101,38 +110,104 @@ export default function AnimatedHotQuestionsGrid({
               />
 
               {/* Content above shadows */}
-              <div className="relative z-10 flex-grow flex flex-col">
-                <div className="flex-grow overflow-y-auto pr-2">
+              <div className="relative z-10 flex flex-col h-full">
+                <div className="flex-1 overflow-y-auto pr-2 min-h-0">
                   <div className="prose prose-sm max-w-none text-gray-700">
                     <ReactMarkdown>{topic.answer}</ReactMarkdown>
                   </div>
                 </div>
 
-                {/* Bottom section with tags */}
-                {topic.tagData && topic.tagData.length > 1 && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="flex flex-wrap gap-1">
-                      {topic.tagData.slice(1).map((tag) => (
-                        <Badge
-                          key={tag.id}
-                          variant="outline"
-                          style={{
-                            borderColor: tag.color,
-                            color: tag.color,
-                          }}
-                          className="text-xs"
-                        >
-                          {tag.emoji} {tag.label}
-                        </Badge>
-                      ))}
+                {/* Bottom section with tags and read button */}
+                <motion.div
+                  className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between gap-2 flex-shrink-0"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : 20 }}
+                  transition={{ delay: isOpen ? 0.5 : 0, duration: 0.4 }}
+                >
+                  {/* Tags */}
+                  {topic.tagData && topic.tagData.length > 1 && (
+                    <div
+                      className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center min-h-0 relative flex-1"
+                      style={{
+                        maskImage:
+                          "linear-gradient(to right, black 85%, transparent 100%)",
+                        WebkitMaskImage:
+                          "linear-gradient(to right, black 85%, transparent 100%)",
+                      }}
+                    >
+                      <div className="flex gap-1 w-max">
+                        {topic.tagData.slice(1).map((tag, tagIndex) => (
+                          <motion.div
+                            key={tag.id}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{
+                              opacity: isOpen ? 1 : 0,
+                              scale: isOpen ? 1 : 0.8,
+                            }}
+                            transition={{
+                              delay: isOpen ? 0.6 + tagIndex * 0.1 : 0,
+                              duration: 0.3,
+                            }}
+                          >
+                            <Badge
+                              variant="outline"
+                              style={{
+                                borderColor: tag.color,
+                                color: tag.color,
+                              }}
+                              className="text-xs"
+                            >
+                              {tag.emoji} {tag.label}
+                            </Badge>
+                          </motion.div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
-              </div>
+                  )}
 
-              <p className="relative z-10 text-xs text-gray-400 mt-4 text-center">
-                დააკლიკეთ კარის დასახურად
-              </p>
+                  {/* Read button - only show if answer is longer than 400 characters */}
+                  {topic.answer.length > 400 && (
+                    <motion.div
+                      className="flex-shrink-0"
+                      initial={{ opacity: 0, x: 20, scale: 0.8 }}
+                      animate={{
+                        opacity: isOpen ? 1 : 0,
+                        x: isOpen ? 0 : 20,
+                        scale: isOpen ? 1 : 0.8,
+                      }}
+                      transition={{ delay: isOpen ? 0.7 : 0, duration: 0.4 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="shadow-sm hover:shadow-md transition-shadow"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            წაკითხვა <ArrowRight className="h-3 w-3 ml-1" />
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                          <DialogHeader>
+                            <DialogTitle className="text-left text-lg font-semibold">
+                              {topic.title}
+                            </DialogTitle>
+                          </DialogHeader>
+                          <div
+                            className="prose prose-sm max-w-none text-gray-700 mt-4"
+                            style={{ whiteSpace: "pre-wrap" }}
+                          >
+                            <ReactMarkdown>{topic.answer}</ReactMarkdown>
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    </motion.div>
+                  )}
+                </motion.div>
+              </div>
             </motion.div>
 
             {/* Door */}
@@ -163,7 +238,7 @@ export default function AnimatedHotQuestionsGrid({
                 {/* Door Handle */}
                 <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-r-md shadow-md z-10"></div>
 
-                <div className="flex-grow flex flex-col justify-center items-center text-center ml-4">
+                <div className="flex-grow flex flex-col justify-center items-center text-center">
                   {/* Primary tag */}
                   {topic.tagData && topic.tagData.length > 0 && (
                     <div className="mb-4">
@@ -192,10 +267,6 @@ export default function AnimatedHotQuestionsGrid({
                     {topic.tagData[0].emoji}
                   </div>
                 )}
-
-                <p className="text-xs text-gray-400 mt-4 text-center">
-                  დააკლიკეთ კარის გასახსნელად
-                </p>
               </motion.div>
             </motion.div>
 
