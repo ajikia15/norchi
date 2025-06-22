@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { CornerDownRight, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface HotQuestionCardProps {
@@ -108,31 +108,25 @@ export default function HotQuestionCard({
             }}
           />
 
-          <div>
-            <div className="flex items-center justify-between gap-2 mb-2">
-              {/* Tags with horizontal scroll - show only first tag on front face */}
-              {topic.tagData && topic.tagData.length > 0 && (
-                <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center flex-1 min-h-0">
-                  <div className="flex gap-1 w-max">
-                    {/* Show only first tag on front face */}
-                    <Badge
-                      key={topic.tagData[0].id}
-                      variant="default"
-                      style={{
-                        backgroundColor: topic.tagData[0].color,
-                        borderColor: topic.tagData[0].color,
-                        color: "white",
-                      }}
-                      className="text-xs"
-                    >
-                      {topic.tagData[0].emoji} {topic.tagData[0].label}
-                    </Badge>
-                  </div>
-                </div>
-              )}
-              <CornerDownRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
-            </div>
-            <h3 className="text-sm lg:text-base font-semibold text-gray-900 leading-tight mb-6">
+          <div className="flex-grow flex flex-col justify-center items-center text-center">
+            {/* Single tag, centered above title */}
+            {topic.tagData && topic.tagData.length > 0 && (
+              <div className="mb-4">
+                <Badge
+                  key={topic.tagData[0].id}
+                  variant="default"
+                  style={{
+                    backgroundColor: topic.tagData[0].color,
+                    borderColor: topic.tagData[0].color,
+                    color: "white",
+                  }}
+                  className="text-xs"
+                >
+                  {topic.tagData[0].emoji} {topic.tagData[0].label}
+                </Badge>
+              </div>
+            )}
+            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight">
               {topic.title}
             </h3>
           </div>
