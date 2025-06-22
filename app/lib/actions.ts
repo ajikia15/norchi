@@ -204,6 +204,109 @@ export async function deleteHotTopic(id: string) {
   return { success: true };
 }
 
+// Export hot topics to JSON
+export async function exportHotTopics() {
+  try {
+    // Get all hot topics and tags
+    const [hotTopicsData, tagsData] = await Promise.all([
+      db.select().from(hotTopics),
+      db.select().from(tags),
+    ]);
+
+    // Create a map of tags for easy lookup
+    const tagsMap = Object.fromEntries(tagsData.map((tag) => [tag.id, tag]));
+
+    // Transform hot topics to include tag data
+    const exportData = {
+      exportedAt: new Date().toISOString(),
+      version: "1.0",
+      topics: hotTopicsData.map((topic) => {
+        const topicTags = JSON.parse(topic.tags || "[]") as string[];
+        return {
+          id: topic.id,
+          title: topic.title,
+          answer: topic.answer,
+          tags: topicTags,
+          tagData: topicTags.map((tagId) => tagsMap[tagId]).filter(Boolean),
+          createdAt: topic.createdAt,
+          updatedAt: topic.updatedAt,
+        };
+      }),
+      tags: tagsData,
+    };
+
+    return {
+      success: true,
+      data: exportData,
+      filename: `hot-topics-export-${
+        new Date().toISOString().split("T")[0]
+      }.json`,
+    };
+  } catch (error) {
+    console.error("Error exporting hot topics:", error);
+    return { success: false, error: "Export failed" };
+  }
+}
+
+// Import a single hot topic from JSON
+export async function importHotTopic(formData: FormData) {
+  try {
+    const jsonData = formData.get("jsonData") as string;
+
+    if (!jsonData) {
+      return { success: false, error: "No JSON data provided" };
+    }
+
+    let parsedData;
+    try {
+      parsedData = JSON.parse(jsonData);
+    } catch {
+      return { success: false, error: "Invalid JSON format" };
+    }
+
+    // Validate required fields
+    if (!parsedData.title || !parsedData.answer) {
+      return { success: false, error: "Title and answer are required" };
+    }
+
+    // Get existing tags to validate tag references
+    const existingTags = await db.select().from(tags);
+    const existingTagIds = new Set(existingTags.map((tag) => tag.id));
+
+    // Validate and filter tags
+    const topicTags = Array.isArray(parsedData.tags) ? parsedData.tags : [];
+    const validTags = topicTags.filter((tagId: string) =>
+      existingTagIds.has(tagId)
+    );
+
+    // Generate new ID to avoid conflicts
+    const id = `ht-${Date.now()}`;
+    const now = new Date().toISOString();
+
+    // Insert the hot topic
+    await db.insert(hotTopics).values({
+      id,
+      tags: JSON.stringify(validTags),
+      title: parsedData.title,
+      answer: parsedData.answer,
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/");
+
+    return {
+      success: true,
+      id,
+      message: `Hot topic imported successfully. ${validTags.length}/${topicTags.length} tags were valid.`,
+    };
+  } catch (error) {
+    console.error("Error importing hot topic:", error);
+    return { success: false, error: "Import failed" };
+  }
+}
+
 // Legacy category actions - will be removed after migration
 export async function createHotcardCategory(formData: FormData) {
   const id = formData.get("id") as string;

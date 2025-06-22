@@ -44,9 +44,21 @@ export default function AnimatedHotQuestionsGrid({
   return (
     <div className="flex flex-wrap justify-center gap-4 lg:gap-6">
       {topics.map((topic, index) => {
-        const dropDelay = index * 0.3; // When each card drops from convoy
+        // Calculate which row this card is in (assuming ~4 cards per row for layout)
+        // This creates alternating animation directions for each row
+        const cardsPerRow = 4; // Reasonable assumption for most screen sizes
+        const rowIndex = Math.floor(index / cardsPerRow);
+        const positionInRow = index % cardsPerRow; // Position within the row
+        const isEvenRow = rowIndex % 2 === 0;
+
+        // Both rows start at the same time, but cards within each row follow the convoy effect
+        const dropDelay = positionInRow * 0.3; // Delay based on position within row, not overall index
+
         const isOpen = openedCards.has(topic.id);
         const isLightOn = everOpenedCards.has(topic.id); // Light stays on once it's been turned on
+
+        // Alternate animation direction: even rows from left, odd rows from right
+        const animationDirection = isEvenRow ? -1 : 1; // -1 for left-to-right, 1 for right-to-left
 
         return (
           <motion.div
@@ -54,9 +66,9 @@ export default function AnimatedHotQuestionsGrid({
             className="w-full sm:w-80 lg:w-72 h-[22rem] relative"
             initial={{
               // Cards stacked with visible layering like fanned cards
-              x: -400 + index * 3, // Slight x offset to see layering
+              x: animationDirection * (400 - index * 3), // Direction based on row
               y: index * 2, // Small y offset
-              rotateY: -90,
+              rotateY: animationDirection * 90, // Rotation direction based on row
               zIndex: topics.length - index,
             }}
             animate={{

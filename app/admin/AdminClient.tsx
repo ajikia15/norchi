@@ -12,6 +12,8 @@ import {
   createTag,
   updateTag,
   deleteTag,
+  exportHotTopics,
+  importHotTopic,
 } from "../lib/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StoryManagerClient from "../components/StoryManagerClient";
@@ -203,6 +205,54 @@ export default function AdminClient({
     });
   };
 
+  // Export handler
+  const handleExportTopics = async () => {
+    startTransition(async () => {
+      try {
+        const result = await exportHotTopics();
+        if (result.success) {
+          // Create a download link
+          const dataStr = JSON.stringify(result.data, null, 2);
+          const dataBlob = new Blob([dataStr], { type: "application/json" });
+          const url = URL.createObjectURL(dataBlob);
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = result.filename || "hot-topics-export.json";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          URL.revokeObjectURL(url);
+        } else {
+          alert("ექსპორტი ვერ მოხერხდა");
+        }
+      } catch (error) {
+        console.error("AdminClient: Error exporting hot topics:", error);
+        alert("ექსპორტი ვერ მოხერხდა");
+      }
+    });
+  };
+
+  // Import handler
+  const handleImportTopic = async (jsonData: string) => {
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("jsonData", jsonData);
+
+        const result = await importHotTopic(formData);
+        if (result.success) {
+          alert(result.message || "ცხელი კითხვა წარმატებით იმპორტირდა!");
+          router.refresh();
+        } else {
+          alert(`იმპორტი ვერ მოხერხდა: ${result.error}`);
+        }
+      } catch (error) {
+        console.error("AdminClient: Error importing hot topic:", error);
+        alert("იმპორტი ვერ მოხერხდა");
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8">
@@ -244,6 +294,8 @@ export default function AdminClient({
               onTagCreate={handleTagCreate}
               onTagUpdate={handleTagUpdate}
               onTagDelete={handleTagDelete}
+              onExportTopics={handleExportTopics}
+              onImportTopic={handleImportTopic}
               isLoading={isPending}
             />
           </TabsContent>

@@ -24,7 +24,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Edit, Trash2, Loader2, Tag as TagIcon } from "lucide-react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Loader2,
+  Tag as TagIcon,
+  Download,
+  Upload,
+} from "lucide-react";
 
 interface HotQuestionsManagerClientProps {
   hotTopicsData: HotTopicsData;
@@ -53,6 +61,8 @@ interface HotQuestionsManagerClientProps {
     color: string
   ) => Promise<void>;
   onTagDelete: (tagId: string) => Promise<void>;
+  onExportTopics: () => Promise<void>;
+  onImportTopic: (jsonData: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -64,12 +74,16 @@ export default function HotQuestionsManagerClient({
   onTagCreate,
   onTagUpdate,
   onTagDelete,
+  onExportTopics,
+  onImportTopic,
   isLoading,
 }: HotQuestionsManagerClientProps) {
   const [isCreateTopicDialogOpen, setIsCreateTopicDialogOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<HotTopic | null>(null);
   const [isCreateTagDialogOpen, setIsCreateTagDialogOpen] = useState(false);
   const [editingTag, setEditingTag] = useState<Tag | null>(null);
+  const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+  const [importJsonData, setImportJsonData] = useState("");
 
   const [topicFormData, setTopicFormData] = useState({
     selectedTags: [] as string[],
@@ -280,6 +294,37 @@ export default function HotQuestionsManagerClient({
     }));
   };
 
+  // Import handlers
+  const handleImportDialogClose = () => {
+    if (isSubmitting) return;
+    setIsImportDialogOpen(false);
+    setImportJsonData("");
+  };
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setImportJsonData(content);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const handleImportSubmit = async () => {
+    if (!importJsonData.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await onImportTopic(importJsonData);
+      handleImportDialogClose();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Card className="w-full max-w-none">
       <CardHeader>
@@ -294,7 +339,25 @@ export default function HotQuestionsManagerClient({
 
           {/* Topics Tab */}
           <TabsContent value="topics" className="mt-4">
-            <div className="flex justify-end mb-4">
+            <div className="flex justify-between mb-4">
+              <div className="flex gap-2">
+                <Button
+                  onClick={onExportTopics}
+                  variant="outline"
+                  disabled={isLoading || topics.length === 0}
+                >
+                  <Download className="h-4 w-4" />
+                  ექსპორტი JSON-ად
+                </Button>
+                <Button
+                  onClick={() => setIsImportDialogOpen(true)}
+                  variant="outline"
+                  disabled={isLoading}
+                >
+                  <Upload className="h-4 w-4" />
+                  იმპორტი JSON-იდან
+                </Button>
+              </div>
               <Button onClick={() => setIsCreateTopicDialogOpen(true)}>
                 <Plus className=" h-4 w-4" />
                 ახალი კითხვა
@@ -623,13 +686,87 @@ export default function HotQuestionsManagerClient({
               disabled={
                 isSubmitting ||
                 !tagFormData.id.trim() ||
-                !tagFormData.label.trim()
+                !tagFormData.label.trim() ||
+                !tagFormData.emoji.trim() ||
+                !tagFormData.color.trim()
               }
             >
               {isSubmitting ? (
                 <Loader2 className=" h-4 w-4 animate-spin" />
               ) : null}
               {editingTag ? "ცვლილებების შენახვა" : "თეგის შექმნა"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={isImportDialogOpen} onOpenChange={handleImportDialogClose}>
+        <DialogContent className="w-[80vw] max-w-[800px]">
+          <DialogHeader>
+            <DialogTitle>ცხელი კითხვის იმპორტი JSON-იდან</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="json-file" className="text-sm font-medium">
+                აირჩიეთ JSON ფაილი
+              </Label>
+              <Input
+                id="json-file"
+                type="file"
+                accept=".json"
+                onChange={handleFileUpload}
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="json-content" className="text-sm font-medium">
+                ან ჩაწერეთ JSON შინაარსი
+              </Label>
+              <textarea
+                id="json-content"
+                value={importJsonData}
+                onChange={(e) => setImportJsonData(e.target.value)}
+                placeholder={`{
+  "title": "კითხვის სათაური",
+  "answer": "კითხვის პასუხი markdown ფორმატში",
+  "tags": ["tag1", "tag2"]
+}`}
+                className="w-full h-40 p-3 border border-gray-300 rounded-md font-mono text-sm"
+                disabled={isSubmitting}
+              />
+            </div>
+            <div className="text-sm text-gray-600">
+              <p>JSON უნდა შეიცავდეს:</p>
+              <ul className="list-disc list-inside mt-1 space-y-1">
+                <li>
+                  <strong>title:</strong> კითხვის სათაური
+                </li>
+                <li>
+                  <strong>answer:</strong> კითხვის პასუხი (Markdown ფორმატში)
+                </li>
+                <li>
+                  <strong>tags:</strong> თეგების ID-ების სია (არასავალდებულო)
+                </li>
+              </ul>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleImportDialogClose}
+              disabled={isSubmitting}
+            >
+              გაუქმება
+            </Button>
+            <Button
+              onClick={handleImportSubmit}
+              disabled={isSubmitting || !importJsonData.trim()}
+            >
+              {isSubmitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : null}
+              იმპორტი
             </Button>
           </DialogFooter>
         </DialogContent>
