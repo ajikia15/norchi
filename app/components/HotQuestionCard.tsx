@@ -116,22 +116,20 @@ export default function HotQuestionCard({
           <div>
             <div className="flex items-start justify-between gap-2 mb-3">
               <div className="flex flex-wrap gap-1">
-                {/* Tags as Badges */}
+                {/* Show only first tag on front face */}
                 {topic.tagData && topic.tagData.length > 0 ? (
-                  topic.tagData.map((tag) => (
-                    <Badge
-                      key={tag.id}
-                      variant="outline"
-                      className="text-xs font-medium border-2"
-                      style={{
-                        borderColor: tag.color,
-                        color: tag.color,
-                        backgroundColor: `${tag.color}10`, // 10% opacity background
-                      }}
-                    >
-                      {tag.emoji} {tag.label}
-                    </Badge>
-                  ))
+                  <Badge
+                    key={topic.tagData[0].id}
+                    variant="outline"
+                    className="text-xs font-medium border-2"
+                    style={{
+                      borderColor: topic.tagData[0].color,
+                      color: topic.tagData[0].color,
+                      backgroundColor: `${topic.tagData[0].color}10`, // 10% opacity background
+                    }}
+                  >
+                    {topic.tagData[0].emoji} {topic.tagData[0].label}
+                  </Badge>
                 ) : (
                   <Badge variant="secondary" className="text-xs font-medium">
                     No tags
@@ -163,6 +161,28 @@ export default function HotQuestionCard({
             transform: "rotateY(180deg)",
           }}
         >
+          {/* All tags in horizontal scroll on back face */}
+          {topic.tagData && topic.tagData.length > 0 && (
+            <div className="mb-3 overflow-x-auto overflow-y-hidden scrollbar-hide h-8 flex items-center">
+              <div className="flex gap-1 w-max">
+                {topic.tagData.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="outline"
+                    className="text-xs font-medium border-2 flex-shrink-0"
+                    style={{
+                      borderColor: tag.color,
+                      color: tag.color,
+                      backgroundColor: `${tag.color}10`, // 10% opacity background
+                    }}
+                  >
+                    {tag.emoji} {tag.label}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex-grow overflow-auto">
             <p className="text-sm text-gray-700 leading-relaxed">
               {topic.answer}

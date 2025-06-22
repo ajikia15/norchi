@@ -424,7 +424,7 @@ function VisualEditorContent({
         handleDirectConnection(connection);
       }
     },
-    [flowData.nodes]
+    [flowData.nodes, handleDirectConnection]
   );
 
   const handleConnectionConfirm = useCallback(
