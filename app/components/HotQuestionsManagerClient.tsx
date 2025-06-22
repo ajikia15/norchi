@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -282,11 +281,11 @@ export default function HotQuestionsManagerClient({
   };
 
   return (
-    <Card>
+    <Card className="w-full max-w-none">
       <CardHeader>
         <CardTitle>აქტუალური კითხვების მენეჯერი</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="px-6">
         <Tabs defaultValue="topics">
           <TabsList>
             <TabsTrigger value="topics">კითხვები</TabsTrigger>
@@ -296,18 +295,10 @@ export default function HotQuestionsManagerClient({
           {/* Topics Tab */}
           <TabsContent value="topics" className="mt-4">
             <div className="flex justify-end mb-4">
-              <Dialog
-                open={isCreateTopicDialogOpen}
-                onOpenChange={handleTopicDialogClose}
-              >
-                <DialogTrigger asChild>
-                  <Button>
-                    <Plus className=" h-4 w-4" />
-                    ახალი კითხვა
-                  </Button>
-                </DialogTrigger>
-                {/* Topic Dialog Content is at the end */}
-              </Dialog>
+              <Button onClick={() => setIsCreateTopicDialogOpen(true)}>
+                <Plus className=" h-4 w-4" />
+                ახალი კითხვა
+              </Button>
             </div>
             <Table>
               <TableHeader>
@@ -380,18 +371,10 @@ export default function HotQuestionsManagerClient({
           {/* Tags Tab */}
           <TabsContent value="tags" className="mt-4">
             <div className="flex justify-end mb-4">
-              <Dialog
-                open={isCreateTagDialogOpen}
-                onOpenChange={handleTagDialogClose}
-              >
-                <DialogTrigger asChild>
-                  <Button>
-                    <TagIcon className=" h-4 w-4" />
-                    ახალი თეგი
-                  </Button>
-                </DialogTrigger>
-                {/* Tag Dialog Content is at the end */}
-              </Dialog>
+              <Button onClick={() => setIsCreateTagDialogOpen(true)}>
+                <TagIcon className=" h-4 w-4" />
+                ახალი თეგი
+              </Button>
             </div>
             <Table>
               <TableHeader>
@@ -463,18 +446,18 @@ export default function HotQuestionsManagerClient({
         open={isCreateTopicDialogOpen}
         onOpenChange={handleTopicDialogClose}
       >
-        <DialogContent className="sm:max-w-[625px] h-[90vh] flex flex-col">
+        <DialogContent className="w-[80vw]! max-w-[1800px]!  flex flex-col">
           <DialogHeader>
             <DialogTitle>
               {editingTopic ? "კითხვის რედაქტირება" : "ახალი კითხვის შექმნა"}
             </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4 flex-grow overflow-y-auto pr-6">
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="tags" className="text-right pt-2">
+          <div className="space-y-6 py-4 flex-grow overflow-y-auto pr-6">
+            <div className="space-y-2">
+              <Label htmlFor="tags" className="text-sm font-medium">
                 აირჩიეთ თეგები
               </Label>
-              <div className="col-span-3">
+              <div>
                 {allTags.length > 0 ? (
                   <div className="flex flex-wrap gap-2">
                     {allTags.map((tag) => (
@@ -502,14 +485,14 @@ export default function HotQuestionsManagerClient({
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-gray-500 col-span-3 pt-2">
+                  <p className="text-sm text-gray-500">
                     თეგები არ არის ხელმისაწვდომი. გთხოვთ, ჯერ შექმენით თეგი.
                   </p>
                 )}
               </div>
             </div>
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="title" className="text-right">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm font-medium">
                 სათაური
               </Label>
               <Input
@@ -518,15 +501,15 @@ export default function HotQuestionsManagerClient({
                 onChange={(e) =>
                   setTopicFormData({ ...topicFormData, title: e.target.value })
                 }
-                className="col-span-3"
                 placeholder="მაგ., მინიმალური ხელფასი"
+                className="w-full"
               />
             </div>
-            <div className="grid grid-cols-4 items-start gap-4">
-              <Label htmlFor="answer" className="text-right pt-2">
+            <div className="space-y-2 flex-grow">
+              <Label htmlFor="answer" className="text-sm font-medium">
                 პასუხი
               </Label>
-              <div className="col-span-3">
+              <div className="min-h-[300px]">
                 <MarkdownEditor
                   value={topicFormData.answer}
                   onChange={(value) =>
@@ -563,7 +546,7 @@ export default function HotQuestionsManagerClient({
 
       {/* Tag Create/Edit Dialog */}
       <Dialog open={isCreateTagDialogOpen} onOpenChange={handleTagDialogClose}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="w-[80vw]! max-w-[1800px]! ">
           <DialogHeader>
             <DialogTitle>
               {editingTag ? "თეგის რედაქტირება" : "ახალი თეგის შექმნა"}
