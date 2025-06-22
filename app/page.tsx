@@ -63,8 +63,8 @@ async function StoriesGrid() {
                 {/* Play Button */}
                 <Button asChild className="w-full shadow-sm" size="lg">
                   <Link href={`/story/${story.id}`}>
-                    <Play className="h-4 w-4 mr-2" />
-                    მოგზაურობის დაწყება
+                    <Play className="h-4 w-4" />
+                    დაიწყე გზა
                   </Link>
                 </Button>
               </div>
@@ -80,16 +80,16 @@ async function StoriesGrid() {
           <BookOpen className="h-10 w-10 text-gray-400" />
         </div>
         <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-          ისტორიები არ არის ხელმისაწვდომი
+          გზები არ არის ხელმისაწვდომი
         </h3>
         <p className="text-muted-foreground max-w-md mb-6 text-lg">
-          ჯერ არ არის ლოგიკური გამოწვევის ისტორიები. ეწვიეთ ადმინისტრატორის
-          პანელს თქვენი პირველი ისტორიის შესაქმნელად.
+          ჯერ არ არის ლოგიკური გამოწვევის გზები. ეწვიეთ ადმინისტრატორის პანელს
+          თქვენი პირველი ისტორიის შესაქმნელად.
         </p>
         <Button asChild size="lg" className="shadow-sm">
           <Link href="/admin/story">
-            <Settings className="h-4 w-4 mr-2" />
-            შექმენით თქვენი პირველი ისტორია
+            <Settings className="h-4 w-4 " />
+            შექმენით თქვენი პირველი გზა
           </Link>
         </Button>
       </div>
@@ -101,7 +101,7 @@ function LoadingFallback() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="text-2xl font-semibold text-gray-600 animate-pulse">
-        ისტორიების ჩატვირთვა...
+        გზების ჩატვირთვა...
       </div>
     </div>
   );
@@ -115,10 +115,10 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-gray-900 tracking-tight mb-4">
-              ლოგიკური გამოწვევის ისტორიები
+              ლოგიკური გამოწვევის გზები
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              აირჩიეთ ისტორია და დაიწყეთ თქვენი ლოგიკური მოგზაურობა აზროვნების
+              აირჩიეთ გზა და დაიწყეთ თქვენი ლოგიკური მოგზაურობა აზროვნების
               გამომწვევი გამოწვევებით
             </p>
           </div>

@@ -51,7 +51,7 @@ export default function StoryClient({ storyId, story }: StoryClientProps) {
       });
     } else {
       alert(
-        "ამ ისტორიას ჯერ არ აქვს შინაარსი. გთხოვთ, დააყენოთ ის ადმინისტრატორის პანელში."
+        "ამ გზას ჯერ არ აქვს შინაარსი. გთხოვთ, დააყენოთ ის ადმინისტრატორის პანელში."
       );
       router.push("/admin");
       return;

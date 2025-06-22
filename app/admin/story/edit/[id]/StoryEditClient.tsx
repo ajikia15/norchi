@@ -405,7 +405,7 @@ export default function StoryEditClient({
                 className="shadow-sm"
                 disabled={isPending}
               >
-                <Play className="h-4 w-4 mr-2" />
+                <Play className="h-4 w-4 " />
                 Test Flow
               </Button>
               <Button
@@ -416,12 +416,12 @@ export default function StoryEditClient({
               >
                 {isPending ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4  animate-spin" />
                     Saving...
                   </>
                 ) : (
                   <>
-                    <Save className="h-4 w-4 mr-2" />
+                    <Save className="h-4 w-4 " />
                     Save Changes
                   </>
                 )}
@@ -521,7 +521,7 @@ export default function StoryEditClient({
                           disabled={isPending}
                           rows={4}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
-                          placeholder="მოკლე აღწერა, თუ რას იკვლევს ეს ისტორია..."
+                          placeholder="მოკლე აღწერა, თუ რას იკვლევს ეს გზა..."
                         />
                       </div>
                     </div>
@@ -593,12 +593,12 @@ export default function StoryEditClient({
                             className="w-full justify-center"
                             disabled={isPending}
                           >
-                            <Download className="h-4 w-4 mr-2" />
+                            <Download className="h-4 w-4 " />
                             ექსპორტი JSON ფორმატში
                           </Button>
                           <p className="text-xs text-muted-foreground mt-2">
-                            ჩამოტვირთეთ თქვენი ისტორია JSON ფაილის სახით
-                            სარეზერვო ასლისთვის ან გასაზიარებლად
+                            ჩამოტვირთეთ თქვენი გზა JSON ფაილის სახით სარეზერვო
+                            ასლისთვის ან გასაზიარებლად
                           </p>
                         </div>
 
@@ -622,13 +622,13 @@ export default function StoryEditClient({
                                 htmlFor="import-json"
                                 className="cursor-pointer"
                               >
-                                <Upload className="h-4 w-4 mr-2" />
+                                <Upload className="h-4 w-4 " />
                                 იმპორტი JSON-დან
                               </label>
                             </Button>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            ჩატვირთეთ ისტორია ადრე ექსპორტირებული JSON ფაილიდან
+                            ჩატვირთეთ გზა ადრე ექსპორტირებული JSON ფაილიდან
                           </p>
                         </div>
                       </div>
@@ -678,7 +678,7 @@ export default function StoryEditClient({
                       className="shadow-sm"
                       disabled={isPending}
                     >
-                      <Plus className="h-4 w-4 mr-2" />
+                      <Plus className="h-4 w-4 " />
                       ახალი კვანძის დამატება
                     </Button>
                   </div>
@@ -733,7 +733,7 @@ export default function StoryEditClient({
                           size="sm"
                           disabled={isPending}
                         >
-                          <Plus className="h-4 w-4 mr-2" />
+                          <Plus className="h-4 w-4 " />
                           კითხვის შექმნა
                         </Button>
                         <Button
@@ -742,7 +742,7 @@ export default function StoryEditClient({
                           size="sm"
                           disabled={isPending}
                         >
-                          <Plus className="h-4 w-4 mr-2" />
+                          <Plus className="h-4 w-4 " />
                           გამოძახების შექმნა
                         </Button>
                       </div>

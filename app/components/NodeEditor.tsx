@@ -392,7 +392,7 @@ export default function NodeEditor({
               <div className="flex justify-between items-center">
                 <Label>ოფციები</Label>
                 <Button variant="outline" size="sm" onClick={addOption}>
-                  <Plus className="h-4 w-4 mr-2" />
+                  <Plus className="h-4 w-4 " />
                   ოფციის დამატება
                 </Button>
               </div>
@@ -571,7 +571,7 @@ export default function NodeEditor({
             გაუქმება
           </Button>
           <Button onClick={handleSave} disabled={!hasUnsavedChanges}>
-            <Save className="h-4 w-4 mr-2" />
+            <Save className="h-4 w-4 " />
             ცვლილებების შენახვა
           </Button>
         </div>

@@ -221,7 +221,7 @@ export default function AdminClient({
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="stories">ისტორიები</TabsTrigger>
+            <TabsTrigger value="stories">გზები</TabsTrigger>
             <TabsTrigger value="hotquestions">ცხელი კითხვები</TabsTrigger>
           </TabsList>
 

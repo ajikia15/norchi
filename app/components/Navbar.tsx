@@ -31,7 +31,7 @@ export default function Navbar() {
                 className="gap-2"
               >
                 <Home className="h-4 w-4" />
-                ისტორიები
+                მთავარი
               </Button>
 
               <Button

@@ -79,7 +79,7 @@ export default function StoryManagerClient({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
-            ისტორიების ბიბლიოთეკა
+            გზების ბიბლიოთეკა
           </h2>
           <p className="text-muted-foreground">
             მართეთ თქვენი ლოგიკური გამოწვევების ნაკადები და გადაერთეთ სხვადასხვა
@@ -91,11 +91,11 @@ export default function StoryManagerClient({
           <DialogTrigger asChild>
             <Button className="shadow-sm" disabled={isLoading}>
               {isLoading ? (
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4  animate-spin" />
               ) : (
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 " />
               )}
-              ახალი ისტორია
+              ახალი გზა
             </Button>
           </DialogTrigger>
           <DialogContent>
@@ -145,7 +145,7 @@ export default function StoryManagerClient({
               >
                 {isSubmitting ? (
                   <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    <Loader2 className="h-4 w-4  animate-spin" />
                     იქმნება...
                   </>
                 ) : (
@@ -224,9 +224,9 @@ export default function StoryManagerClient({
           <div className="col-span-full text-center py-12">
             <div className="text-gray-400 mb-4">
               <BookOpen className="h-12 w-12 mx-auto mb-4" />
-              <p className="text-lg font-medium">ისტორიები ჯერ არ არის</p>
+              <p className="text-lg font-medium">გზები ჯერ არ არის</p>
               <p className="text-sm">
-                შექმენით თქვენი პირველი ლოგიკური გამოწვევის ისტორია
+                შექმენით თქვენი პირველი ლოგიკური გამოწვევის გზა
               </p>
             </div>
             <Button
@@ -234,7 +234,7 @@ export default function StoryManagerClient({
               variant="outline"
               disabled={isLoading}
             >
-              <Plus className="h-4 w-4 mr-2" />
+              <Plus className="h-4 w-4 " />
               პირველი ისტორიის შექმნა
             </Button>
           </div>
