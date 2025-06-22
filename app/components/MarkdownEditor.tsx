@@ -55,12 +55,27 @@ const MarkdownEditor = forwardRef<MDXEditorMethods, MarkdownEditorProps>(
         editorRef.current?.insertMarkdown(markdown),
     }));
 
+    // Workaround for MDXEditor removing empty lines
+    // Replace empty lines with placeholder markers on load
+    const processValueForEditor = (content: string) => {
+      return content.replace(/\n\s*\n/g, "\n&nbsp;\n");
+    };
+
+    // Convert back when saving
+    const processValueFromEditor = (content: string) => {
+      return content.replace(/\n&nbsp;\n/g, "\n\n");
+    };
+
+    const handleEditorChange = (newValue: string) => {
+      onChange(processValueFromEditor(newValue));
+    };
+
     return (
       <div className="border rounded-md overflow-hidden w-full">
         <MDXEditor
           ref={editorRef}
-          markdown={value}
-          onChange={onChange}
+          markdown={processValueForEditor(value)}
+          onChange={handleEditorChange}
           placeholder={placeholder}
           readOnly={disabled}
           plugins={[

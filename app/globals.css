@@ -266,6 +266,11 @@ body.game-active {
   display: none; /* Safari and Chrome */
 }
 
+/* ReactMarkdown styling to preserve empty lines */
+.prose {
+  white-space: pre-wrap;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

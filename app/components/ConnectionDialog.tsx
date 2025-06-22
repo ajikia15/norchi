@@ -33,7 +33,7 @@ export default function ConnectionDialog({
 
   const handleConfirm = () => {
     if (optionLabel.trim()) {
-      onConfirm(optionLabel.trim());
+      onConfirm(optionLabel);
       setOptionLabel("");
       onClose();
     }

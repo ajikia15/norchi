@@ -109,11 +109,7 @@ export default function HotQuestionsManagerClient({
 
   // Topic handlers
   const handleCreateTopic = async () => {
-    if (
-      !topicFormData.title.trim() ||
-      !topicFormData.answer.trim() ||
-      isSubmitting
-    ) {
+    if (!topicFormData.title.trim() || !topicFormData.answer || isSubmitting) {
       return;
     }
 
@@ -122,7 +118,7 @@ export default function HotQuestionsManagerClient({
       await onTopicCreate(
         topicFormData.selectedTags,
         topicFormData.title.trim(),
-        topicFormData.answer.trim()
+        topicFormData.answer
       );
       resetTopicForm();
       setIsCreateTopicDialogOpen(false);
@@ -147,7 +143,7 @@ export default function HotQuestionsManagerClient({
     if (
       !editingTopic ||
       !topicFormData.title.trim() ||
-      !topicFormData.answer.trim() ||
+      !topicFormData.answer ||
       isSubmitting
     ) {
       return;
@@ -159,7 +155,7 @@ export default function HotQuestionsManagerClient({
         editingTopic.id,
         topicFormData.selectedTags,
         topicFormData.title.trim(),
-        topicFormData.answer.trim()
+        topicFormData.answer
       );
       resetTopicForm();
       setEditingTopic(null);

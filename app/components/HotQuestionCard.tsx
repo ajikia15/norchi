@@ -160,6 +160,7 @@ export default function HotQuestionCard({
               className="prose prose-sm max-w-none text-gray-700 relative overflow-hidden"
               style={{
                 maxHeight: "16rem", // More space since tags moved to bottom
+                whiteSpace: "pre-wrap", // Preserve empty lines and whitespace
               }}
             >
               <ReactMarkdown>{topic.answer}</ReactMarkdown>
@@ -225,7 +226,10 @@ export default function HotQuestionCard({
                           {topic.title}
                         </DialogTitle>
                       </DialogHeader>
-                      <div className="prose prose-sm max-w-none text-gray-700 mt-4">
+                      <div
+                        className="prose prose-sm max-w-none text-gray-700 mt-4"
+                        style={{ whiteSpace: "pre-wrap" }}
+                      >
                         <ReactMarkdown>{topic.answer}</ReactMarkdown>
                       </div>
                     </DialogContent>

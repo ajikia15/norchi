@@ -55,7 +55,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
 
   const handleEditSubmit = () => {
     if (editText.trim()) {
-      onEdit({ ...node, text: editText.trim() });
+      onEdit({ ...node, text: editText });
     }
     setIsEditing(false);
   };

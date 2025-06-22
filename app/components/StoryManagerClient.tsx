@@ -47,7 +47,7 @@ export default function StoryManagerClient({
     try {
       await onStoryCreate(
         formData.name.trim(),
-        formData.description.trim() || undefined
+        formData.description || undefined
       );
       setFormData({ name: "", description: "" });
       setIsCreateDialogOpen(false);
