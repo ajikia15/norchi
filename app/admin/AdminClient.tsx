@@ -9,9 +9,9 @@ import {
   createHotTopic,
   updateHotTopic as updateHotTopicAction,
   deleteHotTopic as deleteHotTopicAction,
-  createHotcardCategory,
-  updateHotcardCategory,
-  deleteHotcardCategory,
+  createTag,
+  updateTag,
+  deleteTag,
 } from "../lib/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StoryManagerClient from "../components/StoryManagerClient";
@@ -82,11 +82,12 @@ export default function AdminClient({
     });
   };
 
-  // Category handlers
-  const handleCategoryCreate = async (
+  // Tag handlers
+  const handleTagCreate = async (
     id: string,
     label: string,
-    emoji: string
+    emoji: string,
+    color: string
   ) => {
     startTransition(async () => {
       try {
@@ -94,54 +95,56 @@ export default function AdminClient({
         formData.append("id", id);
         formData.append("label", label);
         formData.append("emoji", emoji);
+        formData.append("color", color);
 
-        const result = await createHotcardCategory(formData);
+        const result = await createTag(formData);
         if (result.success) {
           router.refresh();
         }
       } catch (error) {
-        console.error("AdminClient: Error creating category:", error);
-        alert("Failed to create category");
+        console.error("AdminClient: Error creating tag:", error);
+        alert("Failed to create tag");
       }
     });
   };
 
-  const handleCategoryUpdate = async (
-    categoryId: string,
+  const handleTagUpdate = async (
+    tagId: string,
     label: string,
-    emoji: string
+    emoji: string,
+    color: string
   ) => {
     startTransition(async () => {
       try {
         const formData = new FormData();
         formData.append("label", label);
         formData.append("emoji", emoji);
+        formData.append("color", color);
 
-        await updateHotcardCategory(categoryId, formData);
+        await updateTag(tagId, formData);
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error updating category:", error);
-        alert("Failed to update category");
+        console.error("AdminClient: Error updating tag:", error);
+        alert("Failed to update tag");
       }
     });
   };
 
-  const handleCategoryDelete = async (categoryId: string) => {
+  const handleTagDelete = async (tagId: string) => {
     startTransition(async () => {
       try {
-        await deleteHotcardCategory(categoryId);
+        await deleteTag(tagId);
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error deleting category:", error);
-        alert("Failed to delete category");
+        console.error("AdminClient: Error deleting tag:", error);
+        alert("Failed to delete tag");
       }
     });
   };
 
   // Hot topics handlers
   const handleTopicCreate = async (
-    categoryId: string,
-    topicalTag: string,
+    selectedTags: string[],
     title: string,
     answer: string,
     link?: string
@@ -149,8 +152,7 @@ export default function AdminClient({
     startTransition(async () => {
       try {
         const formData = new FormData();
-        formData.append("categoryId", categoryId);
-        formData.append("topicalTag", topicalTag);
+        formData.append("tags", JSON.stringify(selectedTags));
         formData.append("title", title);
         formData.append("answer", answer);
         if (link) {
@@ -171,8 +173,7 @@ export default function AdminClient({
 
   const handleTopicUpdate = async (
     topicId: string,
-    categoryId: string,
-    topicalTag: string,
+    selectedTags: string[],
     title: string,
     answer: string,
     link?: string
@@ -180,8 +181,7 @@ export default function AdminClient({
     startTransition(async () => {
       try {
         const formData = new FormData();
-        formData.append("categoryId", categoryId);
-        formData.append("topicalTag", topicalTag);
+        formData.append("tags", JSON.stringify(selectedTags));
         formData.append("title", title);
         formData.append("answer", answer);
         if (link) {
@@ -199,14 +199,6 @@ export default function AdminClient({
   };
 
   const handleTopicDelete = async (topicId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this hot question? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
-
     startTransition(async () => {
       try {
         await deleteHotTopicAction(topicId);
@@ -220,12 +212,14 @@ export default function AdminClient({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      <div className="max-w-7xl mx-auto px-6 py-12">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Panel</h1>
-          <p className="text-muted-foreground">
-            Manage your logical challenge stories and hot questions
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Norchi Admin Panel
+          </h1>
+          <p className="text-gray-600">
+            Manage your ideological challenge system
           </p>
         </div>
 
@@ -235,12 +229,8 @@ export default function AdminClient({
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="stories" disabled={isPending}>
-              Story Management
-            </TabsTrigger>
-            <TabsTrigger value="hot-questions" disabled={isPending}>
-              Hot Questions
-            </TabsTrigger>
+            <TabsTrigger value="stories">Stories</TabsTrigger>
+            <TabsTrigger value="hotquestions">Hot Questions</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stories" className="mt-6">
@@ -253,15 +243,15 @@ export default function AdminClient({
             />
           </TabsContent>
 
-          <TabsContent value="hot-questions" className="mt-6">
+          <TabsContent value="hotquestions" className="mt-6">
             <HotQuestionsManagerClient
               hotTopicsData={initialHotTopicsData}
               onTopicCreate={handleTopicCreate}
               onTopicUpdate={handleTopicUpdate}
               onTopicDelete={handleTopicDelete}
-              onCategoryCreate={handleCategoryCreate}
-              onCategoryUpdate={handleCategoryUpdate}
-              onCategoryDelete={handleCategoryDelete}
+              onTagCreate={handleTagCreate}
+              onTagUpdate={handleTagUpdate}
+              onTagDelete={handleTagDelete}
               isLoading={isPending}
             />
           </TabsContent>

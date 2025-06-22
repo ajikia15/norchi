@@ -1,25 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import {
-  HotTopic,
-  HotTopicsData,
-  HotcardCategory,
-  TOPICAL_TAGS,
-} from "../types";
+import { HotTopic, HotTopicsData, Tag } from "../types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -42,36 +30,39 @@ import {
   Edit,
   Trash2,
   ExternalLink,
-  ArrowRight,
   Loader2,
-  Settings,
+  Tag as TagIcon,
 } from "lucide-react";
 
 interface HotQuestionsManagerClientProps {
   hotTopicsData: HotTopicsData;
   onTopicCreate: (
-    categoryId: string,
-    topicalTag: string,
+    selectedTags: string[],
     title: string,
     answer: string,
     link?: string
   ) => Promise<void>;
   onTopicUpdate: (
     topicId: string,
-    categoryId: string,
-    topicalTag: string,
+    selectedTags: string[],
     title: string,
     answer: string,
     link?: string
   ) => Promise<void>;
   onTopicDelete: (topicId: string) => Promise<void>;
-  onCategoryCreate: (id: string, label: string, emoji: string) => Promise<void>;
-  onCategoryUpdate: (
-    categoryId: string,
+  onTagCreate: (
+    id: string,
     label: string,
-    emoji: string
+    emoji: string,
+    color: string
   ) => Promise<void>;
-  onCategoryDelete: (categoryId: string) => Promise<void>;
+  onTagUpdate: (
+    tagId: string,
+    label: string,
+    emoji: string,
+    color: string
+  ) => Promise<void>;
+  onTagDelete: (tagId: string) => Promise<void>;
   isLoading: boolean;
 }
 
@@ -80,51 +71,50 @@ export default function HotQuestionsManagerClient({
   onTopicCreate,
   onTopicUpdate,
   onTopicDelete,
-  onCategoryCreate,
-  onCategoryUpdate,
-  onCategoryDelete,
+  onTagCreate,
+  onTagUpdate,
+  onTagDelete,
   isLoading,
 }: HotQuestionsManagerClientProps) {
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isCreateTopicDialogOpen, setIsCreateTopicDialogOpen] = useState(false);
   const [editingTopic, setEditingTopic] = useState<HotTopic | null>(null);
-  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
-  const [editingCategory, setEditingCategory] =
-    useState<HotcardCategory | null>(null);
+  const [isCreateTagDialogOpen, setIsCreateTagDialogOpen] = useState(false);
+  const [editingTag, setEditingTag] = useState<Tag | null>(null);
 
   const [topicFormData, setTopicFormData] = useState({
-    categoryId: "",
-    topicalTag: "",
+    selectedTags: [] as string[],
     title: "",
     answer: "",
     link: "",
   });
 
-  const [categoryFormData, setCategoryFormData] = useState({
+  const [tagFormData, setTagFormData] = useState({
     id: "",
     label: "",
     emoji: "",
+    color: "#3b82f6",
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const topics = Object.values(hotTopicsData.topics);
-  const categories = Object.values(hotTopicsData.categories);
+  const allTags = Object.values(hotTopicsData.tags);
 
   const resetTopicForm = () => {
     setTopicFormData({
-      categoryId: "",
-      topicalTag: "",
+      selectedTags: [],
       title: "",
       answer: "",
       link: "",
     });
   };
 
-  const resetCategoryForm = () => {
-    setCategoryFormData({
+  const resetTagForm = () => {
+    setTagFormData({
       id: "",
       label: "",
       emoji: "",
+      color: "#3b82f6",
     });
   };
 
@@ -141,14 +131,13 @@ export default function HotQuestionsManagerClient({
     setIsSubmitting(true);
     try {
       await onTopicCreate(
-        topicFormData.categoryId.trim(),
-        topicFormData.topicalTag.trim(),
+        topicFormData.selectedTags,
         topicFormData.title.trim(),
         topicFormData.answer.trim(),
         topicFormData.link.trim() || undefined
       );
       resetTopicForm();
-      setIsCreateDialogOpen(false);
+      setIsCreateTopicDialogOpen(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -159,13 +148,12 @@ export default function HotQuestionsManagerClient({
 
     setEditingTopic(topic);
     setTopicFormData({
-      categoryId: topic.categoryId || "",
-      topicalTag: topic.topicalTag || "",
+      selectedTags: [...topic.tags],
       title: topic.title,
       answer: topic.answer,
       link: topic.link || "",
     });
-    setIsCreateDialogOpen(true);
+    setIsCreateTopicDialogOpen(true);
   };
 
   const handleUpdateTopic = async () => {
@@ -182,15 +170,14 @@ export default function HotQuestionsManagerClient({
     try {
       await onTopicUpdate(
         editingTopic.id,
-        topicFormData.categoryId.trim(),
-        topicFormData.topicalTag.trim(),
+        topicFormData.selectedTags,
         topicFormData.title.trim(),
         topicFormData.answer.trim(),
         topicFormData.link.trim() || undefined
       );
       resetTopicForm();
       setEditingTopic(null);
-      setIsCreateDialogOpen(false);
+      setIsCreateTopicDialogOpen(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -198,15 +185,19 @@ export default function HotQuestionsManagerClient({
 
   const handleDeleteTopic = async (topic: HotTopic) => {
     if (isLoading) return;
-    await onTopicDelete(topic.id);
+
+    if (window.confirm(`Are you sure you want to delete "${topic.title}"?`)) {
+      await onTopicDelete(topic.id);
+    }
   };
 
-  // Category handlers
-  const handleCreateCategory = async () => {
+  // Tag handlers
+  const handleCreateTag = async () => {
     if (
-      !categoryFormData.id.trim() ||
-      !categoryFormData.label.trim() ||
-      !categoryFormData.emoji.trim() ||
+      !tagFormData.id.trim() ||
+      !tagFormData.label.trim() ||
+      !tagFormData.emoji.trim() ||
+      !tagFormData.color.trim() ||
       isSubmitting
     ) {
       return;
@@ -214,35 +205,38 @@ export default function HotQuestionsManagerClient({
 
     setIsSubmitting(true);
     try {
-      await onCategoryCreate(
-        categoryFormData.id.trim(),
-        categoryFormData.label.trim(),
-        categoryFormData.emoji.trim()
+      await onTagCreate(
+        tagFormData.id.trim(),
+        tagFormData.label.trim(),
+        tagFormData.emoji.trim(),
+        tagFormData.color.trim()
       );
-      resetCategoryForm();
-      setIsCategoryDialogOpen(false);
+      resetTagForm();
+      setIsCreateTagDialogOpen(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleEditCategory = (category: HotcardCategory) => {
+  const handleEditTag = (tag: Tag) => {
     if (isLoading) return;
 
-    setEditingCategory(category);
-    setCategoryFormData({
-      id: category.id,
-      label: category.label,
-      emoji: category.emoji,
+    setEditingTag(tag);
+    setTagFormData({
+      id: tag.id,
+      label: tag.label,
+      emoji: tag.emoji,
+      color: tag.color,
     });
-    setIsCategoryDialogOpen(true);
+    setIsCreateTagDialogOpen(true);
   };
 
-  const handleUpdateCategory = async () => {
+  const handleUpdateTag = async () => {
     if (
-      !editingCategory ||
-      !categoryFormData.label.trim() ||
-      !categoryFormData.emoji.trim() ||
+      !editingTag ||
+      !tagFormData.label.trim() ||
+      !tagFormData.emoji.trim() ||
+      !tagFormData.color.trim() ||
       isSubmitting
     ) {
       return;
@@ -250,56 +244,66 @@ export default function HotQuestionsManagerClient({
 
     setIsSubmitting(true);
     try {
-      await onCategoryUpdate(
-        editingCategory.id,
-        categoryFormData.label.trim(),
-        categoryFormData.emoji.trim()
+      await onTagUpdate(
+        editingTag.id,
+        tagFormData.label.trim(),
+        tagFormData.emoji.trim(),
+        tagFormData.color.trim()
       );
-      resetCategoryForm();
-      setEditingCategory(null);
-      setIsCategoryDialogOpen(false);
+      resetTagForm();
+      setEditingTag(null);
+      setIsCreateTagDialogOpen(false);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDeleteCategory = async (category: HotcardCategory) => {
+  const handleDeleteTag = async (tag: Tag) => {
     if (isLoading) return;
 
-    const confirmMessage = `Are you sure you want to delete the category "${category.label}" (${category.id})?\n\nThis will unlink it from any hot questions but won't delete the questions themselves.\n\nThis action cannot be undone.`;
+    const topicsUsingTag = topics.filter((topic) =>
+      topic.tags.includes(tag.id)
+    );
+    const confirmMessage =
+      topicsUsingTag.length > 0
+        ? `Are you sure you want to delete tag "${tag.label}"? This will remove it from ${topicsUsingTag.length} hot question(s).`
+        : `Are you sure you want to delete tag "${tag.label}"?`;
 
     if (window.confirm(confirmMessage)) {
-      try {
-        await onCategoryDelete(category.id);
-      } catch (error) {
-        console.error("Failed to delete category:", error);
-        alert("Failed to delete category. Please try again.");
-      }
+      await onTagDelete(tag.id);
     }
   };
 
   const handleTopicDialogClose = () => {
     if (isSubmitting) return;
-    setIsCreateDialogOpen(false);
+    setIsCreateTopicDialogOpen(false);
     setEditingTopic(null);
     resetTopicForm();
   };
 
-  const handleCategoryDialogClose = () => {
+  const handleTagDialogClose = () => {
     if (isSubmitting) return;
-    setIsCategoryDialogOpen(false);
-    setEditingCategory(null);
-    resetCategoryForm();
+    setIsCreateTagDialogOpen(false);
+    setEditingTag(null);
+    resetTagForm();
+  };
+
+  const toggleTagSelection = (tagId: string) => {
+    setTopicFormData((prev) => ({
+      ...prev,
+      selectedTags: prev.selectedTags.includes(tagId)
+        ? prev.selectedTags.filter((id) => id !== tagId)
+        : [...prev.selectedTags, tagId],
+    }));
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Hot Questions</h2>
           <p className="text-muted-foreground">
-            Manage provocative questions and their categories
+            Manage provocative questions and their tags
           </p>
         </div>
       </div>
@@ -307,540 +311,440 @@ export default function HotQuestionsManagerClient({
       <Tabs defaultValue="questions" className="w-full">
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="questions">Questions</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="tags">Tags</TabsTrigger>
         </TabsList>
 
         <TabsContent value="questions" className="mt-6">
-          <div className="space-y-6">
-            {/* Questions Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Hot Questions</h3>
-                <p className="text-sm text-muted-foreground">
-                  Challenge popular thinking through structured debates
-                </p>
-              </div>
-
-              <Dialog
-                open={isCreateDialogOpen}
-                onOpenChange={setIsCreateDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button className="shadow-sm" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4 mr-2" />
-                    )}
-                    New Hot Question
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingTopic
-                        ? "Edit Hot Question"
-                        : "Create New Hot Question"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="topic-category">
-                          Category (Optional)
-                        </Label>
-                        <Select
-                          value={topicFormData.categoryId}
-                          onValueChange={(value) =>
-                            setTopicFormData({
-                              ...topicFormData,
-                              categoryId: value,
-                            })
-                          }
-                          disabled={isSubmitting}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">No category</SelectItem>
-                            {categories.map((category) => (
-                              <SelectItem key={category.id} value={category.id}>
-                                <div className="flex items-center gap-2">
-                                  <span>{category.emoji}</span>
-                                  <Badge variant="secondary">
-                                    {category.label}
-                                  </Badge>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor="topic-topical-tag">
-                          Topical Tag (Optional)
-                        </Label>
-                        <Select
-                          value={topicFormData.topicalTag}
-                          onValueChange={(value) =>
-                            setTopicFormData({
-                              ...topicFormData,
-                              topicalTag: value,
-                            })
-                          }
-                          disabled={isSubmitting}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select topical style" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="">No topical tag</SelectItem>
-                            {Object.entries(TOPICAL_TAGS).map(([key, tag]) => (
-                              <SelectItem key={key} value={key}>
-                                <div className="flex items-center gap-2">
-                                  <span>{tag.emoji}</span>
-                                  <Badge variant={tag.badgeVariant}>
-                                    {tag.label}
-                                  </Badge>
-                                </div>
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="topic-link">Link (Optional)</Label>
-                      <Input
-                        id="topic-link"
-                        value={topicFormData.link}
-                        onChange={(e) =>
-                          setTopicFormData({
-                            ...topicFormData,
-                            link: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., /story/wine-weed or https://..."
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="topic-title">Question Title</Label>
-                      <Input
-                        id="topic-title"
-                        value={topicFormData.title}
-                        onChange={(e) =>
-                          setTopicFormData({
-                            ...topicFormData,
-                            title: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., Should marijuana be fully legalized?"
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="topic-answer">Answer/Response</Label>
-                      <Textarea
-                        id="topic-answer"
-                        value={topicFormData.answer}
-                        onChange={(e) =>
-                          setTopicFormData({
-                            ...topicFormData,
-                            answer: e.target.value,
-                          })
-                        }
-                        placeholder="Your libertarian perspective on this question..."
-                        rows={4}
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={handleTopicDialogClose}
-                      disabled={isSubmitting}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={
-                        editingTopic ? handleUpdateTopic : handleCreateTopic
-                      }
-                      disabled={
-                        !topicFormData.title.trim() ||
-                        !topicFormData.answer.trim() ||
-                        isSubmitting
-                      }
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          {editingTopic ? "Updating..." : "Creating..."}
-                        </>
-                      ) : editingTopic ? (
-                        "Update Question"
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Hot Questions</CardTitle>
+                <Dialog
+                  open={isCreateTopicDialogOpen}
+                  onOpenChange={handleTopicDialogClose}
+                >
+                  <DialogTrigger asChild>
+                    <Button disabled={isLoading}>
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                       ) : (
-                        "Create Question"
+                        <Plus className="h-4 w-4 mr-2" />
                       )}
+                      New Question
                     </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-
-            {/* Questions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {topics.map((topic) => {
-                const topicalTagData = topic.topicalTag
-                  ? TOPICAL_TAGS[topic.topicalTag]
-                  : null;
-
-                return (
-                  <Card
-                    key={topic.id}
-                    className={`relative transition-all duration-200 hover:shadow-lg border-2 border-gray-200/50 hover:border-primary/50 ${
-                      isLoading ? "opacity-50 pointer-events-none" : ""
-                    }`}
-                  >
-                    <CardHeader className="pb-3">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col gap-2 mb-2">
-                            {/* Category Badge */}
-                            {topic.categoryData && (
-                              <Badge variant="secondary">
-                                {topic.categoryData.label}
-                              </Badge>
-                            )}
-                            {/* Topical Tag Badge */}
-                            {topicalTagData && (
-                              <Badge variant={topicalTagData.badgeVariant}>
-                                {topicalTagData.label}
-                              </Badge>
-                            )}
-                            {/* Fallback to legacy category */}
-                            {!topic.categoryData && !topicalTagData && (
-                              <Badge variant="secondary">
-                                {topic.category}
-                              </Badge>
-                            )}
-                          </div>
-                          <CardTitle className="text-lg leading-tight line-clamp-2">
-                            {topic.title}
-                          </CardTitle>
-                        </div>
-
-                        <div className="flex gap-1 ml-2">
-                          <Button
-                            onClick={() => handleEditTopic(topic)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Edit className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
-                          <Button
-                            onClick={() => handleDeleteTopic(topic)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
-                            disabled={isLoading}
-                          >
-                            {isLoading ? (
-                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="h-3.5 w-3.5" />
-                            )}
-                          </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-2xl">
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingTopic
+                          ? "Edit Hot Question"
+                          : "Create New Hot Question"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label>Tags</Label>
+                        <div className="flex flex-wrap gap-2 p-3 border rounded-md min-h-[80px]">
+                          {allTags.map((tag) => (
+                            <Badge
+                              key={tag.id}
+                              variant={
+                                topicFormData.selectedTags.includes(tag.id)
+                                  ? "default"
+                                  : "outline"
+                              }
+                              className="cursor-pointer"
+                              style={{
+                                backgroundColor:
+                                  topicFormData.selectedTags.includes(tag.id)
+                                    ? tag.color
+                                    : undefined,
+                                borderColor: tag.color,
+                              }}
+                              onClick={() => toggleTagSelection(tag.id)}
+                            >
+                              {tag.emoji} {tag.label}
+                            </Badge>
+                          ))}
+                          {allTags.length === 0 && (
+                            <p className="text-sm text-muted-foreground">
+                              No tags available. Create some tags first.
+                            </p>
+                          )}
                         </div>
                       </div>
 
-                      {/* Topical emoji in bottom-right */}
-                      {topicalTagData?.emoji && (
-                        <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
-                          {topicalTagData.emoji}
-                        </div>
-                      )}
-                    </CardHeader>
-
-                    <CardContent className="pt-0">
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-4 leading-relaxed">
-                        {topic.answer}
-                      </p>
-
-                      {topic.link && (
-                        <div className="flex items-center justify-between">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-xs"
-                            asChild
-                            disabled={isLoading}
-                          >
-                            <a
-                              href={topic.link}
-                              target={
-                                topic.link.startsWith("http")
-                                  ? "_blank"
-                                  : "_self"
-                              }
-                              rel={
-                                topic.link.startsWith("http")
-                                  ? "noopener noreferrer"
-                                  : undefined
-                              }
-                              className="flex items-center gap-1"
-                            >
-                              {topic.link.startsWith("http") ? (
-                                <ExternalLink className="h-3 w-3" />
-                              ) : (
-                                <ArrowRight className="h-3 w-3" />
-                              )}
-                              Explore
-                            </a>
-                          </Button>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-                );
-              })}
-
-              {topics.length === 0 && (
-                <div className="col-span-full text-center py-12">
-                  <div className="text-gray-400 mb-4">
-                    <Plus className="h-12 w-12 mx-auto mb-4" />
-                    <p className="text-lg font-medium">No hot questions yet</p>
-                    <p className="text-sm">
-                      Create your first provocative question
-                    </p>
-                  </div>
-                  <Button
-                    onClick={() => setIsCreateDialogOpen(true)}
-                    variant="outline"
-                    disabled={isLoading}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create First Question
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="categories" className="mt-6">
-          <div className="space-y-6">
-            {/* Categories Header */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold">Categories</h3>
-                <p className="text-sm text-muted-foreground">
-                  Manage broad topic categories (editable by admin)
-                </p>
-              </div>
-
-              <Dialog
-                open={isCategoryDialogOpen}
-                onOpenChange={setIsCategoryDialogOpen}
-              >
-                <DialogTrigger asChild>
-                  <Button className="shadow-sm" disabled={isLoading}>
-                    {isLoading ? (
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Plus className="h-4 w-4 mr-2" />
-                    )}
-                    New Category
-                  </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                  <DialogHeader>
-                    <DialogTitle>
-                      {editingCategory
-                        ? "Edit Category"
-                        : "Create New Category"}
-                    </DialogTitle>
-                  </DialogHeader>
-                  <div className="space-y-4 py-4">
-                    {!editingCategory && (
                       <div className="space-y-2">
-                        <Label htmlFor="category-id">ID</Label>
+                        <Label htmlFor="topic-title">Title*</Label>
                         <Input
-                          id="category-id"
-                          value={categoryFormData.id}
+                          id="topic-title"
+                          value={topicFormData.title}
                           onChange={(e) =>
-                            setCategoryFormData({
-                              ...categoryFormData,
-                              id: e.target.value,
+                            setTopicFormData({
+                              ...topicFormData,
+                              title: e.target.value,
                             })
                           }
-                          placeholder="e.g., economics, education"
                           disabled={isSubmitting}
+                          placeholder="Enter question title"
                         />
                       </div>
-                    )}
-                    <div className="space-y-2">
-                      <Label htmlFor="category-label">Label</Label>
-                      <Input
-                        id="category-label"
-                        value={categoryFormData.label}
-                        onChange={(e) =>
-                          setCategoryFormData({
-                            ...categoryFormData,
-                            label: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., ეკონომიკა"
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="category-emoji">Emoji</Label>
-                      <Input
-                        id="category-emoji"
-                        value={categoryFormData.emoji}
-                        onChange={(e) =>
-                          setCategoryFormData({
-                            ...categoryFormData,
-                            emoji: e.target.value,
-                          })
-                        }
-                        placeholder="e.g., 💵"
-                        disabled={isSubmitting}
-                      />
-                    </div>
-                    <div className="text-sm text-muted-foreground bg-gray-50 p-3 rounded-md">
-                      💡 <strong>Note:</strong> All categories use neutral gray
-                      badge styling. Use topical tags for colorful styling.
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button
-                      variant="outline"
-                      onClick={handleCategoryDialogClose}
-                      disabled={isSubmitting}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      onClick={
-                        editingCategory
-                          ? handleUpdateCategory
-                          : handleCreateCategory
-                      }
-                      disabled={
-                        (!editingCategory && !categoryFormData.id.trim()) ||
-                        !categoryFormData.label.trim() ||
-                        !categoryFormData.emoji.trim() ||
-                        isSubmitting
-                      }
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          {editingCategory ? "Updating..." : "Creating..."}
-                        </>
-                      ) : editingCategory ? (
-                        "Update Category"
-                      ) : (
-                        "Create Category"
-                      )}
-                    </Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
 
-            {/* Categories Table */}
-            {categories.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-400 mb-4">
-                  <Settings className="h-12 w-12 mx-auto mb-4" />
-                  <p className="text-lg font-medium">No categories yet</p>
-                  <p className="text-sm">Create your first category</p>
-                </div>
-                <Button
-                  onClick={() => setIsCategoryDialogOpen(true)}
-                  variant="outline"
-                  disabled={isLoading}
-                >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create First Category
-                </Button>
+                      <div className="space-y-2">
+                        <Label htmlFor="topic-answer">Answer*</Label>
+                        <Textarea
+                          id="topic-answer"
+                          value={topicFormData.answer}
+                          onChange={(e) =>
+                            setTopicFormData({
+                              ...topicFormData,
+                              answer: e.target.value,
+                            })
+                          }
+                          disabled={isSubmitting}
+                          placeholder="Enter the answer/response"
+                          rows={4}
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="topic-link">Link (Optional)</Label>
+                        <Input
+                          id="topic-link"
+                          value={topicFormData.link}
+                          onChange={(e) =>
+                            setTopicFormData({
+                              ...topicFormData,
+                              link: e.target.value,
+                            })
+                          }
+                          disabled={isSubmitting}
+                          placeholder="https://example.com"
+                        />
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={handleTopicDialogClose}
+                        disabled={isSubmitting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={
+                          editingTopic ? handleUpdateTopic : handleCreateTopic
+                        }
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : null}
+                        {editingTopic ? "Update" : "Create"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
-            ) : (
-              <div
-                className={`border rounded-md ${
-                  isLoading ? "opacity-50 pointer-events-none" : ""
-                }`}
-              >
-                <Table>
-                  <TableHeader>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Title</TableHead>
+                    <TableHead>Tags</TableHead>
+                    <TableHead>Answer Preview</TableHead>
+                    <TableHead>Link</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {topics.length === 0 ? (
                     <TableRow>
-                      <TableHead className="w-16">Emoji</TableHead>
-                      <TableHead className="w-32">ID</TableHead>
-                      <TableHead>Label</TableHead>
-                      <TableHead className="text-right w-32">Actions</TableHead>
+                      <TableCell
+                        colSpan={5}
+                        className="text-center text-muted-foreground"
+                      >
+                        No hot questions found. Create one to get started.
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {categories.map((category) => (
-                      <TableRow key={category.id}>
-                        <TableCell className="text-2xl">
-                          {category.emoji}
-                        </TableCell>
-                        <TableCell className="font-mono text-sm text-muted-foreground">
-                          {category.id}
+                  ) : (
+                    topics.map((topic) => (
+                      <TableRow key={topic.id}>
+                        <TableCell className="font-medium">
+                          {topic.title}
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">{category.label}</Badge>
+                          <div className="flex flex-wrap gap-1">
+                            {topic.tagData?.map((tag) => (
+                              <Badge
+                                key={tag.id}
+                                variant="outline"
+                                style={{ borderColor: tag.color }}
+                                className="text-xs"
+                              >
+                                {tag.emoji} {tag.label}
+                              </Badge>
+                            )) || (
+                              <span className="text-sm text-muted-foreground">
+                                No tags
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex gap-1 justify-end">
+                        <TableCell className="max-w-[200px]">
+                          <p className="truncate text-sm text-muted-foreground">
+                            {topic.answer}
+                          </p>
+                        </TableCell>
+                        <TableCell>
+                          {topic.link ? (
+                            <Button variant="ghost" size="sm" asChild>
+                              <a
+                                href={topic.link}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">
+                              —
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
                             <Button
-                              onClick={() => handleEditCategory(category)}
                               variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 hover:bg-blue-50 hover:text-blue-600"
+                              onClick={() => handleEditTopic(topic)}
                               disabled={isLoading}
                             >
-                              {isLoading ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Edit className="h-3.5 w-3.5" />
-                              )}
+                              <Edit className="h-4 w-4" />
                             </Button>
                             <Button
-                              onClick={() => handleDeleteCategory(category)}
                               variant="ghost"
                               size="sm"
-                              className="h-8 w-8 p-0 hover:bg-red-50 hover:text-red-600"
+                              onClick={() => handleDeleteTopic(topic)}
                               disabled={isLoading}
                             >
-                              {isLoading ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Trash2 className="h-3.5 w-3.5" />
-                              )}
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    ))
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="tags" className="mt-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle>Tags</CardTitle>
+                <Dialog
+                  open={isCreateTagDialogOpen}
+                  onOpenChange={handleTagDialogClose}
+                >
+                  <DialogTrigger asChild>
+                    <Button disabled={isLoading}>
+                      {isLoading ? (
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <TagIcon className="h-4 w-4 mr-2" />
+                      )}
+                      New Tag
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        {editingTag ? "Edit Tag" : "Create New Tag"}
+                      </DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="tag-id">ID*</Label>
+                        <Input
+                          id="tag-id"
+                          value={tagFormData.id}
+                          onChange={(e) =>
+                            setTagFormData({
+                              ...tagFormData,
+                              id: e.target.value,
+                            })
+                          }
+                          disabled={isSubmitting || !!editingTag}
+                          placeholder="tag-id (lowercase, no spaces)"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="tag-label">Label*</Label>
+                        <Input
+                          id="tag-label"
+                          value={tagFormData.label}
+                          onChange={(e) =>
+                            setTagFormData({
+                              ...tagFormData,
+                              label: e.target.value,
+                            })
+                          }
+                          disabled={isSubmitting}
+                          placeholder="Tag display name"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="tag-emoji">Emoji*</Label>
+                        <Input
+                          id="tag-emoji"
+                          value={tagFormData.emoji}
+                          onChange={(e) =>
+                            setTagFormData({
+                              ...tagFormData,
+                              emoji: e.target.value,
+                            })
+                          }
+                          disabled={isSubmitting}
+                          placeholder="🏷️"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="tag-color">Color*</Label>
+                        <div className="flex gap-2">
+                          <Input
+                            id="tag-color"
+                            type="color"
+                            value={tagFormData.color}
+                            onChange={(e) =>
+                              setTagFormData({
+                                ...tagFormData,
+                                color: e.target.value,
+                              })
+                            }
+                            disabled={isSubmitting}
+                            className="w-16"
+                          />
+                          <Input
+                            value={tagFormData.color}
+                            onChange={(e) =>
+                              setTagFormData({
+                                ...tagFormData,
+                                color: e.target.value,
+                              })
+                            }
+                            disabled={isSubmitting}
+                            placeholder="#3b82f6"
+                            className="flex-1"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button
+                        variant="outline"
+                        onClick={handleTagDialogClose}
+                        disabled={isSubmitting}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={editingTag ? handleUpdateTag : handleCreateTag}
+                        disabled={isSubmitting}
+                      >
+                        {isSubmitting ? (
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        ) : null}
+                        {editingTag ? "Update" : "Create"}
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
-            )}
-          </div>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Preview</TableHead>
+                    <TableHead>ID</TableHead>
+                    <TableHead>Label</TableHead>
+                    <TableHead>Usage</TableHead>
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {allTags.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="text-center text-muted-foreground"
+                      >
+                        No tags found. Create one to get started.
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    allTags.map((tag) => {
+                      const usageCount = topics.filter((topic) =>
+                        topic.tags.includes(tag.id)
+                      ).length;
+                      return (
+                        <TableRow key={tag.id}>
+                          <TableCell>
+                            <Badge
+                              style={{
+                                backgroundColor: tag.color,
+                                color: "white",
+                              }}
+                            >
+                              {tag.emoji} {tag.label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {tag.id}
+                          </TableCell>
+                          <TableCell>{tag.label}</TableCell>
+                          <TableCell>
+                            <span className="text-sm text-muted-foreground">
+                              {usageCount} question{usageCount !== 1 ? "s" : ""}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEditTag(tag)}
+                                disabled={isLoading}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTag(tag)}
+                                disabled={isLoading}
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })
+                  )}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>

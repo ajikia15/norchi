@@ -3,10 +3,11 @@
   StoriesData,
   HotTopic,
   HotTopicsData,
+  Tag,
   HotcardCategory,
 } from "../types";
 import { db } from "./db/client";
-import { stories, hotTopics, hotcardCategories } from "./db/schema";
+import { stories, hotTopics, tags, hotcardCategories } from "./db/schema";
 
 // Server-side functions for database operations
 export async function loadStoriesData(): Promise<StoriesData> {
@@ -45,10 +46,63 @@ export async function loadStoriesData(): Promise<StoriesData> {
   }
 }
 
-// Server-side hot topics function with categories
+// Server-side hot topics function with tags
 export async function loadHotTopicsData(): Promise<HotTopicsData> {
   try {
-    // Load categories
+    // Load tags
+    const tagsResult = await db.select().from(tags);
+    const tagsMap: Record<string, Tag> = {};
+
+    tagsResult.forEach((dbTag) => {
+      tagsMap[dbTag.id] = {
+        id: dbTag.id,
+        label: dbTag.label,
+        emoji: dbTag.emoji,
+        color: dbTag.color,
+        createdAt: dbTag.createdAt,
+        updatedAt: dbTag.updatedAt,
+      };
+    });
+
+    // Load hot topics
+    const topicsResult = await db.select().from(hotTopics);
+    const topicsMap: Record<string, HotTopic> = {};
+
+    topicsResult.forEach((dbTopic) => {
+      const topicTagIds = JSON.parse(dbTopic.tags || "[]") as string[];
+      const tagData = topicTagIds
+        .map((tagId) => tagsMap[tagId])
+        .filter(Boolean); // Remove undefined tags
+
+      topicsMap[dbTopic.id] = {
+        id: dbTopic.id,
+        tags: topicTagIds,
+        title: dbTopic.title,
+        answer: dbTopic.answer,
+        link: dbTopic.link || undefined,
+        createdAt: dbTopic.createdAt,
+        updatedAt: dbTopic.updatedAt,
+        tagData,
+      };
+    });
+
+    return {
+      topics: topicsMap,
+      tags: tagsMap,
+    };
+  } catch (error) {
+    console.error("Failed to load hot topics from database:", error);
+    throw error;
+  }
+}
+
+// Legacy function for backward compatibility
+export async function loadLegacyHotTopicsData(): Promise<{
+  topics: Record<string, Record<string, unknown>>;
+  categories: Record<string, HotcardCategory>;
+}> {
+  try {
+    // Load legacy categories
     const categoriesResult = await db.select().from(hotcardCategories);
     const categoriesMap: Record<string, HotcardCategory> = {};
 
@@ -62,33 +116,12 @@ export async function loadHotTopicsData(): Promise<HotTopicsData> {
       };
     });
 
-    // Load hot topics
-    const topicsResult = await db.select().from(hotTopics);
-    const topicsMap: Record<string, HotTopic> = {};
-
-    topicsResult.forEach((dbTopic) => {
-      const categoryData = dbTopic.categoryId
-        ? categoriesMap[dbTopic.categoryId]
-        : undefined;
-
-      topicsMap[dbTopic.id] = {
-        id: dbTopic.id,
-        categoryId: dbTopic.categoryId || undefined,
-        category: dbTopic.category,
-        topicalTag: dbTopic.topicalTag as HotTopic["topicalTag"],
-        title: dbTopic.title,
-        answer: dbTopic.answer,
-        link: dbTopic.link || undefined,
-        categoryData,
-      };
-    });
-
     return {
-      topics: topicsMap,
+      topics: {},
       categories: categoriesMap,
     };
   } catch (error) {
-    console.error("Failed to load hot topics from database:", error);
+    console.error("Failed to load legacy hot topics from database:", error);
     throw error;
   }
 }

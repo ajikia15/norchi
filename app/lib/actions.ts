@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "./db/client";
-import { stories, hotTopics, hotcardCategories } from "./db/schema";
+import { stories, hotTopics, tags, hotcardCategories } from "./db/schema";
 import { eq } from "drizzle-orm";
 
 // Story actions
@@ -29,7 +29,7 @@ export async function createStory(formData: FormData) {
     updatedAt: now,
   });
 
-  revalidatePath("/admin/story");
+  revalidatePath("/admin");
   revalidatePath("/");
   return { success: true, id };
 }
@@ -53,7 +53,7 @@ export async function updateStory(id: string, formData: FormData) {
     })
     .where(eq(stories.id, id));
 
-  revalidatePath("/admin/story");
+  revalidatePath("/admin");
   revalidatePath("/");
   revalidatePath(`/story/${id}`);
   return { success: true };
@@ -62,12 +62,153 @@ export async function updateStory(id: string, formData: FormData) {
 export async function deleteStory(id: string) {
   await db.delete(stories).where(eq(stories.id, id));
 
-  revalidatePath("/admin/story");
+  revalidatePath("/admin");
   revalidatePath("/");
   return { success: true };
 }
 
-// Hotcard Category actions
+// Tag actions
+export async function createTag(formData: FormData) {
+  const id = formData.get("id") as string;
+  const label = formData.get("label") as string;
+  const emoji = formData.get("emoji") as string;
+  const color = formData.get("color") as string;
+
+  if (!id || !label || !emoji || !color) {
+    throw new Error("All tag fields are required");
+  }
+
+  const now = new Date().toISOString();
+
+  await db.insert(tags).values({
+    id,
+    label,
+    emoji,
+    color,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { success: true, id };
+}
+
+export async function updateTag(id: string, formData: FormData) {
+  const label = formData.get("label") as string;
+  const emoji = formData.get("emoji") as string;
+  const color = formData.get("color") as string;
+
+  if (!label || !emoji || !color) {
+    throw new Error("All tag fields are required");
+  }
+
+  await db
+    .update(tags)
+    .set({
+      label,
+      emoji,
+      color,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(tags.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function deleteTag(id: string) {
+  // Remove this tag from all hot topics that use it
+  const hotTopicsWithTag = await db.select().from(hotTopics);
+
+  for (const topic of hotTopicsWithTag) {
+    const topicTags = JSON.parse(topic.tags || "[]") as string[];
+    const updatedTags = topicTags.filter((tagId) => tagId !== id);
+
+    if (topicTags.length !== updatedTags.length) {
+      await db
+        .update(hotTopics)
+        .set({
+          tags: JSON.stringify(updatedTags),
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(hotTopics.id, topic.id));
+    }
+  }
+
+  // Delete the tag
+  await db.delete(tags).where(eq(tags.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { success: true };
+}
+
+// Hot Topics actions
+export async function createHotTopic(formData: FormData) {
+  const selectedTags = formData.get("tags") as string;
+  const title = formData.get("title") as string;
+  const answer = formData.get("answer") as string;
+  const link = formData.get("link") as string;
+
+  if (!title || !answer) {
+    throw new Error("Title and answer are required");
+  }
+
+  const id = `ht-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  await db.insert(hotTopics).values({
+    id,
+    tags: selectedTags || "[]",
+    title,
+    answer,
+    link: link || null,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { success: true, id };
+}
+
+export async function updateHotTopic(id: string, formData: FormData) {
+  const selectedTags = formData.get("tags") as string;
+  const title = formData.get("title") as string;
+  const answer = formData.get("answer") as string;
+  const link = formData.get("link") as string;
+
+  if (!title || !answer) {
+    throw new Error("Title and answer are required");
+  }
+
+  await db
+    .update(hotTopics)
+    .set({
+      tags: selectedTags || "[]",
+      title,
+      answer,
+      link: link || null,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(hotTopics.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { success: true };
+}
+
+export async function deleteHotTopic(id: string) {
+  await db.delete(hotTopics).where(eq(hotTopics.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/");
+  return { success: true };
+}
+
+// Legacy category actions - will be removed after migration
 export async function createHotcardCategory(formData: FormData) {
   const id = formData.get("id") as string;
   const label = formData.get("label") as string;
@@ -115,81 +256,7 @@ export async function updateHotcardCategory(id: string, formData: FormData) {
 }
 
 export async function deleteHotcardCategory(id: string) {
-  // First, unlink any hot topics that reference this category
-  await db
-    .update(hotTopics)
-    .set({ categoryId: null })
-    .where(eq(hotTopics.categoryId, id));
-
-  // Then delete the category
   await db.delete(hotcardCategories).where(eq(hotcardCategories.id, id));
-
-  revalidatePath("/admin");
-  revalidatePath("/");
-  return { success: true };
-}
-
-// Hot Topics actions
-export async function createHotTopic(formData: FormData) {
-  const categoryId = formData.get("categoryId") as string;
-  const category = formData.get("category") as string;
-  const topicalTag = formData.get("topicalTag") as string;
-  const title = formData.get("title") as string;
-  const answer = formData.get("answer") as string;
-  const link = formData.get("link") as string;
-
-  if (!title || !answer) {
-    throw new Error("Title and answer are required");
-  }
-
-  const id = `ht-${Date.now()}`;
-
-  await db.insert(hotTopics).values({
-    id,
-    categoryId: categoryId || null,
-    category: category || "uncategorized", // Keep for backward compatibility
-    topicalTag: topicalTag || null,
-    title,
-    answer,
-    link: link || null,
-  });
-
-  revalidatePath("/admin");
-  revalidatePath("/");
-  return { success: true, id };
-}
-
-export async function updateHotTopic(id: string, formData: FormData) {
-  const categoryId = formData.get("categoryId") as string;
-  const category = formData.get("category") as string;
-  const topicalTag = formData.get("topicalTag") as string;
-  const title = formData.get("title") as string;
-  const answer = formData.get("answer") as string;
-  const link = formData.get("link") as string;
-
-  if (!title || !answer) {
-    throw new Error("Title and answer are required");
-  }
-
-  await db
-    .update(hotTopics)
-    .set({
-      categoryId: categoryId || null,
-      category: category || "uncategorized", // Keep for backward compatibility
-      topicalTag: topicalTag || null,
-      title,
-      answer,
-      link: link || null,
-    })
-    .where(eq(hotTopics.id, id));
-
-  revalidatePath("/admin");
-  revalidatePath("/");
-  return { success: true };
-}
-
-export async function deleteHotTopic(id: string) {
-  await db.delete(hotTopics).where(eq(hotTopics.id, id));
 
   revalidatePath("/admin");
   revalidatePath("/");

@@ -58,6 +58,33 @@ export interface PlayerState {
   history: string[];
 }
 
+export interface Tag {
+  id: string;
+  label: string; // Display name like "ეკონომიკა", "განათლება"
+  emoji: string; // e.g. "💵"
+  color: string; // Hex color for styling
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HotTopic {
+  id: string;
+  tags: string[]; // Array of tag IDs
+  title: string;
+  answer: string;
+  link?: string;
+  createdAt: string;
+  updatedAt: string;
+  // Computed/joined fields when tags are loaded
+  tagData?: Tag[];
+}
+
+export interface HotTopicsData {
+  topics: Record<string, HotTopic>;
+  tags: Record<string, Tag>;
+}
+
+// Legacy interfaces - will be removed after migration
 export interface HotcardCategory {
   id: string; // "economics", "education", etc.
   label: string; // Badge label like "ეკონომიკა", "განათლება"
@@ -66,7 +93,7 @@ export interface HotcardCategory {
   updatedAt: string;
 }
 
-// Hardcoded topical tags with styling
+// Legacy topical tags - will be removed after migration
 export type TopicalTag = "ragebait" | "popularDisinfo" | "latestHysteria";
 
 export const TOPICAL_TAGS = {
@@ -86,20 +113,3 @@ export const TOPICAL_TAGS = {
     badgeVariant: "outline" as const,
   },
 } as const;
-
-export interface HotTopic {
-  id: string;
-  categoryId?: string; // References HotcardCategory.id (editable categories)
-  category: string; // Keep for backward compatibility
-  topicalTag?: TopicalTag | null; // Hardcoded topical styling
-  title: string;
-  answer: string;
-  link?: string;
-  // Computed/joined fields when category is loaded
-  categoryData?: HotcardCategory;
-}
-
-export interface HotTopicsData {
-  topics: Record<string, HotTopic>;
-  categories: Record<string, HotcardCategory>;
-}

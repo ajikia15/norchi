@@ -9,6 +9,26 @@ export const stories = sqliteTable("stories", {
   updatedAt: text("updated_at").notNull(),
 });
 
+export const tags = sqliteTable("tags", {
+  id: text("id").primaryKey(),
+  label: text("label").notNull(),
+  emoji: text("emoji").notNull(),
+  color: text("color").notNull().default("#3b82f6"), // hex color for tag styling
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const hotTopics = sqliteTable("hot_topics", {
+  id: text("id").primaryKey(),
+  tags: text("tags").notNull().default("[]"), // JSON array of tag IDs
+  title: text("title").notNull(),
+  answer: text("answer").notNull(),
+  link: text("link"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+// Legacy table - will be removed after migration
 export const hotcardCategories = sqliteTable("hotcard_categories", {
   id: text("id").primaryKey(),
   label: text("label").notNull(),
@@ -17,19 +37,11 @@ export const hotcardCategories = sqliteTable("hotcard_categories", {
   updatedAt: text("updated_at").notNull(),
 });
 
-export const hotTopics = sqliteTable("hot_topics", {
-  id: text("id").primaryKey(),
-  categoryId: text("category_id").references(() => hotcardCategories.id),
-  category: text("category").notNull(), // Keep for backward compatibility
-  topicalTag: text("topical_tag"), // "ragebait" | "popularDisinfo" | "latestHysteria" | null
-  title: text("title").notNull(),
-  answer: text("answer").notNull(),
-  link: text("link"),
-});
-
 export type SelectStory = typeof stories.$inferSelect;
 export type InsertStory = typeof stories.$inferInsert;
-export type SelectHotcardCategory = typeof hotcardCategories.$inferSelect;
-export type InsertHotcardCategory = typeof hotcardCategories.$inferInsert;
+export type SelectTag = typeof tags.$inferSelect;
+export type InsertTag = typeof tags.$inferInsert;
 export type SelectHotTopic = typeof hotTopics.$inferSelect;
 export type InsertHotTopic = typeof hotTopics.$inferInsert;
+export type SelectHotcardCategory = typeof hotcardCategories.$inferSelect;
+export type InsertHotcardCategory = typeof hotcardCategories.$inferInsert;
