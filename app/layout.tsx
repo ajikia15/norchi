@@ -10,7 +10,7 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Norchi - Logical Challenge System",
+  title: "ნორჩი",
   description:
     "A modern, card-based logical challenge system that presents provocative statements to explore belief-based reasoning patterns.",
 };
