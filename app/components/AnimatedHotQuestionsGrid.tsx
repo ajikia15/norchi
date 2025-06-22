@@ -239,23 +239,6 @@ export default function AnimatedHotQuestionsGrid({
                 {/* Door Handle */}
                 <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-r-md shadow-md z-10"></div>
 
-                {/* Primary tag - positioned absolutely at top */}
-                {topic.tagData && topic.tagData.length > 0 && (
-                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
-                    <Badge
-                      variant="default"
-                      style={{
-                        backgroundColor: topic.tagData[0].color,
-                        borderColor: topic.tagData[0].color,
-                        color: "white",
-                      }}
-                      className="text-xs"
-                    >
-                      {topic.tagData[0].emoji} {topic.tagData[0].label}
-                    </Badge>
-                  </div>
-                )}
-
                 {/* Question title - perfectly centered */}
                 <div className="flex-grow flex items-center justify-center text-center">
                   <div className="relative">
@@ -333,10 +316,20 @@ export default function AnimatedHotQuestionsGrid({
                   </div>
                 </div>
 
-                {/* Primary tag emoji in bottom-right */}
-                {topic.tagData?.[0]?.emoji && (
-                  <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
-                    {topic.tagData[0].emoji}
+                {/* Primary tag - positioned at bottom center */}
+                {topic.tagData && topic.tagData.length > 0 && (
+                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                    <Badge
+                      variant="default"
+                      style={{
+                        backgroundColor: topic.tagData[0].color,
+                        borderColor: topic.tagData[0].color,
+                        color: "white",
+                      }}
+                      className="text-xs"
+                    >
+                      {topic.tagData[0].emoji} {topic.tagData[0].label}
+                    </Badge>
                   </div>
                 )}
               </motion.div>
