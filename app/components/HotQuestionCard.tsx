@@ -45,7 +45,7 @@ export default function HotQuestionCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="relative w-full h-80"
+      className="relative w-full h-88"
       style={{ perspective: "1200px" }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
@@ -109,29 +109,28 @@ export default function HotQuestionCard({
           />
 
           <div>
-            <div className="flex items-start justify-between gap-2 mb-3">
-              <div className="flex flex-wrap gap-1">
-                {/* Show only first tag on front face */}
-                {topic.tagData && topic.tagData.length > 0 ? (
-                  <Badge
-                    key={topic.tagData[0].id}
-                    variant="outline"
-                    className="text-xs font-medium border-2"
-                    style={{
-                      borderColor: topic.tagData[0].color,
-                      color: topic.tagData[0].color,
-                      backgroundColor: `${topic.tagData[0].color}10`, // 10% opacity background
-                    }}
-                  >
-                    {topic.tagData[0].emoji} {topic.tagData[0].label}
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary" className="text-xs font-medium">
-                    No tags
-                  </Badge>
-                )}
-              </div>
-              <CornerDownRight className="h-4 w-4 text-gray-400" />
+            <div className="flex items-center justify-between gap-2 mb-2">
+              {/* Tags with horizontal scroll - show only first tag on front face */}
+              {topic.tagData && topic.tagData.length > 0 && (
+                <div className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center flex-1 min-h-0">
+                  <div className="flex gap-1 w-max">
+                    {/* Show only first tag on front face */}
+                    <Badge
+                      key={topic.tagData[0].id}
+                      variant="outline"
+                      className="text-xs font-medium border-2 flex-shrink-0"
+                      style={{
+                        borderColor: topic.tagData[0].color,
+                        color: topic.tagData[0].color,
+                        backgroundColor: `${topic.tagData[0].color}10`, // 10% opacity background
+                      }}
+                    >
+                      {topic.tagData[0].emoji} {topic.tagData[0].label}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+              <CornerDownRight className="h-4 w-4 text-gray-400 flex-shrink-0" />
             </div>
             <h3 className="text-sm lg:text-base font-semibold text-gray-900 leading-tight mb-6">
               {topic.title}
@@ -156,59 +155,79 @@ export default function HotQuestionCard({
             transform: "rotateY(180deg)",
           }}
         >
-          {/* All tags in horizontal scroll on back face */}
-          {topic.tagData && topic.tagData.length > 0 && (
-            <div className="mb-3 overflow-x-auto overflow-y-hidden scrollbar-hide h-8 flex items-center">
-              <div className="flex gap-1 w-max">
-                {topic.tagData.map((tag) => (
-                  <Badge
-                    key={tag.id}
-                    variant="outline"
-                    className="text-xs font-medium border-2 flex-shrink-0"
-                    style={{
-                      borderColor: tag.color,
-                      color: tag.color,
-                      backgroundColor: `${tag.color}10`, // 10% opacity background
-                    }}
-                  >
-                    {tag.emoji} {tag.label}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div className="flex-grow overflow-hidden flex flex-col">
-            <div className="prose prose-sm max-w-none text-gray-700 line-clamp-8 flex-grow">
+          <div className="flex-grow overflow-hidden flex flex-col justify-between">
+            <div
+              className="prose prose-sm max-w-none text-gray-700 relative overflow-hidden"
+              style={{
+                maxHeight: "16rem", // More space since tags moved to bottom
+                maskImage:
+                  "linear-gradient(to bottom, black 85%, transparent 100%)",
+                WebkitMaskImage:
+                  "linear-gradient(to bottom, black 85%, transparent 100%)",
+              }}
+            >
               <ReactMarkdown>{topic.answer}</ReactMarkdown>
             </div>
 
-            {/* Read button - only show if answer is longer than 400 characters */}
-            {topic.answer.length > 400 && (
-              <div className="flex justify-end mt-3">
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Read <ArrowRight className="h-3 w-3" />
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                    <DialogHeader>
-                      <DialogTitle className="text-left text-lg font-semibold">
-                        {topic.title}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="prose prose-sm max-w-none text-gray-700 mt-4">
-                      <ReactMarkdown>{topic.answer}</ReactMarkdown>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            )}
+            {/* Bottom row: Tags on left, Read button on right */}
+            <div className="flex items-center justify-between gap-3 mt-1 flex-shrink-0">
+              {/* Tags with horizontal scroll and blur */}
+              {topic.tagData && topic.tagData.length > 0 && (
+                <div
+                  className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center min-h-0 relative flex-1"
+                  style={{
+                    maskImage:
+                      "linear-gradient(to right, black 85%, transparent 100%)",
+                    WebkitMaskImage:
+                      "linear-gradient(to right, black 85%, transparent 100%)",
+                  }}
+                >
+                  <div className="flex gap-1 w-max">
+                    {topic.tagData.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant="outline"
+                        className="text-xs font-medium border-2 flex-shrink-0"
+                        style={{
+                          borderColor: tag.color,
+                          color: tag.color,
+                          backgroundColor: `${tag.color}10`, // 10% opacity background
+                        }}
+                      >
+                        {tag.emoji} {tag.label}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Read button - only show if answer is longer than 400 characters */}
+              {topic.answer.length > 400 && (
+                <div className="flex-shrink-0">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Read <ArrowRight className="h-3 w-3" />
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                      <DialogHeader>
+                        <DialogTitle className="text-left text-lg font-semibold">
+                          {topic.title}
+                        </DialogTitle>
+                      </DialogHeader>
+                      <div className="prose prose-sm max-w-none text-gray-700 mt-4">
+                        <ReactMarkdown>{topic.answer}</ReactMarkdown>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </motion.div>
