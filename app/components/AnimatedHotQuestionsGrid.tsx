@@ -12,7 +12,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 
 interface AnimatedHotQuestionsGridProps {
@@ -41,6 +41,7 @@ export default function AnimatedHotQuestionsGrid({
       {topics.map((topic, index) => {
         const dropDelay = index * 0.3; // When each card drops from convoy
         const isOpen = openedCards.has(topic.id);
+        const isLightOn = isOpen; // Light turns on when door opens
 
         return (
           <motion.div
@@ -238,27 +239,98 @@ export default function AnimatedHotQuestionsGrid({
                 {/* Door Handle */}
                 <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-r-md shadow-md z-10"></div>
 
-                <div className="flex-grow flex flex-col justify-center items-center text-center">
-                  {/* Primary tag */}
-                  {topic.tagData && topic.tagData.length > 0 && (
-                    <div className="mb-4">
-                      <Badge
-                        variant="default"
-                        style={{
-                          backgroundColor: topic.tagData[0].color,
-                          borderColor: topic.tagData[0].color,
-                          color: "white",
-                        }}
-                        className="text-xs"
-                      >
-                        {topic.tagData[0].emoji} {topic.tagData[0].label}
-                      </Badge>
-                    </div>
-                  )}
+                {/* Primary tag - positioned absolutely at top */}
+                {topic.tagData && topic.tagData.length > 0 && (
+                  <div className="absolute top-4 left-1/2 transform -translate-x-1/2">
+                    <Badge
+                      variant="default"
+                      style={{
+                        backgroundColor: topic.tagData[0].color,
+                        borderColor: topic.tagData[0].color,
+                        color: "white",
+                      }}
+                      className="text-xs"
+                    >
+                      {topic.tagData[0].emoji} {topic.tagData[0].label}
+                    </Badge>
+                  </div>
+                )}
 
-                  <h3 className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight">
-                    {topic.title}
-                  </h3>
+                {/* Question title - perfectly centered */}
+                <div className="flex-grow flex items-center justify-center text-center">
+                  <div className="relative">
+                    {/* Lightbulb above question */}
+                    <motion.div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
+                      <motion.div
+                        className="relative"
+                        animate={{
+                          filter: isLightOn
+                            ? "drop-shadow(0 0 20px #f59e0b)"
+                            : "none",
+                        }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <motion.div
+                          className="relative"
+                          animate={{
+                            scale: isLightOn ? 1.15 : 1,
+                          }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                          {/* Main lightbulb icon */}
+                          <motion.div
+                            animate={{
+                              color: isLightOn ? "#f59e0b" : "#9ca3af",
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Lightbulb size={32} />
+                          </motion.div>
+
+                          {/* Single strong glow layer */}
+                          <AnimatePresence>
+                            {isLightOn && (
+                              <motion.div
+                                className="absolute inset-0 pointer-events-none"
+                                initial={{
+                                  opacity: 0,
+                                  filter: "blur(20px)",
+                                }}
+                                animate={{
+                                  opacity: 0.8,
+                                  filter: "blur(0px)",
+                                }}
+                                exit={{
+                                  opacity: 0,
+                                  filter: "blur(20px)",
+                                }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                              >
+                                <Lightbulb
+                                  size={32}
+                                  className="text-yellow-300"
+                                />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      </motion.div>
+                    </motion.div>
+
+                    {/* Question with light effect */}
+                    <motion.h3
+                      className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight"
+                      animate={{
+                        color: isLightOn ? "#1f2937" : "#374151",
+                        textShadow: isLightOn
+                          ? "0 0 5px rgba(251, 191, 36, 0.3)"
+                          : "none",
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {topic.title}
+                    </motion.h3>
+                  </div>
                 </div>
 
                 {/* Primary tag emoji in bottom-right */}

@@ -22,7 +22,7 @@ export default function HotQuestionsSection() {
   return (
     <section className="py-12 lg:py-16 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-3xl lg:text-4xl font-bold text-gray-900  text-center mb-12">
+        <h2 className="text-3xl lg:text-6xl font-bold text-gray-900  text-center mb-12">
           გაუღე კარი სიმართლეს
         </h2>
         {/* <div className="text-center mb-12">
