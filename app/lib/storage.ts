@@ -79,7 +79,6 @@ export async function loadHotTopicsData(): Promise<HotTopicsData> {
         tags: topicTagIds,
         title: dbTopic.title,
         answer: dbTopic.answer,
-        link: dbTopic.link || undefined,
         createdAt: dbTopic.createdAt,
         updatedAt: dbTopic.updatedAt,
         tagData,

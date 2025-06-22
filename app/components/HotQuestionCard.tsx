@@ -160,14 +160,19 @@ export default function HotQuestionCard({
               className="prose prose-sm max-w-none text-gray-700 relative overflow-hidden"
               style={{
                 maxHeight: "16rem", // More space since tags moved to bottom
-                maskImage:
-                  "linear-gradient(to bottom, black 85%, transparent 100%)",
-                WebkitMaskImage:
-                  "linear-gradient(to bottom, black 85%, transparent 100%)",
               }}
             >
               <ReactMarkdown>{topic.answer}</ReactMarkdown>
             </div>
+
+            {/* Gradient fade overlay above bottom section */}
+            <div
+              className="h-6 -mt-6 relative z-10 pointer-events-none"
+              style={{
+                background:
+                  "linear-gradient(to bottom, transparent 0%, white 100%)",
+              }}
+            />
 
             {/* Bottom row: Tags on left, Read button on right */}
             <div className="flex items-center justify-between gap-3 mt-1 flex-shrink-0">
