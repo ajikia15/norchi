@@ -237,7 +237,7 @@ export default function AnimatedHotQuestionsGrid({
                 }}
               >
                 {/* Door Handle */}
-                <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-r-md shadow-md z-10"></div>
+                <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-r-md shadow-md z-10"></div>
 
                 {/* Primary tag - positioned absolutely at top */}
                 {topic.tagData && topic.tagData.length > 0 && (
