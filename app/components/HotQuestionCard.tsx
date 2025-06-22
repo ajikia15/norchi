@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -17,223 +16,148 @@ import ReactMarkdown from "react-markdown";
 
 interface HotQuestionCardProps {
   topic: HotTopic;
-  index: number;
 }
 
-export default function HotQuestionCard({
-  topic,
-  index,
-}: HotQuestionCardProps) {
+export default function HotQuestionCard({ topic }: HotQuestionCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  const cardFlipTransition = {
-    rotateY: { type: "spring" as const, stiffness: 120, damping: 15 },
-    rotateX: {
-      type: "tween" as const,
-      ease: "easeInOut" as const,
-      duration: 0.5,
-      times: [0, 0.2, 0.5, 0.8, 1],
-    },
-  };
 
   // Get primary tag emoji for decoration (first tag with emoji)
   const primaryTag = topic.tagData?.find((tag) => tag.emoji);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="relative w-full h-[22rem]"
-      style={{ perspective: "1200px" }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-    >
-      <motion.div
+    <div className="relative w-full h-[22rem]">
+      <div
         className="relative w-full h-full cursor-pointer"
-        style={{ transformStyle: "preserve-3d" }}
-        animate={{
-          rotateY: isFlipped ? 180 : 0,
-          rotateX: isFlipped ? [0, 25, -15, 5, 0] : 0,
-          scale: isHovered && !isFlipped ? 1.02 : 1,
-        }}
-        transition={cardFlipTransition}
         onClick={() => setIsFlipped(!isFlipped)}
-        whileHover={
-          !isFlipped
-            ? {
-                rotateZ: "-1deg",
-                z: 20,
-                boxShadow: "0px 15px 35px rgba(0,0,0,0.15)",
-              }
-            : {}
-        }
       >
         {/* Front Face */}
-        <div
-          className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col justify-between overflow-hidden"
-          style={{ backfaceVisibility: "hidden" }}
-        >
-          {/* Lifted Corner - slides diagonally into position */}
-          <motion.div
-            className="absolute pointer-events-none"
-            animate={{
-              x: isHovered && !isFlipped ? 0 : -60,
-              y: isHovered && !isFlipped ? 0 : -60,
-              rotateX: isHovered && !isFlipped ? -35 : -15,
-              rotateY: isHovered && !isFlipped ? 25 : 10,
-              rotateZ: isHovered && !isFlipped ? 12 : 5,
-              z: isHovered && !isFlipped ? 15 : 0,
-              opacity: isHovered && !isFlipped ? 1 : 0,
-            }}
-            transition={{
-              duration: 0.5,
-              ease: "easeOut",
-            }}
-            style={{
-              top: "-2px",
-              left: "-2px",
-              width: "48px",
-              height: "48px",
-              background: "linear-gradient(315deg, #ffffff 0%, #d1d5dc 100%)",
-              border: "2px solid #d1d5db",
-              borderRadius: "8px 0 0 0",
-              transformOrigin: "0% 0%",
-              transformStyle: "preserve-3d",
-              boxShadow:
-                isHovered && !isFlipped
-                  ? "4px 8px 16px rgba(0,0,0,0.15)"
-                  : "none",
-            }}
-          />
+        {!isFlipped && (
+          <div className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col justify-between overflow-hidden">
+            <div className="flex-grow flex flex-col justify-center items-center text-center">
+              {/* Single tag, centered above title */}
+              {topic.tagData && topic.tagData.length > 0 && (
+                <div className="mb-4">
+                  <Badge
+                    key={topic.tagData[0].id}
+                    variant="default"
+                    style={{
+                      backgroundColor: topic.tagData[0].color,
+                      borderColor: topic.tagData[0].color,
+                      color: "white",
+                    }}
+                    className="text-xs"
+                  >
+                    {topic.tagData[0].emoji} {topic.tagData[0].label}
+                  </Badge>
+                </div>
+              )}
+              <h3 className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight">
+                {topic.title}
+              </h3>
+            </div>
 
-          <div className="flex-grow flex flex-col justify-center items-center text-center">
-            {/* Single tag, centered above title */}
-            {topic.tagData && topic.tagData.length > 0 && (
-              <div className="mb-4">
-                <Badge
-                  key={topic.tagData[0].id}
-                  variant="default"
-                  style={{
-                    backgroundColor: topic.tagData[0].color,
-                    borderColor: topic.tagData[0].color,
-                    color: "white",
-                  }}
-                  className="text-xs"
-                >
-                  {topic.tagData[0].emoji} {topic.tagData[0].label}
-                </Badge>
+            {/* Primary tag emoji in bottom-right */}
+            {primaryTag?.emoji && (
+              <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
+                {primaryTag.emoji}
               </div>
             )}
-            <h3 className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight">
-              {topic.title}
-            </h3>
+
+            <p className="text-xs text-gray-400 mt-4">
+              დააკლიკეთ ამოსაბრუნებლად
+            </p>
           </div>
-
-          {/* Primary tag emoji in bottom-right */}
-          {primaryTag?.emoji && (
-            <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
-              {primaryTag.emoji}
-            </div>
-          )}
-
-          <p className="text-xs text-gray-400 mt-4">დააკლიკეთ ამოსაბრუნებლად</p>
-        </div>
+        )}
 
         {/* Back Face */}
-        <div
-          className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col overflow-hidden"
-          style={{
-            backfaceVisibility: "hidden",
-            transform: "rotateY(180deg)",
-          }}
-        >
-          <div className="flex-grow overflow-hidden flex flex-col justify-between">
-            <div
-              className="prose prose-sm max-w-none text-gray-700 relative overflow-hidden"
-              style={{
-                maxHeight: "16rem", // More space since tags moved to bottom
-                whiteSpace: "pre-wrap", // Preserve empty lines and whitespace
-              }}
-            >
-              <ReactMarkdown>{topic.answer}</ReactMarkdown>
-            </div>
+        {isFlipped && (
+          <div className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col overflow-hidden">
+            <div className="flex-grow overflow-hidden flex flex-col justify-between">
+              <div
+                className="prose prose-sm max-w-none text-gray-700 relative overflow-hidden"
+                style={{
+                  maxHeight: "16rem",
+                  whiteSpace: "pre-wrap",
+                }}
+              >
+                <ReactMarkdown>{topic.answer}</ReactMarkdown>
+              </div>
 
-            {/* Gradient fade overlay above bottom section */}
-            <div
-              className="h-6 -mt-6 relative z-10 pointer-events-none"
-              style={{
-                background:
-                  "linear-gradient(to bottom, transparent 0%, white 100%)",
-              }}
-            />
+              {/* Gradient fade overlay above bottom section */}
+              <div
+                className="h-6 -mt-6 relative z-10 pointer-events-none"
+                style={{
+                  background:
+                    "linear-gradient(to bottom, transparent 0%, white 100%)",
+                }}
+              />
 
-            {/* Bottom row: Tags on left, Read button on right */}
-            <div className="flex items-center justify-between gap-3 mt-1 flex-shrink-0">
-              {/* Tags with horizontal scroll and blur */}
-              {topic.tagData && topic.tagData.length > 0 && (
-                <div
-                  className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center min-h-0 relative flex-1"
-                  style={{
-                    maskImage:
-                      "linear-gradient(to right, black 85%, transparent 100%)",
-                    WebkitMaskImage:
-                      "linear-gradient(to right, black 85%, transparent 100%)",
-                  }}
-                >
-                  <div className="flex gap-1 w-max">
-                    {topic.tagData.map((tag) => (
-                      <Badge
-                        key={tag.id}
-                        variant="default"
-                        style={{
-                          backgroundColor: tag.color,
-                          borderColor: tag.color,
-                          color: "white",
-                        }}
-                        className="text-xs"
-                      >
-                        {tag.emoji} {tag.label}
-                      </Badge>
-                    ))}
+              {/* Bottom row: Tags on left, Read button on right */}
+              <div className="flex items-center justify-between gap-3 mt-4 flex-shrink-0">
+                {/* Tags with horizontal scroll and blur */}
+                {topic.tagData && topic.tagData.length > 0 && (
+                  <div
+                    className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center min-h-0 relative flex-1"
+                    style={{
+                      maskImage:
+                        "linear-gradient(to right, black 85%, transparent 100%)",
+                      WebkitMaskImage:
+                        "linear-gradient(to right, black 85%, transparent 100%)",
+                    }}
+                  >
+                    <div className="flex gap-1 w-max">
+                      {topic.tagData.map((tag) => (
+                        <Badge
+                          key={tag.id}
+                          variant="default"
+                          style={{
+                            backgroundColor: tag.color,
+                            borderColor: tag.color,
+                            color: "white",
+                          }}
+                          className="text-xs"
+                        >
+                          {tag.emoji} {tag.label}
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Read button - only show if answer is longer than 400 characters */}
-              {topic.answer.length > 400 && (
-                <div className="flex-shrink-0">
-                  <Dialog>
-                    <DialogTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        წაკითხვა <ArrowRight className="h-3 w-3" />
-                      </Button>
-                    </DialogTrigger>
-                    <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                      <DialogHeader>
-                        <DialogTitle className="text-left text-lg font-semibold">
-                          {topic.title}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div
-                        className="prose prose-sm max-w-none text-gray-700 mt-4"
-                        style={{ whiteSpace: "pre-wrap" }}
-                      >
-                        <ReactMarkdown>{topic.answer}</ReactMarkdown>
-                      </div>
-                    </DialogContent>
-                  </Dialog>
-                </div>
-              )}
+                {/* Read button - only show if answer is longer than 400 characters */}
+                {topic.answer.length > 400 && (
+                  <div className="flex-shrink-0">
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          წაკითხვა <ArrowRight className="h-3 w-3" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogHeader>
+                          <DialogTitle className="text-left text-lg font-semibold">
+                            {topic.title}
+                          </DialogTitle>
+                        </DialogHeader>
+                        <div
+                          className="prose prose-sm max-w-none text-gray-700 mt-4"
+                          style={{ whiteSpace: "pre-wrap" }}
+                        >
+                          <ReactMarkdown>{topic.answer}</ReactMarkdown>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-        </div>
-      </motion.div>
-    </motion.div>
+        )}
+      </div>
+    </div>
   );
 }
