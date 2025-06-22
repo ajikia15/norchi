@@ -100,11 +100,11 @@ export default function StoryManagerClient({
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>ახალი ისტორიის შექმნა</DialogTitle>
+              <DialogTitle>ახალი გზის შექმნა</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="story-name">ისტორიის სახელი</Label>
+                <Label htmlFor="story-name">გზის სახელი</Label>
                 <Input
                   id="story-name"
                   value={formData.name}
@@ -149,7 +149,7 @@ export default function StoryManagerClient({
                     იქმნება...
                   </>
                 ) : (
-                  "ისტორიის შექმნა"
+                  "გზის შექმნა"
                 )}
               </Button>
             </DialogFooter>
@@ -235,7 +235,7 @@ export default function StoryManagerClient({
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 " />
-              პირველი ისტორიის შექმნა
+              პირველი გზის შექმნა
             </Button>
           </div>
         )}

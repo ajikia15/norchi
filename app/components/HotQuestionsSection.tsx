@@ -9,7 +9,7 @@ async function HotQuestionsGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
       {topics.map((topic, index) => (
-        <div key={topic.id} className="h-48 lg:h-52">
+        <div key={topic.id}>
           <HotQuestionCard topic={topic} index={index} />
         </div>
       ))}

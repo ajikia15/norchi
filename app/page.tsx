@@ -84,7 +84,7 @@ async function StoriesGrid() {
         </h3>
         <p className="text-muted-foreground max-w-md mb-6 text-lg">
           ჯერ არ არის ლოგიკური გამოწვევის გზები. ეწვიეთ ადმინისტრატორის პანელს
-          თქვენი პირველი ისტორიის შესაქმნელად.
+          თქვენი პირველი გზის შესაქმნელად.
         </p>
         <Button asChild size="lg" className="shadow-sm">
           <Link href="/admin/story">
@@ -110,7 +110,9 @@ function LoadingFallback() {
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Header */}
+      {/* Hot Questions Section */}
+      <HotQuestionsSection />
+      {/* stories section */}
       <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/30">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
@@ -124,16 +126,12 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-
       {/* Story Grid */}
       <div className="max-w-7xl mx-auto px-6 py-12">
         <Suspense fallback={<LoadingFallback />}>
           <StoriesGrid />
         </Suspense>
       </div>
-
-      {/* Hot Questions Section */}
-      <HotQuestionsSection />
     </div>
   );
 }

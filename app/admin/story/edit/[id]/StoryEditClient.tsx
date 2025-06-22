@@ -475,7 +475,7 @@ export default function StoryEditClient({
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-4">
-                      ისტორიის ინფორმაცია
+                      გზის ინფორმაცია
                     </h3>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -483,7 +483,7 @@ export default function StoryEditClient({
                           htmlFor="story-name"
                           className="text-sm font-medium"
                         >
-                          ისტორიის სახელი
+                          გზის სახელი
                         </label>
                         <input
                           id="story-name"
@@ -498,7 +498,7 @@ export default function StoryEditClient({
                           }}
                           disabled={isPending}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
-                          placeholder="შეიყვანეთ ისტორიის სახელი..."
+                          placeholder="შეიყვანეთ გზის სახელი..."
                         />
                       </div>
                       <div className="space-y-2">
@@ -529,7 +529,7 @@ export default function StoryEditClient({
 
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-semibold mb-4">
-                      ისტორიის სტატისტიკა
+                      გზის სტატისტიკა
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="bg-gray-50 p-4 rounded-lg">
@@ -642,7 +642,7 @@ export default function StoryEditClient({
                             </div>
                             <ul className="text-amber-700 space-y-1 text-xs">
                               <li>
-                                • იმპორტი ჩაანაცვლებს ყველა მიმდინარე ისტორიის
+                                • იმპორტი ჩაანაცვლებს ყველა მიმდინარე გზის
                                 მონაცემს
                               </li>
                               <li>

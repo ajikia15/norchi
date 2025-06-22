@@ -56,7 +56,7 @@ export default function AdminClient({
         }
       } catch (error) {
         console.error("AdminClient: Error creating story:", error);
-        alert("ისტორიის შექმნა ვერ მოხერხდა");
+        alert("გზის შექმნა ვერ მოხერხდა");
       }
     });
   };
@@ -64,7 +64,7 @@ export default function AdminClient({
   const handleStoryDelete = async (storyId: string) => {
     if (
       !confirm(
-        "დარწმუნებული ხართ, რომ გსურთ ამ ისტორიის წაშლა? ამ ქმედების გაუქმება შეუძლებელია."
+        "დარწმუნებული ხართ, რომ გსურთ ამ გზის წაშლა? ამ ქმედების გაუქმება შეუძლებელია."
       )
     ) {
       return;
@@ -77,7 +77,7 @@ export default function AdminClient({
         router.refresh();
       } catch (error) {
         console.error("AdminClient: Error deleting story:", error);
-        alert("ისტორიის წაშლა ვერ მოხერხდა");
+        alert("გზის წაშლა ვერ მოხერხდა");
       }
     });
   };

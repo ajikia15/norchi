@@ -45,7 +45,7 @@ export default function HotQuestionCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.3 }}
-      className="relative w-full h-88"
+      className="relative w-full h-[22rem]"
       style={{ perspective: "1200px" }}
       onHoverStart={() => setIsHovered(true)}
       onHoverEnd={() => setIsHovered(false)}
