@@ -117,11 +117,14 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-gray-900 tracking-tight mb-4">
-              ლოგიკური გამოწვევის გზები
+              რაში არ ეთანხმები გირჩს?
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              აირჩიეთ გზა და დაიწყეთ თქვენი ლოგიკური მოგზაურობა აზროვნების
-              გამომწვევი გამოწვევებით
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              გირჩის საზოგადოებაში აზრთა სხვადასხვაობა ბუნებრივია — ლიდერებიც კი
+              ყველაფერზე არ თანხმდებიან. მაგრამ ვცხოვრობთ ერთად, რადგან მთავარში
+              ვთანხმდებით. რაც არ უნდა გეზიზღებოდეთ, დარწმუნებულები ვართ, რომ
+              რაღაცაში დაგვეთანხმები. სცადე გზები, რომელიც ბევრმა გირჩელმა
+              გაიარა.
             </p>
           </div>
         </div>
