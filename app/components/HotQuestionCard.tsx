@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { HotTopic, TOPICAL_TAGS } from "../types";
+import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, ArrowRight, CornerDownRight } from "lucide-react";
@@ -42,10 +42,8 @@ export default function HotQuestionCard({
     },
   };
 
-  // Get topical tag data for styling
-  const topicalTagData = topic.topicalTag
-    ? TOPICAL_TAGS[topic.topicalTag]
-    : null;
+  // Get primary tag emoji for decoration (first tag with emoji)
+  const primaryTag = topic.tagData?.find((tag) => tag.emoji);
 
   return (
     <motion.div
@@ -117,17 +115,26 @@ export default function HotQuestionCard({
 
           <div>
             <div className="flex items-start justify-between gap-2 mb-3">
-              <div className="flex flex-col gap-1">
-                {/* Category Badge (editable categories) */}
-                {topic.categoryData && (
+              <div className="flex flex-wrap gap-1">
+                {/* Tags as Badges */}
+                {topic.tagData && topic.tagData.length > 0 ? (
+                  topic.tagData.map((tag) => (
+                    <Badge
+                      key={tag.id}
+                      variant="outline"
+                      className="text-xs font-medium border-2"
+                      style={{
+                        borderColor: tag.color,
+                        color: tag.color,
+                        backgroundColor: `${tag.color}10`, // 10% opacity background
+                      }}
+                    >
+                      {tag.emoji} {tag.label}
+                    </Badge>
+                  ))
+                ) : (
                   <Badge variant="secondary" className="text-xs font-medium">
-                    {topic.categoryData.label}
-                  </Badge>
-                )}
-                {/* Fallback to legacy category */}
-                {!topic.categoryData && !topicalTagData && (
-                  <Badge variant="secondary" className="text-xs font-medium">
-                    {topic.category}
+                    No tags
                   </Badge>
                 )}
               </div>
@@ -138,10 +145,10 @@ export default function HotQuestionCard({
             </h3>
           </div>
 
-          {/* Topical emoji in bottom-right (only from topical tags) */}
-          {topicalTagData?.emoji && (
+          {/* Primary tag emoji in bottom-right */}
+          {primaryTag?.emoji && (
             <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
-              {topicalTagData.emoji}
+              {primaryTag.emoji}
             </div>
           )}
 
@@ -179,10 +186,10 @@ export default function HotQuestionCard({
             </Button>
           )}
 
-          {/* Topical emoji in bottom-right on back face too */}
-          {topicalTagData?.emoji && (
+          {/* Primary tag emoji in bottom-right on back face too */}
+          {primaryTag?.emoji && (
             <div className="absolute bottom-2 right-2 opacity-50 text-3xl">
-              {topicalTagData.emoji}
+              {primaryTag.emoji}
             </div>
           )}
         </div>

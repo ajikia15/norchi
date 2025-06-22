@@ -321,7 +321,7 @@ export default function HotQuestionsManagerClient({
                 <CardTitle>Hot Questions</CardTitle>
                 <Dialog
                   open={isCreateTopicDialogOpen}
-                  onOpenChange={handleTopicDialogClose}
+                  onOpenChange={setIsCreateTopicDialogOpen}
                 >
                   <DialogTrigger asChild>
                     <Button disabled={isLoading}>
@@ -550,7 +550,7 @@ export default function HotQuestionsManagerClient({
                 <CardTitle>Tags</CardTitle>
                 <Dialog
                   open={isCreateTagDialogOpen}
-                  onOpenChange={handleTagDialogClose}
+                  onOpenChange={setIsCreateTagDialogOpen}
                 >
                   <DialogTrigger asChild>
                     <Button disabled={isLoading}>
