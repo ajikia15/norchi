@@ -118,7 +118,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
               onEdit(node);
             }}
             className="p-1.5 hover:bg-white/20 rounded transition-colors"
-            title="Edit node"
+            title="კვანძის რედაქტირება"
           >
             <Edit2 className="w-4 h-4" />
           </button>
@@ -164,7 +164,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
                   right: "-10px",
                 }}
                 className="w-4 h-4 !bg-white border-2 border-gray-600 hover:!bg-blue-100 transition-colors"
-                title={`Connect "${option.label}"`}
+                title={`დაკავშირება "${option.label}"`}
               />
             </div>
           ))}
@@ -188,7 +188,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
             onAddConnection(node.id);
           }}
           className="absolute -right-10 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:scale-110 shadow-lg"
-          title="Add new option"
+          title="ახალი ვარიანტის დამატება"
         >
           <Plus className="w-4 h-4" />
         </button>

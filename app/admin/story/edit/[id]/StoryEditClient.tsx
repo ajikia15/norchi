@@ -465,7 +465,7 @@ export default function StoryEditClient({
               disabled={isPending}
             >
               <Play className="h-4 w-4" />
-              Visual Editor
+              ვიზუალური რედაქტორი
             </TabsTrigger>
           </TabsList>
 
@@ -475,7 +475,7 @@ export default function StoryEditClient({
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-lg font-semibold mb-4">
-                      Story Information
+                      ისტორიის ინფორმაცია
                     </h3>
                     <div className="space-y-4">
                       <div className="space-y-2">
@@ -483,7 +483,7 @@ export default function StoryEditClient({
                           htmlFor="story-name"
                           className="text-sm font-medium"
                         >
-                          Story Name
+                          ისტორიის სახელი
                         </label>
                         <input
                           id="story-name"
@@ -498,7 +498,7 @@ export default function StoryEditClient({
                           }}
                           disabled={isPending}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
-                          placeholder="Enter story name..."
+                          placeholder="შეიყვანეთ ისტორიის სახელი..."
                         />
                       </div>
                       <div className="space-y-2">
@@ -506,7 +506,7 @@ export default function StoryEditClient({
                           htmlFor="story-description"
                           className="text-sm font-medium"
                         >
-                          Description (Optional)
+                          აღწერა (სურვილისამებრ)
                         </label>
                         <textarea
                           id="story-description"
@@ -521,7 +521,7 @@ export default function StoryEditClient({
                           disabled={isPending}
                           rows={4}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50"
-                          placeholder="Brief description of what this story explores..."
+                          placeholder="მოკლე აღწერა, თუ რას იკვლევს ეს ისტორია..."
                         />
                       </div>
                     </div>
@@ -529,7 +529,7 @@ export default function StoryEditClient({
 
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-semibold mb-4">
-                      Story Statistics
+                      ისტორიის სტატისტიკა
                     </h3>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="bg-gray-50 p-4 rounded-lg">
@@ -537,7 +537,7 @@ export default function StoryEditClient({
                           {nodeCount}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Total Nodes
+                          სულ კვანძები
                         </div>
                       </div>
                       <div className="bg-gray-50 p-4 rounded-lg">
@@ -549,7 +549,7 @@ export default function StoryEditClient({
                           }
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Questions
+                          კითხვები
                         </div>
                       </div>
                       <div className="bg-gray-50 p-4 rounded-lg">
@@ -561,7 +561,7 @@ export default function StoryEditClient({
                           }
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Endings
+                          დასასრულები
                         </div>
                       </div>
                       <div className="bg-gray-50 p-4 rounded-lg">
@@ -574,7 +574,7 @@ export default function StoryEditClient({
                             ).length}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Info Cards
+                          საინფორმაციო ბარათები
                         </div>
                       </div>
                     </div>
@@ -582,7 +582,7 @@ export default function StoryEditClient({
 
                   <div className="border-t pt-6">
                     <h3 className="text-lg font-semibold mb-4">
-                      Import & Export
+                      იმპორტი და ექსპორტი
                     </h3>
                     <div className="space-y-4">
                       <div className="flex flex-col sm:flex-row gap-4">
@@ -594,11 +594,11 @@ export default function StoryEditClient({
                             disabled={isPending}
                           >
                             <Download className="h-4 w-4 mr-2" />
-                            Export as JSON
+                            ექსპორტი JSON ფორმატში
                           </Button>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Download your story as a JSON file for backup or
-                            sharing
+                            ჩამოტვირთეთ თქვენი ისტორია JSON ფაილის სახით
+                            სარეზერვო ასლისთვის ან გასაზიარებლად
                           </p>
                         </div>
 
@@ -623,12 +623,12 @@ export default function StoryEditClient({
                                 className="cursor-pointer"
                               >
                                 <Upload className="h-4 w-4 mr-2" />
-                                Import from JSON
+                                იმპორტი JSON-დან
                               </label>
                             </Button>
                           </div>
                           <p className="text-xs text-muted-foreground mt-2">
-                            Load a story from a previously exported JSON file
+                            ჩატვირთეთ ისტორია ადრე ექსპორტირებული JSON ფაილიდან
                           </p>
                         </div>
                       </div>
@@ -638,18 +638,20 @@ export default function StoryEditClient({
                           <div className="text-amber-600 mt-0.5">⚠️</div>
                           <div className="text-sm">
                             <div className="font-medium text-amber-800 mb-1">
-                              Important:
+                              მნიშვნელოვანია:
                             </div>
                             <ul className="text-amber-700 space-y-1 text-xs">
                               <li>
-                                • Importing will replace all current story data
+                                • იმპორტი ჩაანაცვლებს ყველა მიმდინარე ისტორიის
+                                მონაცემს
                               </li>
                               <li>
-                                • Make sure to save your current work before
-                                importing
+                                • იმპორტამდე დარწმუნდით, რომ შეინახეთ მიმდინარე
+                                ნამუშევარი
                               </li>
                               <li>
-                                • Only import JSON files exported from Norchi
+                                • მხოლოდ ნორჩიდან ექსპორტირებული JSON ფაილების
+                                იმპორტი
                               </li>
                             </ul>
                           </div>
@@ -667,7 +669,9 @@ export default function StoryEditClient({
               <Card className="shadow-sm border-0 bg-white/60 backdrop-blur-sm">
                 <CardHeader className="pb-4">
                   <div className="flex justify-between items-center">
-                    <CardTitle className="text-xl">Node Library</CardTitle>
+                    <CardTitle className="text-xl">
+                      კვანძების ბიბლიოთეკა
+                    </CardTitle>
                     <Button
                       onClick={() => handleCreateNode("question")}
                       size="sm"
@@ -675,7 +679,7 @@ export default function StoryEditClient({
                       disabled={isPending}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      Add new node
+                      ახალი კვანძის დამატება
                     </Button>
                   </div>
                 </CardHeader>
@@ -696,9 +700,9 @@ export default function StoryEditClient({
                   <CardTitle className="text-xl">
                     {editingNode
                       ? isCreating
-                        ? "Create New Node"
-                        : "Edit Node"
-                      : "Node Editor"}
+                        ? "ახალი კვანძის შექმნა"
+                        : "კვანძის რედაქტირება"
+                      : "კვანძის რედაქტორი"}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0">
@@ -717,11 +721,11 @@ export default function StoryEditClient({
                         <FileText className="h-8 w-8 text-gray-400" />
                       </div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                        Select a node to edit
+                        აირჩიეთ კვანძი რედაქტირებისთვის
                       </h3>
                       <p className="text-muted-foreground max-w-sm mb-4">
-                        Choose a node from the library or create a new one to
-                        start editing
+                        აირჩიეთ კვანძი ბიბლიოთეკიდან ან შექმენით ახალი
+                        რედაქტირების დასაწყებად
                       </p>
                       <div className="flex gap-2">
                         <Button
@@ -730,7 +734,7 @@ export default function StoryEditClient({
                           disabled={isPending}
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          Create Question
+                          კითხვის შექმნა
                         </Button>
                         <Button
                           onClick={() => handleCreateNode("callout")}
@@ -739,7 +743,7 @@ export default function StoryEditClient({
                           disabled={isPending}
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          Create Callout
+                          გამოძახების შექმნა
                         </Button>
                       </div>
                     </div>
@@ -766,7 +770,7 @@ export default function StoryEditClient({
               }`}
             >
               <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Visual Editor</CardTitle>
+                <CardTitle className="text-xl">ვიზუალური რედაქტორი</CardTitle>
               </CardHeader>
               <CardContent
                 className={`${

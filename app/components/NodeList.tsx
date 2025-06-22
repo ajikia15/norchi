@@ -115,7 +115,7 @@ export default function NodeList({
             variant="secondary"
             className="text-xs bg-green-100 text-green-800 border-green-200"
           >
-            → Next
+            → შემდეგი
           </Badge>
         );
       case "return":
@@ -124,7 +124,7 @@ export default function NodeList({
             variant="secondary"
             className="text-xs bg-blue-100 text-blue-800 border-blue-200"
           >
-            ↩ Return
+            ↩ დაბრუნება
           </Badge>
         );
       case "points-to":
@@ -133,7 +133,7 @@ export default function NodeList({
             variant="secondary"
             className="text-xs bg-purple-100 text-purple-800 border-purple-200"
           >
-            ← Points Here
+            ← მიუთითებს აქ
           </Badge>
         );
       default:
@@ -150,10 +150,10 @@ export default function NodeList({
           <Edit className="h-8 w-8 text-gray-400" />
         </div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
-          No nodes yet
+          კვანძები ჯერ არ არის
         </h3>
         <p className="text-muted-foreground max-w-sm">
-          Create your first node to start building your flow
+          შექმენით თქვენი პირველი კვანძი, რომ დაიწყოთ თქვენი ნაკადის მშენებლობა
         </p>
       </div>
     );
@@ -195,7 +195,7 @@ export default function NodeList({
                       className="text-xs bg-green-100 text-green-800 border-green-200"
                     >
                       <Crown className="h-3 w-3 mr-1" />
-                      START
+                      დაწყება
                     </Badge>
                   )}
 
@@ -229,13 +229,17 @@ export default function NodeList({
                 {/* Metadata */}
                 <div className="text-xs text-muted-foreground">
                   {node.type === "question" && (
-                    <span>{node.options.length} option(s)</span>
+                    <span>{node.options.length} ოფცია</span>
                   )}
                   {node.type === "callout" && (
-                    <span>Returns to: {node.returnToNodeId || "Not set"}</span>
+                    <span>
+                      აბრუნებს: {node.returnToNodeId || "მითითებული არ არის"}
+                    </span>
                   )}
                   {node.type === "infocard" && (
-                    <span>Continues to: {node.nextNodeId || "Not set"}</span>
+                    <span>
+                      აგრძელებს: {node.nextNodeId || "მითითებული არ არის"}
+                    </span>
                   )}
                 </div>
               </div>

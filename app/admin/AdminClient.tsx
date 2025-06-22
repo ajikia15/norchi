@@ -56,7 +56,7 @@ export default function AdminClient({
         }
       } catch (error) {
         console.error("AdminClient: Error creating story:", error);
-        alert("Failed to create story");
+        alert("ისტორიის შექმნა ვერ მოხერხდა");
       }
     });
   };
@@ -64,7 +64,7 @@ export default function AdminClient({
   const handleStoryDelete = async (storyId: string) => {
     if (
       !confirm(
-        "Are you sure you want to delete this story? This action cannot be undone."
+        "დარწმუნებული ხართ, რომ გსურთ ამ ისტორიის წაშლა? ამ ქმედების გაუქმება შეუძლებელია."
       )
     ) {
       return;
@@ -77,7 +77,7 @@ export default function AdminClient({
         router.refresh();
       } catch (error) {
         console.error("AdminClient: Error deleting story:", error);
-        alert("Failed to delete story");
+        alert("ისტორიის წაშლა ვერ მოხერხდა");
       }
     });
   };
@@ -103,7 +103,7 @@ export default function AdminClient({
         }
       } catch (error) {
         console.error("AdminClient: Error creating tag:", error);
-        alert("Failed to create tag");
+        alert("თეგის შექმნა ვერ მოხერხდა");
       }
     });
   };
@@ -125,7 +125,7 @@ export default function AdminClient({
         router.refresh();
       } catch (error) {
         console.error("AdminClient: Error updating tag:", error);
-        alert("Failed to update tag");
+        alert("თეგის განახლება ვერ მოხერხდა");
       }
     });
   };
@@ -137,7 +137,7 @@ export default function AdminClient({
         router.refresh();
       } catch (error) {
         console.error("AdminClient: Error deleting tag:", error);
-        alert("Failed to delete tag");
+        alert("თეგის წაშლა ვერ მოხერხდა");
       }
     });
   };
@@ -162,7 +162,7 @@ export default function AdminClient({
         }
       } catch (error) {
         console.error("AdminClient: Error creating hot topic:", error);
-        alert("Failed to create hot question");
+        alert("ცხელი კითხვის შექმნა ვერ მოხერხდა");
       }
     });
   };
@@ -185,7 +185,7 @@ export default function AdminClient({
         router.refresh();
       } catch (error) {
         console.error("AdminClient: Error updating hot topic:", error);
-        alert("Failed to update hot question");
+        alert("ცხელი კითხვის განახლება ვერ მოხერხდა");
       }
     });
   };
@@ -198,7 +198,7 @@ export default function AdminClient({
         router.refresh();
       } catch (error) {
         console.error("AdminClient: Error deleting hot topic:", error);
-        alert("Failed to delete hot question");
+        alert("ცხელი კითხვის წაშლა ვერ მოხერხდა");
       }
     });
   };
@@ -208,10 +208,10 @@ export default function AdminClient({
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Norchi Admin Panel
+            ნორჩის ადმინისტრატორის პანელი
           </h1>
           <p className="text-gray-600">
-            Manage your ideological challenge system
+            მართეთ თქვენი იდეოლოგიური გამოწვევის სისტემა
           </p>
         </div>
 
@@ -221,8 +221,8 @@ export default function AdminClient({
           className="w-full"
         >
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="stories">Stories</TabsTrigger>
-            <TabsTrigger value="hotquestions">Hot Questions</TabsTrigger>
+            <TabsTrigger value="stories">ისტორიები</TabsTrigger>
+            <TabsTrigger value="hotquestions">ცხელი კითხვები</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stories" className="mt-6">

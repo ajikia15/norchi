@@ -12,7 +12,7 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "ნორჩი",
   description:
-    "A modern, card-based logical challenge system that presents provocative statements to explore belief-based reasoning patterns.",
+    "თანამედროვე, ბარათებზე დაფუძნებული ლოგიკური გამოწვევის სისტემა, რომელიც წარმოგიდგენთ პროვოკაციულ განცხადებებს რწმენაზე დაფუძნებული მსჯელობის ნიმუშების შესასწავლად.",
 };
 
 export const viewport: Viewport = {
@@ -29,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ka">
       <body className={`${outfit.variable} font-sans antialiased`}>
         <Navbar />
         <main className="relative">{children}</main>

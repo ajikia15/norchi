@@ -56,31 +56,31 @@ export default function ConnectionDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Set Connection Label</DialogTitle>
+          <DialogTitle>კავშირის იარლიყის დაყენება</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="text-sm text-muted-foreground">
-            Creating connection from <strong>{sourceNodeId}</strong> to{" "}
-            <strong>{targetNodeId}</strong>
+            კავშირის შექმნა <strong>{sourceNodeId}</strong>-დან{" "}
+            <strong>{targetNodeId}</strong>-ზე
           </div>
           <div className="space-y-2">
-            <Label htmlFor="option-label">Option Label</Label>
+            <Label htmlFor="option-label">ვარიანტის იარლიყი</Label>
             <Input
               id="option-label"
               value={optionLabel}
               onChange={(e) => setOptionLabel(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter the choice text (e.g., 'Yes', 'No', 'Continue')"
+              placeholder="შეიყვანეთ არჩევანის ტექსტი (მაგ., 'დიახ', 'არა', 'გაგრძელება')"
               autoFocus
             />
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            გაუქმება
           </Button>
           <Button onClick={handleConfirm} disabled={!optionLabel.trim()}>
-            Create Connection
+            კავშირის შექმნა
           </Button>
         </DialogFooter>
       </DialogContent>

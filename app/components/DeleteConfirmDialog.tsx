@@ -60,7 +60,7 @@ export default function DeleteConfirmDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <AlertTriangle className="h-5 w-5 text-red-500" />
-            Delete Node
+            კვანძის წაშლა
           </DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
@@ -68,7 +68,7 @@ export default function DeleteConfirmDialog({
             <div className="text-2xl">{getNodeIcon(nodeToDelete.type)}</div>
             <div className="flex-1 min-w-0">
               <div className="font-medium text-sm">
-                {nodeToDelete.type.toUpperCase()} Node
+                {nodeToDelete.type.toUpperCase()} კვანძი
               </div>
               <div className="text-sm text-muted-foreground truncate">
                 {nodeToDelete.text}
@@ -77,21 +77,21 @@ export default function DeleteConfirmDialog({
           </div>
           <div className="text-sm text-muted-foreground">
             <p className="mb-2">
-              Are you sure you want to delete this node? This action cannot be
-              undone.
+              დარწმუნებული ხართ, რომ გსურთ ამ კვანძის წაშლა? ამ ქმედების
+              გაუქმება შეუძლებელია.
             </p>
             {nodeToDelete.type === "question" &&
               nodeToDelete.options?.length > 0 && (
                 <p className="text-amber-600 font-medium">
-                  ⚠️ This will also remove {nodeToDelete.options.length} option
-                  connections.
+                  ⚠️ ეს ასევე წაშლის {nodeToDelete.options.length} ვარიანტის
+                  კავშირს.
                 </p>
               )}
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
-            Cancel
+            გაუქმება
           </Button>
           <Button
             variant="destructive"
@@ -99,7 +99,7 @@ export default function DeleteConfirmDialog({
             className="flex items-center gap-2"
           >
             <Trash2 className="h-4 w-4" />
-            Delete Node
+            კვანძის წაშლა
           </Button>
         </DialogFooter>
       </DialogContent>

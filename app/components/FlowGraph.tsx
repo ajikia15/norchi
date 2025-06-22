@@ -120,7 +120,9 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
             <div className="text-center">
               <div className="font-bold text-sm mb-1">
                 {getNodeIcon()} {nodeId}
-                {isStart && <span className="ml-2 text-green-600">START</span>}
+                {isStart && (
+                  <span className="ml-2 text-green-600">დაწყება</span>
+                )}
               </div>
               <div className="text-xs text-gray-600 line-clamp-2">
                 {node.text.length > 40
@@ -181,7 +183,7 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
             id: `${nodeId}-${node.returnToNodeId}`,
             source: nodeId,
             target: node.returnToNodeId,
-            label: node.buttonLabel || "Try Again",
+            label: node.buttonLabel || "სცადეთ თავიდან",
             type: "straight",
             style: {
               stroke: "#ef4444",
@@ -208,7 +210,7 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
             id: `${nodeId}-${node.nextNodeId}`,
             source: nodeId,
             target: node.nextNodeId,
-            label: node.buttonLabel || "Continue",
+            label: node.buttonLabel || "გაგრძელება",
             type: "smoothstep",
             style: {
               stroke: "#10b981",

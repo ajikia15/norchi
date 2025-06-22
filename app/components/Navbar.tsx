@@ -31,7 +31,7 @@ export default function Navbar() {
                 className="gap-2"
               >
                 <Home className="h-4 w-4" />
-                Stories
+                ისტორიები
               </Button>
 
               <Button
@@ -41,31 +41,31 @@ export default function Navbar() {
                 className="gap-2"
               >
                 <Settings className="h-4 w-4" />
-                Admin
+                ადმინი
               </Button>
 
               {/* Fake links for now */}
               <Button variant="ghost" size="sm" className="gap-2" disabled>
                 <Users className="h-4 w-4" />
-                Community
+                საზოგადოება
                 <Badge variant="secondary" className="ml-1 text-xs">
-                  Soon
+                  მალე
                 </Badge>
               </Button>
 
               <Button variant="ghost" size="sm" className="gap-2" disabled>
                 <BookOpen className="h-4 w-4" />
-                Library
+                ბიბლიოთეკა
                 <Badge variant="secondary" className="ml-1 text-xs">
-                  Soon
+                  მალე
                 </Badge>
               </Button>
 
               <Button variant="ghost" size="sm" className="gap-2" disabled>
                 <Workflow className="h-4 w-4" />
-                Templates
+                შაბლონები
                 <Badge variant="secondary" className="ml-1 text-xs">
-                  Soon
+                  მალე
                 </Badge>
               </Button>
             </div>

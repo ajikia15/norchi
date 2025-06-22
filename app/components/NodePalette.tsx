@@ -7,29 +7,29 @@ const nodeTypes = [
   {
     type: "question",
     icon: "❓",
-    label: "Question",
-    description: "Ask user to choose between options",
+    label: "კითხვა",
+    description: "სთხოვეთ მომხმარებელს აირჩიოს ოფციებიდან",
     color: "#3b82f6",
   },
   {
     type: "end",
     icon: "🏁",
-    label: "End",
-    description: "Terminal node that ends the story",
+    label: "დასასრული",
+    description: "ტერმინალური კვანძი, რომელიც ასრულებს ისტორიას",
     color: "#e879f9",
   },
   {
     type: "callout",
     icon: "⚠️",
-    label: "Callout",
-    description: "Show warning or important message",
+    label: "შენიშვნა",
+    description: "გაფრთხილების ან მნიშვნელოვანი შეტყობინების ჩვენება",
     color: "#ef4444",
   },
   {
     type: "infocard",
     icon: "💡",
-    label: "Info Card",
-    description: "Display information to continue",
+    label: "ინფო ბარათი",
+    description: "ინფორმაციის ჩვენება გასაგრძელებლად",
     color: "#10b981",
   },
 ];
@@ -43,9 +43,9 @@ export default function NodePalette() {
   return (
     <Card className="w-64 h-fit shadow-sm border-0 bg-white/60 backdrop-blur-sm">
       <CardHeader className="pb-4">
-        <CardTitle className="text-lg">Node Palette</CardTitle>
+        <CardTitle className="text-lg">კვანძების პალიტრა</CardTitle>
         <p className="text-sm text-muted-foreground">
-          Drag nodes to the canvas to add them
+          გადაიტანეთ კვანძები ტილოზე, რომ დაამატოთ ისინი
         </p>
       </CardHeader>
       <CardContent className="pt-0 space-y-3">

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -16,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import { Plus, Trash2, GripVertical, Save, X, ArrowRight } from "lucide-react";
+import { Plus, Trash2, GripVertical, Save, X } from "lucide-react";
 import CreateNodeDialog from "./CreateNodeDialog";
 
 const NO_DESTINATION_VALUE = "__NO_DESTINATION__";
@@ -179,7 +178,9 @@ export default function NodeEditor({
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       if (
-        confirm("You have unsaved changes. Are you sure you want to cancel?")
+        confirm(
+          "თქვენ გაქვთ შეუნახავი ცვლილებები. დარწმუნებული ხართ, რომ გსურთ გაუქმება?"
+        )
       ) {
         onCancel();
       }
@@ -191,19 +192,19 @@ export default function NodeEditor({
   const handleSave = () => {
     // Basic validation
     if (!editedNode.text.trim()) {
-      alert("Please enter some text");
+      alert("გთხოვთ, შეიყვანოთ ტექსტი");
       return;
     }
 
     if (editedNode.type === "question") {
       if (editedNode.options.length < 2) {
-        alert("Questions must have at least 2 options");
+        alert("კითხვას უნდა ჰქონდეს მინიმუმ 2 ოფცია");
         return;
       }
 
       for (const option of editedNode.options) {
         if (!option.label.trim()) {
-          alert("All options must have labels");
+          alert("ყველა ოფციას უნდა ჰქონდეს ტექსტი");
           return;
         }
       }
@@ -211,14 +212,18 @@ export default function NodeEditor({
 
     if (editedNode.type === "callout") {
       if (!editedNode.returnToNodeId) {
-        alert("Callout nodes must specify a return node");
+        alert(
+          "შენიშვნის ტიპის კვანძს უნდა ჰქონდეს მითითებული დასაბრუნებელი კვანძი"
+        );
         return;
       }
     }
 
     if (editedNode.type === "infocard") {
       if (!editedNode.nextNodeId) {
-        alert("Infocard nodes must specify a next node");
+        alert(
+          "ინფო ბარათის ტიპის კვანძს უნდა ჰქონდეს მითითებული შემდეგი კვანძი"
+        );
         return;
       }
     }
@@ -295,381 +300,289 @@ export default function NodeEditor({
 
   // Create options for dropdowns
   const getDropdownOptions = () => {
-    return [
-      {
-        value: NO_DESTINATION_VALUE,
-        label: "-- No destination --",
-        isCreate: false,
-      },
-      {
-        value: "__CREATE_QUESTION",
-        label: "❓ + Create New Question",
-        isCreate: true,
-      },
-      { value: "__CREATE_END", label: "🏁 + Create New End", isCreate: true },
-      {
-        value: "__CREATE_CALLOUT",
-        label: "⚠️ + Create New Callout",
-        isCreate: true,
-      },
-      {
-        value: "__CREATE_INFOCARD",
-        label: "💡 + Create New Info Card",
-        isCreate: true,
-      },
-      {
-        value: "__SEPARATOR__",
-        label: "---- Existing Nodes ----",
-        isCreate: false,
-      },
-      ...availableNodes.map((nodeId) => ({
-        value: nodeId,
-        label: formatNodeForDisplay(nodeId),
-        isCreate: false,
-      })),
-    ];
+    const options = availableNodes.map((id) => (
+      <SelectItem key={id} value={id}>
+        {formatNodeForDisplay(id)}
+      </SelectItem>
+    ));
+
+    options.unshift(
+      <SelectItem key={NO_DESTINATION_VALUE} value={NO_DESTINATION_VALUE}>
+        <span className="text-gray-400">დანიშნულების გარეშე</span>
+      </SelectItem>
+    );
+
+    options.push(
+      <SelectItem key="create-new" value="create-new" className="text-blue-600">
+        ახალი კვანძის შექმნა...
+      </SelectItem>
+    );
+
+    return options;
   };
 
   return (
-    <>
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Badge variant="secondary" className="text-sm">
-              {getNodeTypeIcon(editedNode.type)} {editedNode.type.toUpperCase()}
-            </Badge>
-            {hasUnsavedChanges && (
-              <Badge variant="destructive" className="text-xs">
-                Unsaved changes
-              </Badge>
-            )}
-          </div>
-          <div className="flex gap-2">
-            <Button onClick={handleCancel} variant="outline" size="sm">
-              <X className="h-4 w-4 mr-2" />
-              Cancel
+    <Card className="flex flex-col h-full">
+      <CardHeader className="flex-shrink-0">
+        <div className="flex justify-between items-center">
+          <CardTitle>კვანძის რედაქტორი</CardTitle>
+          <div>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleSave}
+              disabled={!hasUnsavedChanges}
+              aria-label="Save changes"
+            >
+              <Save className="h-5 w-5" />
             </Button>
-            {hasUnsavedChanges && (
-              <Button onClick={handleSave} size="sm">
-                <Save className="h-4 w-4 mr-2" />
-                Save Node
-              </Button>
-            )}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleCancel}
+              aria-label="Cancel editing"
+            >
+              <X className="h-5 w-5" />
+            </Button>
           </div>
         </div>
+      </CardHeader>
 
-        {/* Basic Configuration */}
-        <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">Basic Configuration</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <Label>Node Type</Label>
+      <CardContent className="flex-grow overflow-y-auto pr-2">
+        <div className="space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="node-type">კვანძის ტიპი</Label>
               <Select
                 value={editedNode.type}
-                onValueChange={(value) =>
-                  handleTypeChange(
-                    value as "question" | "end" | "callout" | "infocard"
-                  )
-                }
+                onValueChange={(
+                  value: "question" | "end" | "callout" | "infocard"
+                ) => handleTypeChange(value)}
               >
-                <SelectTrigger>
-                  <SelectValue />
+                <SelectTrigger id="node-type">
+                  <SelectValue placeholder="აირჩიეთ ტიპი" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="question">❓ Question</SelectItem>
-                  <SelectItem value="end">🏁 End</SelectItem>
-                  <SelectItem value="callout">⚠️ Callout</SelectItem>
-                  <SelectItem value="infocard">💡 Info Card</SelectItem>
+                  <SelectItem value="question">❓ კითხვა</SelectItem>
+                  <SelectItem value="end">🏁 დასასრული</SelectItem>
+                  <SelectItem value="callout">⚠️ შენიშვნა</SelectItem>
+                  <SelectItem value="infocard">💡 ინფო ბარათი</SelectItem>
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="node-text">Content</Label>
-              <Textarea
-                id="node-text"
-                value={editedNode.text}
-                onChange={(e) => handleTextChange(e.target.value)}
-                placeholder="Enter the main text content..."
-                rows={4}
-              />
+            <div>
+              <Label htmlFor="node-id">კვანძის ID</Label>
+              <Input id="node-id" value={editedNode.id} disabled />
             </div>
-          </CardContent>
-        </Card>
+          </div>
 
-        {/* Type-specific Configuration */}
-        {editedNode.type === "question" && (
-          <Card>
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-lg">Answer Options</CardTitle>
-                <Button onClick={addOption} size="sm" variant="outline">
+          <div>
+            <Label htmlFor="node-text">კვანძის ტექსტი</Label>
+            <Textarea
+              id="node-text"
+              value={editedNode.text}
+              onChange={(e) => handleTextChange(e.target.value)}
+              placeholder="შეიყვანეთ კვანძის ტექსტი (Markdown მხარდაჭერილია)"
+              className="min-h-[120px]"
+            />
+          </div>
+
+          {editedNode.type === "question" && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <Label>ოფციები</Label>
+                <Button variant="outline" size="sm" onClick={addOption}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Option
+                  ოფციის დამატება
                 </Button>
               </div>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {editedNode.options.map((option, index) => (
-                <Card
-                  key={index}
-                  className={cn(
-                    "border border-gray-200 bg-gray-50/50",
-                    draggedIndex === index && "opacity-50"
-                  )}
-                  draggable
-                  onDragStart={(e) => handleDragStart(e, index)}
-                  onDragOver={handleDragOver}
-                  onDrop={(e) => handleDrop(e, index)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 cursor-move mt-1"
+              <div
+                className="space-y-2"
+                onDragOver={handleDragOver}
+                onDrop={(e) => handleDrop(e, editedNode.options.length)}
+              >
+                {editedNode.options.map((option, index) => (
+                  <div
+                    key={index}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, index)}
+                    onDrop={(e) => handleDrop(e, index)}
+                    className={cn(
+                      "flex items-center gap-2 p-2 border rounded-md bg-white",
+                      draggedIndex === index && "opacity-50"
+                    )}
+                  >
+                    <GripVertical className="h-5 w-5 text-gray-400 cursor-move flex-shrink-0" />
+                    <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
+                      <Input
+                        value={option.label}
+                        onChange={(e) =>
+                          handleOptionChange(index, "label", e.target.value)
+                        }
+                        placeholder={`ოფცია ${index + 1}`}
+                      />
+                      <Select
+                        value={getSelectValue(option.nextNodeId)}
+                        onValueChange={(value) =>
+                          handleCreateNewNode(
+                            value,
+                            `options[${index}].nextNodeId`
+                          )
+                        }
+                        onOpenChange={() =>
+                          onNodeHover && onNodeHover(option.nextNodeId || null)
+                        }
                       >
-                        <GripVertical className="h-4 w-4" />
-                      </Button>
-
-                      <div className="flex-1 space-y-3">
-                        <div className="space-y-2">
-                          <Label className="text-sm">Option {index + 1}</Label>
-                          <Input
-                            value={option.label}
-                            onChange={(e) =>
-                              handleOptionChange(index, "label", e.target.value)
-                            }
-                            placeholder="Enter option label..."
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label className="text-sm flex items-center gap-2">
-                            Next Node
-                            <ArrowRight className="h-3 w-3" />
-                          </Label>
-                          <Select
-                            value={getSelectValue(option.nextNodeId)}
-                            onValueChange={(value) => {
-                              if (
-                                !handleCreateNewNode(
-                                  value,
-                                  `question_option_${index}`
-                                )
-                              ) {
-                                handleOptionChange(index, "nextNodeId", value);
-                              }
-                            }}
-                          >
-                            <SelectTrigger>
-                              <SelectValue>
-                                {getSelectDisplayValue(option.nextNodeId)}
-                              </SelectValue>
-                            </SelectTrigger>
-                            <SelectContent>
-                              {getDropdownOptions().map(
-                                (option, optionIndex) => (
-                                  <SelectItem
-                                    key={optionIndex}
-                                    value={option.value}
-                                    onMouseEnter={() => {
-                                      if (
-                                        !option.isCreate &&
-                                        option.value !== NO_DESTINATION_VALUE &&
-                                        option.value !== "__SEPARATOR__"
-                                      ) {
-                                        onNodeHover?.(option.value);
-                                      }
-                                    }}
-                                    onMouseLeave={() => onNodeHover?.(null)}
-                                    disabled={option.value === "__SEPARATOR__"}
-                                    className={cn(
-                                      option.isCreate &&
-                                        "font-medium text-blue-600",
-                                      option.value === "__SEPARATOR__" &&
-                                        "text-gray-500 italic font-normal"
-                                    )}
-                                  >
-                                    {option.label}
-                                  </SelectItem>
-                                )
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={() => removeOption(index)}
-                        variant="ghost"
-                        size="sm"
-                        className="h-6 w-6 p-0 hover:bg-red-50 hover:text-red-600 mt-1"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                        <SelectTrigger
+                          onMouseOver={() =>
+                            onNodeHover &&
+                            onNodeHover(option.nextNodeId || null)
+                          }
+                          onMouseLeave={() => onNodeHover && onNodeHover(null)}
+                        >
+                          <SelectValue placeholder="აირჩიეთ დანიშნულება">
+                            {getSelectDisplayValue(option.nextNodeId)}
+                          </SelectValue>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <div className="max-h-60 overflow-y-auto">
+                            {getDropdownOptions()}
+                          </div>
+                        </SelectContent>
+                      </Select>
                     </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </CardContent>
-          </Card>
-        )}
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => removeOption(index)}
+                      className="flex-shrink-0"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-        {editedNode.type === "callout" && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Callout Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Return to Node</Label>
+          {editedNode.type === "callout" && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="returnToNodeId">დაბრუნება</Label>
                 <Select
                   value={getSelectValue(editedNode.returnToNodeId)}
-                  onValueChange={(value) => {
-                    if (!handleCreateNewNode(value, "callout_return")) {
-                      setEditedNode({
-                        ...editedNode,
-                        returnToNodeId:
-                          value === NO_DESTINATION_VALUE ? "" : value,
-                      });
-                    }
-                  }}
+                  onValueChange={(value) =>
+                    handleCreateNewNode(value, "returnToNodeId")
+                  }
+                  onOpenChange={() =>
+                    onNodeHover &&
+                    onNodeHover(editedNode.returnToNodeId || null)
+                  }
                 >
-                  <SelectTrigger>
-                    <SelectValue>
+                  <SelectTrigger
+                    id="returnToNodeId"
+                    onMouseOver={() =>
+                      onNodeHover &&
+                      onNodeHover(editedNode.returnToNodeId || null)
+                    }
+                    onMouseLeave={() => onNodeHover && onNodeHover(null)}
+                  >
+                    <SelectValue placeholder="აირჩიეთ დანიშნულება">
                       {getSelectDisplayValue(editedNode.returnToNodeId)}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {getDropdownOptions().map((option, optionIndex) => (
-                      <SelectItem
-                        key={optionIndex}
-                        value={option.value}
-                        onMouseEnter={() => {
-                          if (
-                            !option.isCreate &&
-                            option.value !== NO_DESTINATION_VALUE &&
-                            option.value !== "__SEPARATOR__"
-                          ) {
-                            onNodeHover?.(option.value);
-                          }
-                        }}
-                        onMouseLeave={() => onNodeHover?.(null)}
-                        disabled={option.value === "__SEPARATOR__"}
-                        className={cn(
-                          option.isCreate && "font-medium text-blue-600",
-                          option.value === "__SEPARATOR__" &&
-                            "text-gray-500 italic font-normal"
-                        )}
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    <div className="max-h-60 overflow-y-auto">
+                      {getDropdownOptions()}
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <Label>Button Label</Label>
+              <div>
+                <Label htmlFor="callout-button-label">ღილაკის ტექსტი</Label>
                 <Input
-                  value={editedNode.buttonLabel || "Try Again"}
+                  id="callout-button-label"
+                  value={editedNode.buttonLabel}
                   onChange={(e) =>
                     setEditedNode({
                       ...editedNode,
                       buttonLabel: e.target.value,
                     })
                   }
-                  placeholder="Try Again"
+                  placeholder="მაგ., სცადეთ თავიდან"
                 />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          )}
 
-        {editedNode.type === "infocard" && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-lg">Info Card Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Next Node</Label>
+          {editedNode.type === "infocard" && (
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="nextNodeId">შემდეგი კვანძი</Label>
                 <Select
                   value={getSelectValue(editedNode.nextNodeId)}
-                  onValueChange={(value) => {
-                    if (!handleCreateNewNode(value, "infocard_next")) {
-                      setEditedNode({
-                        ...editedNode,
-                        nextNodeId: value === NO_DESTINATION_VALUE ? "" : value,
-                      });
-                    }
-                  }}
+                  onValueChange={(value) =>
+                    handleCreateNewNode(value, "nextNodeId")
+                  }
+                  onOpenChange={() =>
+                    onNodeHover && onNodeHover(editedNode.nextNodeId || null)
+                  }
                 >
-                  <SelectTrigger>
-                    <SelectValue>
+                  <SelectTrigger
+                    id="nextNodeId"
+                    onMouseOver={() =>
+                      onNodeHover && onNodeHover(editedNode.nextNodeId || null)
+                    }
+                    onMouseLeave={() => onNodeHover && onNodeHover(null)}
+                  >
+                    <SelectValue placeholder="აირჩიეთ დანიშნულება">
                       {getSelectDisplayValue(editedNode.nextNodeId)}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
-                    {getDropdownOptions().map((option, optionIndex) => (
-                      <SelectItem
-                        key={optionIndex}
-                        value={option.value}
-                        onMouseEnter={() => {
-                          if (
-                            !option.isCreate &&
-                            option.value !== NO_DESTINATION_VALUE &&
-                            option.value !== "__SEPARATOR__"
-                          ) {
-                            onNodeHover?.(option.value);
-                          }
-                        }}
-                        onMouseLeave={() => onNodeHover?.(null)}
-                        disabled={option.value === "__SEPARATOR__"}
-                        className={cn(
-                          option.isCreate && "font-medium text-blue-600",
-                          option.value === "__SEPARATOR__" &&
-                            "text-gray-500 italic font-normal"
-                        )}
-                      >
-                        {option.label}
-                      </SelectItem>
-                    ))}
+                    <div className="max-h-60 overflow-y-auto">
+                      {getDropdownOptions()}
+                    </div>
                   </SelectContent>
                 </Select>
               </div>
-
-              <div className="space-y-2">
-                <Label>Button Label</Label>
+              <div>
+                <Label htmlFor="infocard-button-label">ღილაკის ტექსტი</Label>
                 <Input
-                  value={editedNode.buttonLabel || "Continue"}
+                  id="infocard-button-label"
+                  value={editedNode.buttonLabel}
                   onChange={(e) =>
                     setEditedNode({
                       ...editedNode,
                       buttonLabel: e.target.value,
                     })
                   }
-                  placeholder="Continue"
+                  placeholder="მაგ., გაგრძელება"
                 />
               </div>
-            </CardContent>
-          </Card>
-        )}
+            </div>
+          )}
+        </div>
+      </CardContent>
+
+      <div className="p-4 border-t flex-shrink-0">
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={handleCancel}>
+            გაუქმება
+          </Button>
+          <Button onClick={handleSave} disabled={!hasUnsavedChanges}>
+            <Save className="h-4 w-4 mr-2" />
+            ცვლილებების შენახვა
+          </Button>
+        </div>
       </div>
 
-      {/* Create Node Dialog */}
       <CreateNodeDialog
         isOpen={createDialog.isOpen}
-        nodeType={createDialog.nodeType}
-        onClose={() =>
-          setCreateDialog({ isOpen: false, nodeType: "", currentField: "" })
-        }
+        onClose={() => setCreateDialog({ ...createDialog, isOpen: false })}
         onConfirm={handleCreateConfirm}
+        nodeType={createDialog.nodeType}
       />
-    </>
+    </Card>
   );
 }

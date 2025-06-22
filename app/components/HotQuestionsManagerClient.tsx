@@ -168,7 +168,9 @@ export default function HotQuestionsManagerClient({
   const handleDeleteTopic = async (topic: HotTopic) => {
     if (isLoading) return;
 
-    if (window.confirm(`Are you sure you want to delete "${topic.title}"?`)) {
+    if (
+      window.confirm(`დარწმუნებული ხართ, რომ გსურთ წაშალოთ "${topic.title}"?`)
+    ) {
       await onTopicDelete(topic.id);
     }
   };
@@ -248,8 +250,8 @@ export default function HotQuestionsManagerClient({
     );
     const confirmMessage =
       topicsUsingTag.length > 0
-        ? `Are you sure you want to delete tag "${tag.label}"? This will remove it from ${topicsUsingTag.length} hot question(s).`
-        : `Are you sure you want to delete tag "${tag.label}"?`;
+        ? `თეგი "${tag.label}" გამოიყენება ${topicsUsingTag.length} კითხვაში. დარწმუნებული ხართ, რომ გსურთ მისი წაშლა? ეს ასევე წაშლის თეგს ყველა დაკავშირებული კითხვიდან.`
+        : `დარწმუნებული ხართ, რომ გსურთ წაშალოთ თეგი "${tag.label}"?`;
 
     if (window.confirm(confirmMessage)) {
       await onTagDelete(tag.id);
@@ -280,423 +282,375 @@ export default function HotQuestionsManagerClient({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Hot Questions</h2>
-          <p className="text-muted-foreground">
-            Manage provocative questions and their tags
-          </p>
-        </div>
-      </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>აქტუალური კითხვების მენეჯერი</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <Tabs defaultValue="topics">
+          <TabsList>
+            <TabsTrigger value="topics">კითხვები</TabsTrigger>
+            <TabsTrigger value="tags">თეგები</TabsTrigger>
+          </TabsList>
 
-      <Tabs defaultValue="questions" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="questions">Questions</TabsTrigger>
-          <TabsTrigger value="tags">Tags</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="questions" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Hot Questions</CardTitle>
-                <Dialog
-                  open={isCreateTopicDialogOpen}
-                  onOpenChange={setIsCreateTopicDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button disabled={isLoading}>
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <Plus className="h-4 w-4 mr-2" />
-                      )}
-                      New Question
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent className="!max-w-[90vw] !w-[90vw] max-h-[85vh] overflow-y-auto p-0">
-                    <div className="p-6">
-                      <DialogHeader>
-                        <DialogTitle>
-                          {editingTopic
-                            ? "Edit Hot Question"
-                            : "Create New Hot Question"}
-                        </DialogTitle>
-                      </DialogHeader>
-                      <div className="space-y-4 py-4">
-                        <div className="space-y-2">
-                          <Label>Tags</Label>
-                          <div className="flex flex-wrap gap-2 p-3 border rounded-md ">
-                            {allTags.map((tag) => (
-                              <Badge
-                                key={tag.id}
-                                variant={
-                                  topicFormData.selectedTags.includes(tag.id)
-                                    ? "default"
-                                    : "outline"
-                                }
-                                className="cursor-pointer"
-                                style={{
-                                  backgroundColor:
-                                    topicFormData.selectedTags.includes(tag.id)
-                                      ? tag.color
-                                      : undefined,
-                                  borderColor: tag.color,
-                                }}
-                                onClick={() => toggleTagSelection(tag.id)}
-                              >
-                                {tag.emoji} {tag.label}
-                              </Badge>
-                            ))}
-                            {allTags.length === 0 && (
-                              <p className="text-sm text-muted-foreground">
-                                No tags available. Create some tags first.
-                              </p>
-                            )}
-                          </div>
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="topic-title">Title*</Label>
-                          <Input
-                            id="topic-title"
-                            value={topicFormData.title}
-                            onChange={(e) =>
-                              setTopicFormData({
-                                ...topicFormData,
-                                title: e.target.value,
-                              })
-                            }
-                            disabled={isSubmitting}
-                            placeholder="Enter question title"
-                          />
-                        </div>
-
-                        <div className="space-y-2">
-                          <Label htmlFor="topic-answer">Answer*</Label>
-                          <MarkdownEditor
-                            value={topicFormData.answer}
-                            onChange={(value) =>
-                              setTopicFormData({
-                                ...topicFormData,
-                                answer: value,
-                              })
-                            }
-                            disabled={isSubmitting}
-                            placeholder="Enter the answer/response with markdown formatting"
-                          />
-                        </div>
-                      </div>
-                      <DialogFooter className="p-6 pt-0">
-                        <Button
-                          variant="outline"
-                          onClick={handleTopicDialogClose}
-                          disabled={isSubmitting}
-                        >
-                          Cancel
-                        </Button>
-                        <Button
-                          onClick={
-                            editingTopic ? handleUpdateTopic : handleCreateTopic
-                          }
-                          disabled={isSubmitting}
-                        >
-                          {isSubmitting ? (
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          ) : null}
-                          {editingTopic ? "Update" : "Create"}
-                        </Button>
-                      </DialogFooter>
-                    </div>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
+          {/* Topics Tab */}
+          <TabsContent value="topics" className="mt-4">
+            <div className="flex justify-end mb-4">
+              <Dialog
+                open={isCreateTopicDialogOpen}
+                onOpenChange={handleTopicDialogClose}
+              >
+                <DialogTrigger asChild>
+                  <Button>
+                    <Plus className="mr-2 h-4 w-4" />
+                    ახალი კითხვა
+                  </Button>
+                </DialogTrigger>
+                {/* Topic Dialog Content is at the end */}
+              </Dialog>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>სათაური</TableHead>
+                  <TableHead>თეგები</TableHead>
+                  <TableHead className="text-right">მოქმედებები</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
                   <TableRow>
-                    <TableHead>Title</TableHead>
-                    <TableHead>Tags</TableHead>
-                    <TableHead>Answer Preview</TableHead>
-
-                    <TableHead className="w-[100px]">Actions</TableHead>
+                    <TableCell colSpan={3} className="text-center">
+                      <Loader2 className="h-6 w-6 animate-spin inline-block" />
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {topics.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={4}
-                        className="text-center text-muted-foreground"
-                      >
-                        No hot questions found. Create one to get started.
+                ) : topics.length > 0 ? (
+                  topics.map((topic) => (
+                    <TableRow key={topic.id}>
+                      <TableCell className="font-medium">
+                        {topic.title}
                       </TableCell>
-                    </TableRow>
-                  ) : (
-                    topics.map((topic) => (
-                      <TableRow key={topic.id}>
-                        <TableCell className="font-medium">
-                          {topic.title}
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-wrap gap-1">
-                            {topic.tagData?.map((tag) => (
-                              <Badge
-                                key={tag.id}
-                                variant="outline"
-                                style={{ borderColor: tag.color }}
-                                className="text-xs"
-                              >
-                                {tag.emoji} {tag.label}
-                              </Badge>
-                            )) || (
-                              <span className="text-sm text-muted-foreground">
-                                No tags
-                              </span>
-                            )}
-                          </div>
-                        </TableCell>
-                        <TableCell className="max-w-[200px]">
-                          <p className="truncate text-sm text-muted-foreground">
-                            {topic.answer}
-                          </p>
-                        </TableCell>
-
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditTopic(topic)}
-                              disabled={isLoading}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeleteTopic(topic)}
-                              disabled={isLoading}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="tags" className="mt-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle>Tags</CardTitle>
-                <Dialog
-                  open={isCreateTagDialogOpen}
-                  onOpenChange={setIsCreateTagDialogOpen}
-                >
-                  <DialogTrigger asChild>
-                    <Button disabled={isLoading}>
-                      {isLoading ? (
-                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      ) : (
-                        <TagIcon className="h-4 w-4 mr-2" />
-                      )}
-                      New Tag
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>
-                        {editingTag ? "Edit Tag" : "Create New Tag"}
-                      </DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="tag-id">ID*</Label>
-                        <Input
-                          id="tag-id"
-                          value={tagFormData.id}
-                          onChange={(e) =>
-                            setTagFormData({
-                              ...tagFormData,
-                              id: e.target.value,
-                            })
-                          }
-                          disabled={isSubmitting || !!editingTag}
-                          placeholder="tag-id (lowercase, no spaces)"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="tag-label">Label*</Label>
-                        <Input
-                          id="tag-label"
-                          value={tagFormData.label}
-                          onChange={(e) =>
-                            setTagFormData({
-                              ...tagFormData,
-                              label: e.target.value,
-                            })
-                          }
-                          disabled={isSubmitting}
-                          placeholder="Tag display name"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="tag-emoji">Emoji*</Label>
-                        <Input
-                          id="tag-emoji"
-                          value={tagFormData.emoji}
-                          onChange={(e) =>
-                            setTagFormData({
-                              ...tagFormData,
-                              emoji: e.target.value,
-                            })
-                          }
-                          disabled={isSubmitting}
-                          placeholder="🏷️"
-                        />
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="tag-color">Color*</Label>
-                        <div className="flex gap-2">
-                          <Input
-                            id="tag-color"
-                            type="color"
-                            value={tagFormData.color}
-                            onChange={(e) =>
-                              setTagFormData({
-                                ...tagFormData,
-                                color: e.target.value,
-                              })
-                            }
-                            disabled={isSubmitting}
-                            className="w-16"
-                          />
-                          <Input
-                            value={tagFormData.color}
-                            onChange={(e) =>
-                              setTagFormData({
-                                ...tagFormData,
-                                color: e.target.value,
-                              })
-                            }
-                            disabled={isSubmitting}
-                            placeholder="#3b82f6"
-                            className="flex-1"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <DialogFooter>
-                      <Button
-                        variant="outline"
-                        onClick={handleTagDialogClose}
-                        disabled={isSubmitting}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={editingTag ? handleUpdateTag : handleCreateTag}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? (
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                        ) : null}
-                        {editingTag ? "Update" : "Create"}
-                      </Button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Preview</TableHead>
-                    <TableHead>ID</TableHead>
-                    <TableHead>Label</TableHead>
-                    <TableHead>Usage</TableHead>
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {allTags.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="text-center text-muted-foreground"
-                      >
-                        No tags found. Create one to get started.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    allTags.map((tag) => {
-                      const usageCount = topics.filter((topic) =>
-                        topic.tags.includes(tag.id)
-                      ).length;
-                      return (
-                        <TableRow key={tag.id}>
-                          <TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          {topic.tagData?.map((tag) => (
                             <Badge
+                              key={tag.id}
                               style={{
                                 backgroundColor: tag.color,
+                                borderColor: tag.color,
                                 color: "white",
                               }}
                             >
                               {tag.emoji} {tag.label}
                             </Badge>
-                          </TableCell>
-                          <TableCell className="font-mono text-sm">
-                            {tag.id}
-                          </TableCell>
-                          <TableCell>{tag.label}</TableCell>
-                          <TableCell>
-                            <span className="text-sm text-muted-foreground">
-                              {usageCount} question{usageCount !== 1 ? "s" : ""}
-                            </span>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditTag(tag)}
-                                disabled={isLoading}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteTag(tag)}
-                                disabled={isLoading}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
-    </div>
+                          ))}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditTopic(topic)}
+                          disabled={isLoading}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteTopic(topic)}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">
+                      კითხვები არ მოიძებნა.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TabsContent>
+
+          {/* Tags Tab */}
+          <TabsContent value="tags" className="mt-4">
+            <div className="flex justify-end mb-4">
+              <Dialog
+                open={isCreateTagDialogOpen}
+                onOpenChange={handleTagDialogClose}
+              >
+                <DialogTrigger asChild>
+                  <Button>
+                    <TagIcon className="mr-2 h-4 w-4" />
+                    ახალი თეგი
+                  </Button>
+                </DialogTrigger>
+                {/* Tag Dialog Content is at the end */}
+              </Dialog>
+            </div>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ნიმუში</TableHead>
+                  <TableHead>ID</TableHead>
+                  <TableHead>დასახელება</TableHead>
+                  <TableHead className="text-right">მოქმედებები</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">
+                      <Loader2 className="h-6 w-6 animate-spin inline-block" />
+                    </TableCell>
+                  </TableRow>
+                ) : allTags.length > 0 ? (
+                  allTags.map((tag) => (
+                    <TableRow key={tag.id}>
+                      <TableCell>
+                        <Badge
+                          style={{
+                            backgroundColor: tag.color,
+                            borderColor: tag.color,
+                            color: "white",
+                          }}
+                        >
+                          {tag.emoji} {tag.label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-mono">{tag.id}</TableCell>
+                      <TableCell>{tag.label}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleEditTag(tag)}
+                          disabled={isLoading}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteTag(tag)}
+                          disabled={isLoading}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center">
+                      თეგები არ მოიძებნა.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </TabsContent>
+        </Tabs>
+      </CardContent>
+
+      {/* Topic Create/Edit Dialog */}
+      <Dialog
+        open={isCreateTopicDialogOpen}
+        onOpenChange={handleTopicDialogClose}
+      >
+        <DialogContent className="sm:max-w-[625px] h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTopic ? "კითხვის რედაქტირება" : "ახალი კითხვის შექმნა"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4 flex-grow overflow-y-auto pr-6">
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="tags" className="text-right pt-2">
+                აირჩიეთ თეგები
+              </Label>
+              <div className="col-span-3">
+                {allTags.length > 0 ? (
+                  <div className="flex flex-wrap gap-2">
+                    {allTags.map((tag) => (
+                      <Badge
+                        key={tag.id}
+                        variant={
+                          topicFormData.selectedTags.includes(tag.id)
+                            ? "default"
+                            : "outline"
+                        }
+                        onClick={() => toggleTagSelection(tag.id)}
+                        className="cursor-pointer"
+                        style={
+                          topicFormData.selectedTags.includes(tag.id)
+                            ? {
+                                backgroundColor: tag.color,
+                                borderColor: tag.color,
+                                color: "white",
+                              }
+                            : {}
+                        }
+                      >
+                        {tag.emoji} {tag.label}
+                      </Badge>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-500 col-span-3 pt-2">
+                    თეგები არ არის ხელმისაწვდომი. გთხოვთ, ჯერ შექმენით თეგი.
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="title" className="text-right">
+                სათაური
+              </Label>
+              <Input
+                id="title"
+                value={topicFormData.title}
+                onChange={(e) =>
+                  setTopicFormData({ ...topicFormData, title: e.target.value })
+                }
+                className="col-span-3"
+                placeholder="მაგ., მინიმალური ხელფასი"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-start gap-4">
+              <Label htmlFor="answer" className="text-right pt-2">
+                პასუხი
+              </Label>
+              <div className="col-span-3">
+                <MarkdownEditor
+                  value={topicFormData.answer}
+                  onChange={(value) =>
+                    setTopicFormData({ ...topicFormData, answer: value || "" })
+                  }
+                  placeholder="აკრიფეთ პასუხი აქ..."
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateTopicDialogOpen(false)}
+            >
+              გაუქმება
+            </Button>
+            <Button
+              onClick={editingTopic ? handleUpdateTopic : handleCreateTopic}
+              disabled={
+                isSubmitting ||
+                !topicFormData.title.trim() ||
+                !topicFormData.answer
+              }
+            >
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {editingTopic ? "ცვლილებების შენახვა" : "კითხვის შექმნა"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Tag Create/Edit Dialog */}
+      <Dialog open={isCreateTagDialogOpen} onOpenChange={handleTagDialogClose}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTag ? "თეგის რედაქტირება" : "ახალი თეგის შექმნა"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tag-id" className="text-right">
+                თეგის ID
+              </Label>
+              <Input
+                id="tag-id"
+                value={tagFormData.id}
+                onChange={(e) =>
+                  setTagFormData({ ...tagFormData, id: e.target.value })
+                }
+                className="col-span-3 font-mono"
+                placeholder="მაგ., ekonomika"
+                disabled={!!editingTag}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tag-label" className="text-right">
+                თეგის დასახელება
+              </Label>
+              <Input
+                id="tag-label"
+                value={tagFormData.label}
+                onChange={(e) =>
+                  setTagFormData({ ...tagFormData, label: e.target.value })
+                }
+                className="col-span-3"
+                placeholder="მაგ., ეკონომიკა"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tag-emoji" className="text-right">
+                თეგის ემოჯი
+              </Label>
+              <Input
+                id="tag-emoji"
+                value={tagFormData.emoji}
+                onChange={(e) =>
+                  setTagFormData({ ...tagFormData, emoji: e.target.value })
+                }
+                className="col-span-3"
+                maxLength={2}
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="tag-color" className="text-right">
+                თეგის ფერი
+              </Label>
+              <Input
+                id="tag-color"
+                type="color"
+                value={tagFormData.color}
+                onChange={(e) =>
+                  setTagFormData({ ...tagFormData, color: e.target.value })
+                }
+                className="col-span-3 p-1"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCreateTagDialogOpen(false)}
+            >
+              გაუქმება
+            </Button>
+            <Button
+              onClick={editingTag ? handleUpdateTag : handleCreateTag}
+              disabled={
+                isSubmitting ||
+                !tagFormData.id.trim() ||
+                !tagFormData.label.trim()
+              }
+            >
+              {isSubmitting ? (
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              ) : null}
+              {editingTag ? "ცვლილებების შენახვა" : "თეგის შექმნა"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </Card>
   );
 }

@@ -62,7 +62,7 @@ export default function StoryManagerClient({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
+    return new Date(dateString).toLocaleDateString("ka-GE", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -78,10 +78,12 @@ export default function StoryManagerClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Story Library</h2>
+          <h2 className="text-2xl font-bold text-gray-900">
+            ისტორიების ბიბლიოთეკა
+          </h2>
           <p className="text-muted-foreground">
-            Manage your logical challenge flows and switch between different
-            stories
+            მართეთ თქვენი ლოგიკური გამოწვევების ნაკადები და გადაერთეთ სხვადასხვა
+            ისტორიებს შორის
           </p>
         </div>
 
@@ -93,29 +95,29 @@ export default function StoryManagerClient({
               ) : (
                 <Plus className="h-4 w-4 mr-2" />
               )}
-              New Story
+              ახალი ისტორია
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Story</DialogTitle>
+              <DialogTitle>ახალი ისტორიის შექმნა</DialogTitle>
             </DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="story-name">Story Name</Label>
+                <Label htmlFor="story-name">ისტორიის სახელი</Label>
                 <Input
                   id="story-name"
                   value={formData.name}
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="e.g., Army Service Ethics, Economic Freedom..."
+                  placeholder="მაგ., ჯარის ეთიკა, ეკონომიკური თავისუფლება..."
                   disabled={isSubmitting}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="story-description">
-                  Description (Optional)
+                  აღწერა (სურვილისამებრ)
                 </Label>
                 <Textarea
                   id="story-description"
@@ -123,7 +125,7 @@ export default function StoryManagerClient({
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
                   }
-                  placeholder="Brief description of what this story explores..."
+                  placeholder="მოკლე აღწერა, თუ რას იკვლევს ეს ამბავი..."
                   rows={3}
                   disabled={isSubmitting}
                 />
@@ -135,7 +137,7 @@ export default function StoryManagerClient({
                 onClick={() => setIsCreateDialogOpen(false)}
                 disabled={isSubmitting}
               >
-                Cancel
+                გაუქმება
               </Button>
               <Button
                 onClick={handleCreateStory}
@@ -144,10 +146,10 @@ export default function StoryManagerClient({
                 {isSubmitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Creating...
+                    იქმნება...
                   </>
                 ) : (
-                  "Create Story"
+                  "ისტორიის შექმნა"
                 )}
               </Button>
             </DialogFooter>
@@ -206,7 +208,7 @@ export default function StoryManagerClient({
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <BookOpen className="h-3 w-3" />
-                    <span>{getNodeCount(story)} nodes</span>
+                    <span>{getNodeCount(story)} კვანძი</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
@@ -222,9 +224,9 @@ export default function StoryManagerClient({
           <div className="col-span-full text-center py-12">
             <div className="text-gray-400 mb-4">
               <BookOpen className="h-12 w-12 mx-auto mb-4" />
-              <p className="text-lg font-medium">No stories yet</p>
+              <p className="text-lg font-medium">ისტორიები ჯერ არ არის</p>
               <p className="text-sm">
-                Create your first logical challenge story
+                შექმენით თქვენი პირველი ლოგიკური გამოწვევის ისტორია
               </p>
             </div>
             <Button
@@ -233,7 +235,7 @@ export default function StoryManagerClient({
               disabled={isLoading}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create First Story
+              პირველი ისტორიის შექმნა
             </Button>
           </div>
         )}

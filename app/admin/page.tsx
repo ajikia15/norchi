@@ -23,7 +23,7 @@ export default function AdminPage() {
       fallback={
         <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
           <div className="text-2xl font-semibold text-gray-600 animate-pulse">
-            Loading admin panel...
+            ადმინისტრატორის პანელის ჩატვირთვა...
           </div>
         </div>
       }

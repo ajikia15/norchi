@@ -293,10 +293,10 @@ export default function GameCard({
           >
             <ArrowLeft className="h-12 w-12 md:h-20 md:w-20 mb-2 md:mb-4" />
             <span className="text-xl md:text-3xl font-bold">
-              {node.options[0]?.label || "Left"}
+              {node.options[0]?.label || "მარცხნივ"}
             </span>
             <span className="text-sm md:text-lg opacity-90 mt-1 md:mt-2">
-              Swipe Left
+              გადაფურცლეთ მარცხნივ
             </span>
           </motion.div>
         </motion.div>
@@ -317,10 +317,10 @@ export default function GameCard({
           >
             <ArrowRight className="h-12 w-12 md:h-20 md:w-20 mb-2 md:mb-4" />
             <span className="text-xl md:text-3xl font-bold">
-              {node.options[1]?.label || "Right"}
+              {node.options[1]?.label || "მარჯვნივ"}
             </span>
             <span className="text-sm md:text-lg opacity-90 mt-1 md:mt-2">
-              Swipe Right
+              გადაფურცლეთ მარჯვნივ
             </span>
           </motion.div>
         </motion.div>
@@ -513,10 +513,10 @@ export default function GameCard({
               transition={{ duration: 2, repeat: Infinity }}
             >
               <p className="text-xs md:text-sm text-slate-600 font-medium">
-                Make your choice
+                გააკეთეთ თქვენი არჩევანი
               </p>
               <p className="text-xs text-slate-400">
-                Swipe firmly to choose, or tap a button
+                მტკიცედ გადაფურცლეთ ასარჩევად, ან დააჭირეთ ღილაკს
               </p>
             </motion.div>
           </motion.div>
@@ -608,8 +608,8 @@ export default function GameCard({
                     <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <span className="relative z-10 text-white font-semibold">
                       {node.type === "callout"
-                        ? node.buttonLabel || "Try Again"
-                        : node.buttonLabel || "Continue"}
+                        ? node.buttonLabel || "სცადეთ თავიდან"
+                        : node.buttonLabel || "გაგრძელება"}
                     </span>
                     <motion.div
                       className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"

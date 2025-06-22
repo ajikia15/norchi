@@ -144,7 +144,7 @@ export default function HotQuestionCard({
             </div>
           )}
 
-          <p className="text-xs text-gray-400 mt-4">Click to flip</p>
+          <p className="text-xs text-gray-400 mt-4">დააკლიკეთ ამოსაბრუნებლად</p>
         </div>
 
         {/* Back Face */}
@@ -217,7 +217,7 @@ export default function HotQuestionCard({
                         size="sm"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        Read <ArrowRight className="h-3 w-3" />
+                        წაკითხვა <ArrowRight className="h-3 w-3" />
                       </Button>
                     </DialogTrigger>
                     <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">

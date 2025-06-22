@@ -52,7 +52,7 @@ async function StoriesGrid() {
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <div className="flex items-center gap-1">
                     <BookOpen className="h-3 w-3" />
-                    <span>{getNodeCount(story)} challenges</span>
+                    <span>{getNodeCount(story)} გამოწვევა</span>
                   </div>
                   <div className="flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
@@ -64,7 +64,7 @@ async function StoriesGrid() {
                 <Button asChild className="w-full shadow-sm" size="lg">
                   <Link href={`/story/${story.id}`}>
                     <Play className="h-4 w-4 mr-2" />
-                    Start Journey
+                    მოგზაურობის დაწყება
                   </Link>
                 </Button>
               </div>
@@ -80,16 +80,16 @@ async function StoriesGrid() {
           <BookOpen className="h-10 w-10 text-gray-400" />
         </div>
         <h3 className="text-2xl font-semibold text-gray-900 mb-3">
-          No stories available
+          ისტორიები არ არის ხელმისაწვდომი
         </h3>
         <p className="text-muted-foreground max-w-md mb-6 text-lg">
-          There are no logical challenge stories to explore yet. Visit the admin
-          panel to create your first story.
+          ჯერ არ არის ლოგიკური გამოწვევის ისტორიები. ეწვიეთ ადმინისტრატორის
+          პანელს თქვენი პირველი ისტორიის შესაქმნელად.
         </p>
         <Button asChild size="lg" className="shadow-sm">
           <Link href="/admin/story">
             <Settings className="h-4 w-4 mr-2" />
-            Create Your First Story
+            შექმენით თქვენი პირველი ისტორია
           </Link>
         </Button>
       </div>
@@ -101,7 +101,7 @@ function LoadingFallback() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="text-2xl font-semibold text-gray-600 animate-pulse">
-        Loading stories...
+        ისტორიების ჩატვირთვა...
       </div>
     </div>
   );
@@ -115,11 +115,11 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-gray-900 tracking-tight mb-4">
-              Logical Challenge Stories
+              ლოგიკური გამოწვევის ისტორიები
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Choose a story and embark on your logical journey through
-              thought-provoking challenges
+              აირჩიეთ ისტორია და დაიწყეთ თქვენი ლოგიკური მოგზაურობა აზროვნების
+              გამომწვევი გამოწვევებით
             </p>
           </div>
         </div>

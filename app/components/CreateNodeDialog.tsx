@@ -76,25 +76,26 @@ export default function CreateNodeDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            {getNodeTypeIcon(nodeType)} Create New {getNodeTypeLabel(nodeType)}
+            {getNodeTypeIcon(nodeType)} შექმენით ახალი{" "}
+            {getNodeTypeLabel(nodeType)}
           </DialogTitle>
           <DialogDescription>
-            Enter a name for your new {nodeType} node. You can edit the full
-            content after creation.
+            შეიყვანეთ სახელი თქვენი ახალი {nodeType} კვანძისთვის. თქვენ
+            შეგიძლიათ შეცვალოთ სრული შინაარსი შექმნის შემდეგ.
           </DialogDescription>
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
           <div className="space-y-2">
             <Label htmlFor="node-name" className="text-sm font-medium">
-              Node Name
+              კვანძის სახელი
             </Label>
             <Input
               id="node-name"
               value={nodeName}
               onChange={(e) => setNodeName(e.target.value)}
               onKeyDown={handleKeyPress}
-              placeholder={`Enter ${nodeType} name...`}
+              placeholder={`შეიყვანეთ ${nodeType} სახელი...`}
               className="w-full"
               autoFocus
             />
@@ -103,14 +104,14 @@ export default function CreateNodeDialog({
 
         <DialogFooter>
           <Button variant="outline" onClick={handleCancel}>
-            Cancel
+            გაუქმება
           </Button>
           <Button
             onClick={handleConfirm}
             disabled={!nodeName.trim()}
             className="min-w-[100px]"
           >
-            Create {getNodeTypeLabel(nodeType)}
+            შექმენით {getNodeTypeLabel(nodeType)}
           </Button>
         </DialogFooter>
       </DialogContent>

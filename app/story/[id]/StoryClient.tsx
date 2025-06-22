@@ -51,7 +51,7 @@ export default function StoryClient({ storyId, story }: StoryClientProps) {
       });
     } else {
       alert(
-        "This story has no content yet. Please set it up in the admin panel."
+        "ამ ისტორიას ჯერ არ აქვს შინაარსი. გთხოვთ, დააყენოთ ის ადმინისტრატორის პანელში."
       );
       router.push("/admin");
       return;
@@ -108,7 +108,7 @@ export default function StoryClient({ storyId, story }: StoryClientProps) {
           }}
         >
           <div className="text-3xl font-bold text-gray-800 mb-2">
-            Loading your journey...
+            თქვენი მოგზაურობის ჩატვირთვა...
           </div>
           <div className="w-16 h-1 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full mx-auto animate-pulse" />
         </motion.div>

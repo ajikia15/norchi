@@ -568,6 +568,21 @@ function VisualEditorContent({
     []
   );
 
+  // If there are no nodes, show an empty state
+  if (Object.keys(flowData.nodes).length === 0) {
+    return (
+      <div className="w-full h-full flex-grow flex items-center justify-center relative bg-gray-50">
+        <NodePalette />
+        <div className="text-center">
+          <h3 className="text-xl font-semibold text-gray-800">ცარიელი ტილო</h3>
+          <p className="text-gray-500 mt-2">
+            გადმოათრიეთ კვანძი მარცხენა პალიტრიდან დასაწყებად.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex gap-4 h-full min-h-[600px]">
       {/* Left Sidebar - Node Palette */}
@@ -656,7 +671,7 @@ function VisualEditorContent({
 
       {/* Right Sidebar - Node Editor */}
       <div className="w-96 flex-shrink-0">
-        <Card className="h-full shadow-sm border-0 bg-white/60 backdrop-blur-sm flex flex-col">
+        <Card className="min-w-[400px] max-w-[400px] h-full shadow-lg border-l-2 bg-white/60 backdrop-blur-sm flex flex-col">
           <CardHeader className="pb-4 flex-shrink-0">
             <CardTitle className="text-lg">
               {editingNode ? "Edit Node" : "Node Properties"}
@@ -666,41 +681,24 @@ function VisualEditorContent({
             <div className="flex-1 overflow-y-auto pr-2">
               {editingNode ? (
                 <NodeEditor
+                  key={editingNode.id}
                   node={editingNode}
                   allNodes={flowData.nodes}
                   onSave={handleSaveNode}
                   onCancel={handleCancelEdit}
                 />
               ) : (
-                <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="flex flex-col items-center justify-center text-center h-full p-6">
                   <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-2xl">🎯</span>
+                    <div className="w-8 h-8 rounded-sm border-2 border-dashed border-gray-400" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    Select a node to edit
+                    აირჩიეთ კვანძი
                   </h3>
-                  <p className="text-muted-foreground text-sm mb-3">
-                    Click on any node or drag from the palette to start editing
+                  <p className="text-muted-foreground max-w-sm">
+                    დააკლიკეთ კვანძს ვიზუალურ რედაქტორში, რომ ნახოთ მისი
+                    დეტალები და შეიტანოთ ცვლილებები.
                   </p>
-                  <div className="text-xs text-muted-foreground bg-gray-50 rounded-md p-2">
-                    <div className="font-medium mb-1">
-                      💡 Keyboard Shortcuts:
-                    </div>
-                    <div>
-                      •{" "}
-                      <kbd className="px-1 py-0.5 bg-white border rounded text-xs">
-                        Delete
-                      </kbd>{" "}
-                      - Delete selected node
-                    </div>
-                    <div>
-                      •{" "}
-                      <kbd className="px-1 py-0.5 bg-white border rounded text-xs">
-                        Double-click
-                      </kbd>{" "}
-                      - Edit node text
-                    </div>
-                  </div>
                 </div>
               )}
             </div>

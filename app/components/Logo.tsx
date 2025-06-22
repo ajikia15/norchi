@@ -52,7 +52,7 @@ export default function Logo({
       >
         <Image
           src="/norchi2.png"
-          alt="Norchi Logo"
+          alt="ნორჩის ლოგო"
           width={32}
           height={32}
           priority
@@ -63,7 +63,7 @@ export default function Logo({
         <h1 className={`${styles.title} text-gray-900 font-bold`}>ნორჩი</h1>
         {showSubtitle && (
           <p className={`${styles.subtitle} text-muted-foreground`}>
-            Logical Challenges
+            ლოგიკური გამოწვევები
           </p>
         )}
       </div>
