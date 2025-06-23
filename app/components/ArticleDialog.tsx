@@ -37,69 +37,23 @@ export default function ArticleDialog({
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+    const handleBackdropClick = (e: MouseEvent) => {
+      if (e.target === dialog) {
         onClose();
       }
-    };
-
-    const handleBackdropClick = (e: MouseEvent | TouchEvent) => {
-      // Check if click/touch is on the dialog backdrop (not on the content)
-      const isClickOnDialog = e.target === dialog;
-
-      // For mobile: also check if click is outside the content area
-      const contentArea = dialog.querySelector(
-        ".dialog-content-area"
-      ) as HTMLElement;
-      if (contentArea) {
-        const contentRect = contentArea.getBoundingClientRect();
-        const clientX =
-          "clientX" in e ? e.clientX : (e as TouchEvent).touches[0]?.clientX;
-        const clientY =
-          "clientY" in e ? e.clientY : (e as TouchEvent).touches[0]?.clientY;
-
-        if (clientX && clientY) {
-          const isClickOutsideContent =
-            clientX < contentRect.left ||
-            clientX > contentRect.right ||
-            clientY < contentRect.top ||
-            clientY > contentRect.bottom;
-
-          if (isClickOutsideContent || isClickOnDialog) {
-            onClose();
-          }
-          return;
-        }
-      }
-
-      // Fallback to original logic
-      if (isClickOnDialog) {
-        onClose();
-      }
-    };
-
-    const handleClose = () => {
-      onClose();
     };
 
     dialog.addEventListener("click", handleBackdropClick);
-    dialog.addEventListener("touchend", handleBackdropClick);
-    dialog.addEventListener("close", handleClose);
-    document.addEventListener("keydown", handleEscape);
 
     return () => {
       dialog.removeEventListener("click", handleBackdropClick);
-      dialog.removeEventListener("touchend", handleBackdropClick);
-      dialog.removeEventListener("close", handleClose);
-      document.removeEventListener("keydown", handleEscape);
     };
-  }, [onClose, isOpen]);
+  }, [onClose]);
 
   return (
     <dialog
       ref={dialogRef}
-      className="open:animate-in open:fade-in-0 m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/80 open:duration-300"
-      style={{ overflow: "hidden" }}
+      className="m-0 h-full w-full max-w-none bg-transparent p-0 backdrop:bg-black/80"
     >
       <RemoveScroll enabled={isOpen}>
         {/* Main container with responsive width */}
@@ -128,17 +82,9 @@ export default function ArticleDialog({
             </div>
 
             {/* Scrollable content area */}
-            <div className="flex-1 overflow-y-auto" data-dialog-content>
+            <div className="flex-1 overflow-y-auto">
               <div className="px-6 py-6 md:px-8 md:py-8 lg:px-12 lg:py-12">
-                {/* Article content with simple clean styling */}
-                <div
-                  className="text-gray-800"
-                  style={{
-                    fontSize: "1.125rem",
-                    lineHeight: "1.8",
-                    fontFamily: "system-ui, -apple-system, sans-serif",
-                  }}
-                >
+                <div className="text-lg leading-relaxed text-gray-800">
                   <ReactMarkdown>{topic.answer}</ReactMarkdown>
                 </div>
               </div>
