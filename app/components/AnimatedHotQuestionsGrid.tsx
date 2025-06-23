@@ -68,7 +68,7 @@ export default function AnimatedHotQuestionsGrid({
               // Cards stacked with visible layering like fanned cards
               x: animationDirection * (400 - index * 3), // Direction based on row
               y: index * 2, // Small y offset
-              rotateY: animationDirection * 90, // Rotation direction based on row
+              rotateY: -animationDirection * 90, // Rotation direction flipped for alternating rows
               zIndex: topics.length - index,
             }}
             animate={{
