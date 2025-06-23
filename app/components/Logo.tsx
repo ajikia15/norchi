@@ -21,22 +21,22 @@ export default function Logo({
       container: "gap-2",
       icon: "w-8 h-8",
       iconInner: "h-5 w-5",
-      title: "font-bold text-base",
-      subtitle: "text-xs",
+      title: "font-bold text-xl",
+      subtitle: "text-sm",
     },
     md: {
       container: "gap-3",
       icon: "w-10 h-10",
       iconInner: "h-7 w-7",
-      title: "font-bold text-xl",
-      subtitle: "text-xs",
+      title: "font-bold text-3xl",
+      subtitle: "text-sm",
     },
     lg: {
       container: "gap-4",
       icon: "w-12 h-12",
       iconInner: "h-8 w-8",
-      title: "font-bold text-2xl",
-      subtitle: "text-sm",
+      title: "text-4xl",
+      subtitle: "text-base",
     },
   };
 
@@ -60,7 +60,7 @@ export default function Logo({
         />
       </div>
       <div>
-        <h1 className={`${styles.title} text-gray-900 font-bold`}>ნორჩი</h1>
+        <h1 className={`text-gray-900  font-bold text-xl`}>ნორჩი</h1>
         {showSubtitle && (
           <p className={`${styles.subtitle} text-muted-foreground`}>
             ლოგიკური გამოწვევები

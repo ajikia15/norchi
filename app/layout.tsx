@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
+import { firaGO } from "./lib/fonts";
 
 const outfit = Outfit({
   variable: "--font-outfit",
@@ -30,9 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ka">
-      <body className={`${outfit.variable} font-sans antialiased`}>
+      <body className={` ${outfit.variable} ${firaGO.variable} antialiased`}>
         <Navbar />
-        <main className="relative">{children}</main>
+        <main className="relative font-firago">{children}</main>
       </body>
     </html>
   );

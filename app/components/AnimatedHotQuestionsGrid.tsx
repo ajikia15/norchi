@@ -129,10 +129,19 @@ export default function AnimatedHotQuestionsGrid({
 
               {/* Content above shadows */}
               <div className="relative z-10 flex flex-col h-full">
-                <div className="flex-1 overflow-y-auto pr-2 min-h-0">
+                <div className="flex-1 relative min-h-0 overflow-hidden">
                   <div className="prose prose-sm max-w-none text-gray-700">
                     <ReactMarkdown>{topic.answer}</ReactMarkdown>
                   </div>
+                  {/* Blur effect when door is open to show there's more content */}
+                  {isOpen && (
+                    <motion.div
+                      className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent pointer-events-none"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4, duration: 0.3 }}
+                    />
+                  )}
                 </div>
 
                 {/* Bottom section with tags and read button */}
@@ -140,7 +149,7 @@ export default function AnimatedHotQuestionsGrid({
                   className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between gap-2 flex-shrink-0"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : 20 }}
-                  transition={{ delay: isOpen ? 0.5 : 0, duration: 0.4 }}
+                  transition={{ delay: isOpen ? 0.2 : 0, duration: 0.3 }}
                 >
                   {/* Tags */}
                   {topic.tagData && topic.tagData.length > 0 && (
@@ -163,8 +172,8 @@ export default function AnimatedHotQuestionsGrid({
                               scale: isOpen ? 1 : 0.8,
                             }}
                             transition={{
-                              delay: isOpen ? 0.6 + tagIndex * 0.1 : 0,
-                              duration: 0.3,
+                              delay: isOpen ? 0.3 + tagIndex * 0.05 : 0,
+                              duration: 0.2,
                             }}
                           >
                             <Badge
@@ -183,8 +192,8 @@ export default function AnimatedHotQuestionsGrid({
                     </div>
                   )}
 
-                  {/* Read button - only show if answer is longer than 400 characters */}
-                  {topic.answer.length > 400 && (
+                  {/* Read button - always show */}
+                  {
                     <motion.div
                       className="flex-shrink-0"
                       initial={{ opacity: 0, x: 20, scale: 0.8 }}
@@ -193,7 +202,7 @@ export default function AnimatedHotQuestionsGrid({
                         x: isOpen ? 0 : 20,
                         scale: isOpen ? 1 : 0.8,
                       }}
-                      transition={{ delay: isOpen ? 0.7 : 0, duration: 0.4 }}
+                      transition={{ delay: isOpen ? 0.25 : 0, duration: 0.3 }}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
@@ -223,7 +232,7 @@ export default function AnimatedHotQuestionsGrid({
                         </DialogContent>
                       </Dialog>
                     </motion.div>
-                  )}
+                  }
                 </motion.div>
               </div>
             </motion.div>
@@ -322,9 +331,6 @@ export default function AnimatedHotQuestionsGrid({
                       className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight"
                       animate={{
                         color: isLightOn ? "#1f2937" : "#374151",
-                        textShadow: isLightOn
-                          ? "0 0 5px rgba(251, 191, 36, 0.3)"
-                          : "none",
                       }}
                       transition={{ duration: 0.3 }}
                     >
