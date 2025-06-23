@@ -1,6 +1,13 @@
 import { Suspense } from "react";
 import { loadHotTopicsData } from "../lib/storage";
-import AnimatedHotQuestionsGrid from "./AnimatedHotQuestionsGrid";
+import dynamic from "next/dynamic";
+
+const AnimatedHotQuestionsGrid = dynamic(
+  () => import("./AnimatedHotQuestionsGrid"),
+  {
+    ssr: false,
+  }
+);
 
 // Server component that loads data and passes to client component
 async function HotQuestionsGrid() {

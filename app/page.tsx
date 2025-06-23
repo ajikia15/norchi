@@ -4,8 +4,8 @@ import { loadAllData } from "./lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
-import AnimatedHotQuestionsGrid from "./components/AnimatedHotQuestionsGrid";
 import Link from "next/link";
+import HotQuestionsClientSection from "./components/HotQuestionsClientSection";
 
 // Optimized parallel data loading
 async function getPageData() {
@@ -110,18 +110,6 @@ function StoriesLoadingFallback() {
   );
 }
 
-function HotQuestionsLoadingFallback() {
-  return (
-    <div className="max-w-7xl mx-auto px-6 text-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-80 bg-gray-200 rounded-lg animate-pulse" />
-        ))}
-      </div>
-    </div>
-  );
-}
-
 // Main page component with optimized data loading
 export default async function HomePage() {
   // Load all data in parallel at the top level
@@ -132,16 +120,7 @@ export default async function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Hot Questions Section - now with pre-loaded data */}
-      <section className="py-12 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-6">
-          <h2 className="text-xl text-gray-400 text-center mb-12">
-            შეუღე კარი სიმართლეს
-          </h2>
-          <Suspense fallback={<HotQuestionsLoadingFallback />}>
-            <AnimatedHotQuestionsGrid topics={topics} />
-          </Suspense>
-        </div>
-      </section>
+      <HotQuestionsClientSection topics={topics} />
 
       {/* Stories section */}
       <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/30">

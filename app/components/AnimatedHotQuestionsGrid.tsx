@@ -257,8 +257,8 @@ export default function AnimatedHotQuestionsGrid({
                 rotateY: isOpen ? 120 : 0, // Open towards us (positive angle) when hinge is on right
               }}
               transition={{
-                duration: 0.5,
-                ease: [0.25, 0.46, 0.45, 0.94], // Custom ease for door opening
+                duration: isOpen ? 0.5 : 0.3, // Faster closing animation
+                ease: isOpen ? [0.25, 0.46, 0.45, 0.94] : [0.4, 0.0, 0.2, 1], // Different easing for close
               }}
               onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
             >
