@@ -7,16 +7,11 @@ import Autoplay from "embla-carousel-autoplay";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+
 import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { isMobile } from "../lib/isMobile";
+import ArticleDialog from "./ArticleDialog";
 
 interface AnimatedHotQuestionsGridProps {
   topics: HotTopic[];
@@ -28,6 +23,9 @@ export default function AnimatedHotQuestionsGrid({
   const [openedCards, setOpenedCards] = useState<Set<string>>(new Set());
   const [everOpenedCards, setEverOpenedCards] = useState<Set<string>>(
     new Set()
+  );
+  const [articleDialogTopic, setArticleDialogTopic] = useState<HotTopic | null>(
+    null
   );
   const [mobile, setMobile] = useState(false);
   const [carouselStopped, setCarouselStopped] = useState(false);
@@ -170,31 +168,18 @@ export default function AnimatedHotQuestionsGrid({
                             )}
 
                             <div className="flex-shrink-0">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="shadow-sm"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    წაკითხვა{" "}
-                                    <ArrowRight className="ml-1 h-3 w-3" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
-                                  <DialogHeader>
-                                    <DialogTitle className="text-left text-lg font-semibold">
-                                      {topic.title}
-                                    </DialogTitle>
-                                  </DialogHeader>
-                                  <div className="prose prose-sm mt-4 max-w-none text-gray-700">
-                                    <ReactMarkdown>
-                                      {topic.answer}
-                                    </ReactMarkdown>
-                                  </div>
-                                </DialogContent>
-                              </Dialog>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="touch-manipulation shadow-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setArticleDialogTopic(topic);
+                                }}
+                                style={{ touchAction: "manipulation" }}
+                              >
+                                წาკითხვა <ArrowRight className="ml-1 h-3 w-3" />
+                              </Button>
                             </div>
                           </div>
                         )}
@@ -286,6 +271,15 @@ export default function AnimatedHotQuestionsGrid({
             />
           ))}
         </div>
+
+        {/* Article Dialog for mobile */}
+        {articleDialogTopic && (
+          <ArticleDialog
+            topic={articleDialogTopic}
+            isOpen={!!articleDialogTopic}
+            onClose={() => setArticleDialogTopic(null)}
+          />
+        )}
       </div>
     );
   }
@@ -456,31 +450,18 @@ export default function AnimatedHotQuestionsGrid({
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                     >
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="shadow-sm transition-shadow hover:shadow-md"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            წაკითხვა <ArrowRight className="ml-1 h-3 w-3" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle className="text-left text-lg font-semibold">
-                              {topic.title}
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div
-                            className="prose prose-sm mt-4 max-w-none text-gray-700"
-                            style={{ whiteSpace: "pre-wrap" }}
-                          >
-                            <ReactMarkdown>{topic.answer}</ReactMarkdown>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="touch-manipulation shadow-sm transition-shadow hover:shadow-md"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setArticleDialogTopic(topic);
+                        }}
+                        style={{ touchAction: "manipulation" }}
+                      >
+                        წაკითხვა <ArrowRight className="ml-1 h-3 w-3" />
+                      </Button>
                     </motion.div>
                   }
                 </motion.div>
@@ -627,6 +608,15 @@ export default function AnimatedHotQuestionsGrid({
           </motion.div>
         );
       })}
+
+      {/* Article Dialog */}
+      {articleDialogTopic && (
+        <ArticleDialog
+          topic={articleDialogTopic}
+          isOpen={!!articleDialogTopic}
+          onClose={() => setArticleDialogTopic(null)}
+        />
+      )}
     </div>
   );
 }

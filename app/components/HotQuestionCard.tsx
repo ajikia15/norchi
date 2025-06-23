@@ -5,15 +5,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import ArticleDialog from "./ArticleDialog";
 
 interface HotQuestionCardProps {
   topic: HotTopic;
@@ -21,6 +15,7 @@ interface HotQuestionCardProps {
 
 export default function HotQuestionCard({ topic }: HotQuestionCardProps) {
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isArticleDialogOpen, setIsArticleDialogOpen] = useState(false);
 
   // Get primary tag emoji for decoration (first tag with emoji)
   const primaryTag = topic.tagData?.find((tag) => tag.emoji);
@@ -213,30 +208,16 @@ export default function HotQuestionCard({ topic }: HotQuestionCardProps) {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.7, duration: 0.4 }}
                     >
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            წაკითხვა <ArrowRight className="h-3 w-3" />
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-                          <DialogHeader>
-                            <DialogTitle className="text-left text-lg font-semibold">
-                              {topic.title}
-                            </DialogTitle>
-                          </DialogHeader>
-                          <div
-                            className="prose prose-sm max-w-none text-gray-700 mt-4"
-                            style={{ whiteSpace: "pre-wrap" }}
-                          >
-                            <ReactMarkdown>{topic.answer}</ReactMarkdown>
-                          </div>
-                        </DialogContent>
-                      </Dialog>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsArticleDialogOpen(true);
+                        }}
+                      >
+                        წაკითხვა <ArrowRight className="h-3 w-3" />
+                      </Button>
                     </motion.div>
                   )}
                 </motion.div>
@@ -245,6 +226,13 @@ export default function HotQuestionCard({ topic }: HotQuestionCardProps) {
           )}
         </AnimatePresence>
       </motion.div>
+
+      {/* Article Dialog */}
+      <ArticleDialog
+        topic={topic}
+        isOpen={isArticleDialogOpen}
+        onClose={() => setIsArticleDialogOpen(false)}
+      />
     </motion.div>
   );
 }
