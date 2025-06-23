@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { isMobile } from "../lib/isMobile";
 
 interface AnimatedHotQuestionsGridProps {
   topics: HotTopic[];
@@ -26,6 +27,12 @@ export default function AnimatedHotQuestionsGrid({
   const [everOpenedCards, setEverOpenedCards] = useState<Set<string>>(
     new Set()
   );
+  const [mobile, setMobile] = useState(false);
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent || "";
+    setMobile(isMobile(userAgent));
+  }, []);
 
   const toggleCard = (topicId: string) => {
     setOpenedCards((prev) => {
@@ -262,6 +269,23 @@ export default function AnimatedHotQuestionsGrid({
                   backfaceVisibility: "hidden",
                 }}
               >
+                {/* Draggable area (left half for mobile only) */}
+                {mobile && (
+                  <motion.div
+                    className="absolute left-0 top-0 z-30 h-full w-1/2"
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 100 }}
+                    dragElastic={0.1}
+                    onDragEnd={(event, info) => {
+                      const dragDistance = info.offset.x;
+                      if (!isOpen && dragDistance > 50) {
+                        toggleCard(topic.id);
+                      }
+                    }}
+                    style={{ backgroundColor: "transparent" }}
+                  />
+                )}
+
                 {/* Door Handle */}
                 <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 transform rounded-r-md bg-gradient-to-r from-green-400 to-green-600 shadow-md"></div>
 
