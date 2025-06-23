@@ -1,16 +1,18 @@
 import { Suspense } from "react";
 import { Story } from "./types";
-import { loadStoriesData } from "./lib/storage";
+import { loadAllData } from "./lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
-import HotQuestionsSection from "./components/HotQuestionsSection";
+import AnimatedHotQuestionsGrid from "./components/AnimatedHotQuestionsGrid";
 import Link from "next/link";
 
-async function StoriesGrid() {
-  const storiesData = await loadStoriesData();
-  const stories = Object.values(storiesData.stories);
+// Optimized parallel data loading
+async function getPageData() {
+  return await loadAllData();
+}
 
+async function StoriesGrid({ stories }: { stories: Story[] }) {
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -97,22 +99,51 @@ async function StoriesGrid() {
   }
 }
 
-function LoadingFallback() {
+// Optimized loading fallbacks
+function StoriesLoadingFallback() {
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
-      <div className="text-2xl font-semibold text-gray-600 animate-pulse">
-        გზების ჩატვირთვა...
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
+      ))}
+    </div>
+  );
+}
+
+function HotQuestionsLoadingFallback() {
+  return (
+    <div className="max-w-7xl mx-auto px-6 text-center">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-80 bg-gray-200 rounded-lg animate-pulse" />
+        ))}
       </div>
     </div>
   );
 }
 
-export default function HomePage() {
+// Main page component with optimized data loading
+export default async function HomePage() {
+  // Load all data in parallel at the top level
+  const { storiesData, hotTopicsData } = await getPageData();
+  const stories = Object.values(storiesData.stories);
+  const topics = Object.values(hotTopicsData.topics);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Hot Questions Section */}
-      <HotQuestionsSection />
-      {/* stories section */}
+      {/* Hot Questions Section - now with pre-loaded data */}
+      <section className="py-12 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6">
+          <h2 className="text-xl text-gray-400 text-center mb-12">
+            შეუღე კარი სიმართლეს
+          </h2>
+          <Suspense fallback={<HotQuestionsLoadingFallback />}>
+            <AnimatedHotQuestionsGrid topics={topics} />
+          </Suspense>
+        </div>
+      </section>
+
+      {/* Stories section */}
       <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/30">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="text-center">
@@ -129,10 +160,11 @@ export default function HomePage() {
           </div>
         </div>
       </div>
-      {/* Story Grid */}
+
+      {/* Story Grid - now with pre-loaded data */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <Suspense fallback={<LoadingFallback />}>
-          <StoriesGrid />
+        <Suspense fallback={<StoriesLoadingFallback />}>
+          <StoriesGrid stories={stories} />
         </Suspense>
       </div>
     </div>

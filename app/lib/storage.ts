@@ -8,9 +8,10 @@
 } from "../types";
 import { db } from "./db/client";
 import { stories, hotTopics, tags, hotcardCategories } from "./db/schema";
+import { cache } from "react";
 
-// Server-side functions for database operations
-export async function loadStoriesData(): Promise<StoriesData> {
+// Cached server-side functions for database operations with React cache
+export const loadStoriesData = cache(async (): Promise<StoriesData> => {
   try {
     const result = await db.select().from(stories);
 
@@ -44,13 +45,17 @@ export async function loadStoriesData(): Promise<StoriesData> {
     console.error("Failed to load stories from database:", error);
     throw error;
   }
-}
+});
 
-// Server-side hot topics function with tags
-export async function loadHotTopicsData(): Promise<HotTopicsData> {
+// Optimized server-side hot topics function with parallel loading and caching
+export const loadHotTopicsData = cache(async (): Promise<HotTopicsData> => {
   try {
-    // Load tags
-    const tagsResult = await db.select().from(tags);
+    // Load both tags and topics in parallel for better performance
+    const [tagsResult, topicsResult] = await Promise.all([
+      db.select().from(tags),
+      db.select().from(hotTopics),
+    ]);
+
     const tagsMap: Record<string, Tag> = {};
 
     tagsResult.forEach((dbTag) => {
@@ -64,8 +69,6 @@ export async function loadHotTopicsData(): Promise<HotTopicsData> {
       };
     });
 
-    // Load hot topics
-    const topicsResult = await db.select().from(hotTopics);
     const topicsMap: Record<string, HotTopic> = {};
 
     topicsResult.forEach((dbTopic) => {
@@ -93,37 +96,52 @@ export async function loadHotTopicsData(): Promise<HotTopicsData> {
     console.error("Failed to load hot topics from database:", error);
     throw error;
   }
-}
+});
 
-// Legacy function for backward compatibility
-export async function loadLegacyHotTopicsData(): Promise<{
-  topics: Record<string, Record<string, unknown>>;
-  categories: Record<string, HotcardCategory>;
-}> {
-  try {
-    // Load legacy categories
-    const categoriesResult = await db.select().from(hotcardCategories);
-    const categoriesMap: Record<string, HotcardCategory> = {};
+// Combined data loader for parallel loading on pages that need both
+export const loadAllData = cache(async () => {
+  const [storiesData, hotTopicsData] = await Promise.all([
+    loadStoriesData(),
+    loadHotTopicsData(),
+  ]);
 
-    categoriesResult.forEach((dbCategory) => {
-      categoriesMap[dbCategory.id] = {
-        id: dbCategory.id,
-        label: dbCategory.label,
-        emoji: dbCategory.emoji,
-        createdAt: dbCategory.createdAt,
-        updatedAt: dbCategory.updatedAt,
+  return {
+    storiesData,
+    hotTopicsData,
+  };
+});
+
+// Legacy function for backward compatibility with caching
+export const loadLegacyHotTopicsData = cache(
+  async (): Promise<{
+    topics: Record<string, Record<string, unknown>>;
+    categories: Record<string, HotcardCategory>;
+  }> => {
+    try {
+      // Load legacy categories
+      const categoriesResult = await db.select().from(hotcardCategories);
+      const categoriesMap: Record<string, HotcardCategory> = {};
+
+      categoriesResult.forEach((dbCategory) => {
+        categoriesMap[dbCategory.id] = {
+          id: dbCategory.id,
+          label: dbCategory.label,
+          emoji: dbCategory.emoji,
+          createdAt: dbCategory.createdAt,
+          updatedAt: dbCategory.updatedAt,
+        };
+      });
+
+      return {
+        topics: {},
+        categories: categoriesMap,
       };
-    });
-
-    return {
-      topics: {},
-      categories: categoriesMap,
-    };
-  } catch (error) {
-    console.error("Failed to load legacy hot topics from database:", error);
-    throw error;
+    } catch (error) {
+      console.error("Failed to load legacy hot topics from database:", error);
+      throw error;
+    }
   }
-}
+);
 
 // Note: All CRUD operations are now handled by server actions in app/lib/actions.ts
 // These functions only exist for data loading and type safety

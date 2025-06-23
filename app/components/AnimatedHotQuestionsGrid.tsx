@@ -63,7 +63,7 @@ export default function AnimatedHotQuestionsGrid({
         return (
           <motion.div
             key={topic.id}
-            className="w-full sm:w-80 lg:w-72 h-[22rem] relative"
+            className="relative h-[22rem] w-full sm:w-80 lg:w-72"
             initial={{
               // Cards stacked with visible layering like fanned cards
               x: animationDirection * (400 - index * 3), // Direction based on row
@@ -101,7 +101,7 @@ export default function AnimatedHotQuestionsGrid({
             >
               {/* Dynamic Shadow Overlay */}
               <motion.div
-                className="absolute inset-0 bg-black rounded-lg pointer-events-none"
+                className="pointer-events-none absolute inset-0 rounded-lg bg-black"
                 animate={{
                   opacity: isOpen ? 0 : 0.7,
                 }}
@@ -113,7 +113,7 @@ export default function AnimatedHotQuestionsGrid({
 
               {/* Door Edge Shadow */}
               <motion.div
-                className="absolute top-0 right-0 w-8 h-full bg-gradient-to-l from-black/50 to-transparent rounded-r-lg pointer-events-none"
+                className="pointer-events-none absolute right-0 top-0 h-full w-8 rounded-r-lg bg-gradient-to-l from-black/50 to-transparent"
                 animate={{
                   opacity: isOpen ? 0 : 0.8,
                   scaleX: isOpen ? 0 : 1,
@@ -128,15 +128,15 @@ export default function AnimatedHotQuestionsGrid({
               />
 
               {/* Content above shadows */}
-              <div className="relative z-10 flex flex-col h-full">
-                <div className="flex-1 relative min-h-0 overflow-hidden">
+              <div className="relative z-10 flex h-full flex-col">
+                <div className="relative min-h-0 flex-1 overflow-hidden">
                   <div className="prose prose-sm max-w-none text-gray-700">
                     <ReactMarkdown>{topic.answer}</ReactMarkdown>
                   </div>
                   {/* Blur effect when door is open to show there's more content */}
                   {isOpen && (
                     <motion.div
-                      className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent pointer-events-none"
+                      className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.4, duration: 0.3 }}
@@ -146,7 +146,7 @@ export default function AnimatedHotQuestionsGrid({
 
                 {/* Bottom section with tags and read button */}
                 <motion.div
-                  className="mt-3 pt-3 border-t border-gray-200 flex items-center justify-between gap-2 flex-shrink-0"
+                  className="mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : 20 }}
                   transition={{ delay: isOpen ? 0.2 : 0, duration: 0.3 }}
@@ -154,7 +154,7 @@ export default function AnimatedHotQuestionsGrid({
                   {/* Tags */}
                   {topic.tagData && topic.tagData.length > 0 && (
                     <div
-                      className="overflow-x-auto overflow-y-hidden scrollbar-hide flex items-center min-h-0 relative flex-1"
+                      className="scrollbar-hide relative flex min-h-0 flex-1 items-center overflow-x-auto overflow-y-hidden"
                       style={{
                         maskImage:
                           "linear-gradient(to right, black 85%, transparent 100%)",
@@ -162,7 +162,7 @@ export default function AnimatedHotQuestionsGrid({
                           "linear-gradient(to right, black 85%, transparent 100%)",
                       }}
                     >
-                      <div className="flex gap-1 w-max">
+                      <div className="flex w-max gap-1">
                         {topic.tagData.map((tag, tagIndex) => (
                           <motion.div
                             key={tag.id}
@@ -211,20 +211,20 @@ export default function AnimatedHotQuestionsGrid({
                           <Button
                             variant="outline"
                             size="sm"
-                            className="shadow-sm hover:shadow-md transition-shadow"
+                            className="shadow-sm transition-shadow hover:shadow-md"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            წაკითხვა <ArrowRight className="h-3 w-3 ml-1" />
+                            წაკითხვა <ArrowRight className="ml-1 h-3 w-3" />
                           </Button>
                         </DialogTrigger>
-                        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+                        <DialogContent className="max-h-[80vh] max-w-2xl overflow-y-auto">
                           <DialogHeader>
                             <DialogTitle className="text-left text-lg font-semibold">
                               {topic.title}
                             </DialogTitle>
                           </DialogHeader>
                           <div
-                            className="prose prose-sm max-w-none text-gray-700 mt-4"
+                            className="prose prose-sm mt-4 max-w-none text-gray-700"
                             style={{ whiteSpace: "pre-wrap" }}
                           >
                             <ReactMarkdown>{topic.answer}</ReactMarkdown>
@@ -257,19 +257,19 @@ export default function AnimatedHotQuestionsGrid({
             >
               {/* Door Panel */}
               <motion.div
-                className="absolute w-full h-full bg-white rounded-lg border-2 p-4 lg:p-5 flex flex-col justify-between overflow-hidden shadow-lg"
+                className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 bg-white p-4 shadow-lg lg:p-5"
                 style={{
                   backfaceVisibility: "hidden",
                 }}
               >
                 {/* Door Handle */}
-                <div className="absolute left-2 top-1/2 transform -translate-y-1/2 w-2 h-8 bg-gradient-to-r from-green-400 to-green-600 rounded-r-md shadow-md z-10"></div>
+                <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 transform rounded-r-md bg-gradient-to-r from-green-400 to-green-600 shadow-md"></div>
 
                 {/* Question title - perfectly centered */}
-                <div className="flex-grow flex items-center justify-center text-center">
+                <div className="flex flex-grow items-center justify-center text-center">
                   <div className="relative">
                     {/* Lightbulb above question */}
-                    <motion.div className="absolute -top-16 left-1/2 transform -translate-x-1/2">
+                    <motion.div className="absolute -top-16 left-1/2 -translate-x-1/2 transform">
                       <motion.div
                         className="relative"
                         animate={{
@@ -300,7 +300,7 @@ export default function AnimatedHotQuestionsGrid({
                           <AnimatePresence>
                             {isLightOn && (
                               <motion.div
-                                className="absolute inset-0 pointer-events-none"
+                                className="pointer-events-none absolute inset-0"
                                 initial={{
                                   opacity: 0,
                                   filter: "blur(20px)",
@@ -328,7 +328,7 @@ export default function AnimatedHotQuestionsGrid({
 
                     {/* Question with light effect */}
                     <motion.h3
-                      className="text-lg lg:text-xl font-semibold text-gray-900 leading-tight"
+                      className="text-lg font-semibold leading-tight text-gray-900 lg:text-xl"
                       animate={{
                         color: isLightOn ? "#1f2937" : "#374151",
                       }}
@@ -341,14 +341,14 @@ export default function AnimatedHotQuestionsGrid({
 
                 {/* Primary tag - positioned at bottom center */}
                 {topic.tagData && topic.tagData.length > 0 && (
-                  <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2">
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 transform">
                     <Badge
                       variant="outline"
                       style={{
                         borderColor: topic.tagData[0].color,
                         color: topic.tagData[0].color,
                       }}
-                      className="text-xs bg-transparent"
+                      className="bg-transparent text-xs"
                     >
                       {topic.tagData[0].emoji} {topic.tagData[0].label}
                     </Badge>
@@ -361,7 +361,7 @@ export default function AnimatedHotQuestionsGrid({
             <AnimatePresence>
               {isOpen && (
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-b from-stone-200 to-stone-300 rounded-lg -z-10"
+                  className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-b from-stone-200 to-stone-300"
                   style={{
                     transform: "translateZ(-50px)",
                   }}

@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { loadHotTopicsData } from "../lib/storage";
 import AnimatedHotQuestionsGrid from "./AnimatedHotQuestionsGrid";
 
+// Server component that loads data and passes to client component
 async function HotQuestionsGrid() {
   const hotTopicsData = await loadHotTopicsData();
   const topics = Object.values(hotTopicsData.topics);
@@ -12,17 +13,21 @@ async function HotQuestionsGrid() {
 function HotQuestionsLoading() {
   return (
     <div className="max-w-7xl mx-auto px-6 text-center">
-      <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-primary"></div>
-      <p className="mt-4 text-gray-600">აქტუალური კითხვების ჩატვირთვა...</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="h-80 bg-gray-200 rounded-lg animate-pulse" />
+        ))}
+      </div>
     </div>
   );
 }
 
+// This component is kept for backward compatibility but is now optimized
 export default function HotQuestionsSection() {
   return (
     <section className="py-12 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-xl  text-gray-400  text-center mb-12">
+        <h2 className="text-xl text-gray-400 text-center mb-12">
           შეუღე კარი სიმართლეს
         </h2>
         {/* <div className="text-center mb-12">

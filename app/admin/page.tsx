@@ -1,13 +1,10 @@
 import { Suspense } from "react";
-import { loadStoriesData, loadHotTopicsData } from "../lib/storage";
+import { loadAllData } from "../lib/storage";
 import AdminClient from "./AdminClient";
 
 async function AdminContent() {
-  // Load data server-side
-  const [storiesData, hotTopicsData] = await Promise.all([
-    loadStoriesData(),
-    loadHotTopicsData(),
-  ]);
+  // Use optimized parallel data loading
+  const { storiesData, hotTopicsData } = await loadAllData();
 
   return (
     <AdminClient
