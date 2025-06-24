@@ -2,8 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Home, Settings, BookOpen, Workflow, Users } from "lucide-react";
+import { Home, Settings, Users } from "lucide-react";
 import Logo from "./Logo";
 
 export default function Navbar() {
@@ -14,9 +13,9 @@ export default function Navbar() {
   const isHome = pathname === "/";
 
   return (
-    <nav className="bg-white/95 backdrop-blur-sm border-b border-gray-200/50 sticky top-0 z-50 font-firago">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+    <nav className="sticky top-0 z-50 border-b border-gray-200/50 bg-white/95 font-firago backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="flex h-16 items-center justify-between">
           {/* Logo/Brand */}
           <Logo href="/" size="sm" showSubtitle={false} />
 
@@ -44,29 +43,9 @@ export default function Navbar() {
                 ადმინი
               </Button>
 
-              {/* Fake links for now */}
               <Button variant="ghost" size="sm" className="gap-2" disabled>
                 <Users className="h-4 w-4" />
                 საზოგადოება
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  მალე
-                </Badge>
-              </Button>
-
-              <Button variant="ghost" size="sm" className="gap-2" disabled>
-                <BookOpen className="h-4 w-4" />
-                ბიბლიოთეკა
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  მალე
-                </Badge>
-              </Button>
-
-              <Button variant="ghost" size="sm" className="gap-2" disabled>
-                <Workflow className="h-4 w-4" />
-                შაბლონები
-                <Badge variant="secondary" className="ml-1 text-xs">
-                  მალე
-                </Badge>
               </Button>
             </div>
           </div>
