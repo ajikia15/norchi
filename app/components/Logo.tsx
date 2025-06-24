@@ -60,7 +60,7 @@ export default function Logo({
         />
       </div>
       <div>
-        <h1 className={`text-gray-900  font-bold text-xl`}>ნორჩი</h1>
+        <h1 className={`text-xl font-bold text-gray-900`}>ნორჩი</h1>
         {showSubtitle && (
           <p className={`${styles.subtitle} text-muted-foreground`}>
             ლოგიკური გამოწვევები

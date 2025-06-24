@@ -145,44 +145,21 @@ export default function AnimatedHotQuestionsGrid({
                           )}
                         </div>
 
-                        {isOpen && (
-                          <div className="mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3">
-                            {topic.tagData && topic.tagData.length > 0 && (
-                              <div className="flex min-h-0 flex-1 items-center overflow-x-auto overflow-y-hidden">
-                                <div className="flex w-max gap-1">
-                                  {topic.tagData.map((tag) => (
-                                    <Badge
-                                      key={tag.id}
-                                      variant="outline"
-                                      style={{
-                                        borderColor: tag.color,
-                                        color: tag.color,
-                                      }}
-                                      className="text-xs"
-                                    >
-                                      {tag.emoji} {tag.label}
-                                    </Badge>
-                                  ))}
-                                </div>
-                              </div>
-                            )}
-
-                            <div className="flex-shrink-0">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="touch-manipulation shadow-sm"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setArticleDialogTopic(topic);
-                                }}
-                                style={{ touchAction: "manipulation" }}
-                              >
-                                წาკითხვა <ArrowRight className="ml-1 h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
+                        <div className="mt-3 flex flex-shrink-0 items-center justify-center border-t border-gray-200 pt-3">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="mx-4 w-full touch-manipulation shadow-sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setArticleDialogTopic(topic);
+                            }}
+                            style={{ touchAction: "manipulation" }}
+                          >
+                            წაიკითხე ბოლომდე{" "}
+                            <ArrowRight className="ml-1 h-3 w-3" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
 
