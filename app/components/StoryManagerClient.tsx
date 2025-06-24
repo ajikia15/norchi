@@ -62,11 +62,13 @@ export default function StoryManagerClient({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("ka-GE", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    // Use a simple, consistent format that works on both server and client
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    return `${day}/${month}/${year}`;
   };
 
   const getNodeCount = (story: Story) => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition, useState, useEffect } from "react";
+import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StoriesData, HotTopicsData } from "../types";
 import {
@@ -50,17 +50,10 @@ export default function AdminClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [activeTab, setActiveTab] = useState("stories");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const tabFromUrl = searchParams.get("tab") || "stories";
-    setActiveTab(tabFromUrl);
-  }, [searchParams]);
+  // Get tab from URL or default to "stories"
+  const activeTab = searchParams.get("tab") || "stories";
 
   const handleTabChange = (value: string) => {
-    setActiveTab(value);
     router.push(`/admin?tab=${value}`);
   };
 
@@ -225,8 +218,6 @@ export default function AdminClient({
   };
 
   const handleExportTopics = async () => {
-    if (!mounted) return;
-
     startTransition(async () => {
       try {
         const result = await exportHotTopics();
@@ -264,30 +255,6 @@ export default function AdminClient({
       }
     });
   };
-
-  // Prevent hydration mismatch by not rendering until mounted
-  if (!mounted) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
-              ნორჩის ადმინისტრატორის პანელი
-            </h1>
-            <p className="text-gray-600">
-              მართეთ თქვენი იდეოლოგიური გამოწვევის სისტემა
-            </p>
-          </div>
-          <Tabs value="stories" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="stories">გზები</TabsTrigger>
-              <TabsTrigger value="hotquestions">ცხელი კითხვები</TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
