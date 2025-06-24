@@ -8,7 +8,6 @@ import { updateStory } from "@/app/lib/actions";
 import NodeList from "@/app/components/NodeList";
 import NodeEditor from "@/app/components/NodeEditor";
 import FlowGraph from "@/app/components/FlowGraph";
-import VisualEditor from "@/app/components/VisualEditor";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -48,7 +47,6 @@ export default function StoryEditClient({
   const [isCreating, setIsCreating] = useState(false);
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [interactiveEditorIsFullscreen, setInteractiveEditorIsFullscreen] =
     useState(false);
 
@@ -186,19 +184,12 @@ export default function StoryEditClient({
     setHoveredNodeId(nodeId);
   };
 
-  const toggleFullscreen = () => {
-    setIsFullscreen(!isFullscreen);
-  };
-
   const toggleInteractiveEditorFullscreen = () => {
     setInteractiveEditorIsFullscreen(!interactiveEditorIsFullscreen);
   };
 
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape" && isFullscreen) {
-        setIsFullscreen(false);
-      }
       if (event.key === "Escape" && interactiveEditorIsFullscreen) {
         setInteractiveEditorIsFullscreen(false);
       }
@@ -206,7 +197,7 @@ export default function StoryEditClient({
 
     document.addEventListener("keydown", handleEscape);
     return () => document.removeEventListener("keydown", handleEscape);
-  }, [isFullscreen, interactiveEditorIsFullscreen]);
+  }, [interactiveEditorIsFullscreen]);
 
   const handleCreateAndConnect = (
     nodeType: string,
@@ -532,14 +523,6 @@ export default function StoryEditClient({
               >
                 <View className="h-4 w-4" />
                 ინტერაქტიული რედაქტორი
-              </TabsTrigger>
-              <TabsTrigger
-                value="visual"
-                className="flex items-center gap-2"
-                disabled={isPending}
-              >
-                <Play className="h-4 w-4" />
-                ვიზუალური რედაქტორი
               </TabsTrigger>
             </TabsList>
 
@@ -899,32 +882,11 @@ export default function StoryEditClient({
                 </div>
               </div>
             </TabsContent>
-
-            <TabsContent value="visual">
-              <div
-                className={
-                  isFullscreen
-                    ? "fixed inset-0 bg-white z-50 p-8"
-                    : "max-w-7xl mx-auto px-6 py-8"
-                }
-              >
-                <VisualEditor
-                  flowData={flowData}
-                  onFlowDataChange={handleFlowDataChange}
-                  isFullscreen={isFullscreen}
-                  onToggleFullscreen={toggleFullscreen}
-                />
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
       </div>
     );
   }
-
-  const editorClass = isFullscreen
-    ? "fixed inset-0 bg-white z-50 p-8"
-    : "max-w-7xl mx-auto px-6 py-8";
 
   const interactiveEditorClass = interactiveEditorIsFullscreen
     ? "fixed inset-0 bg-white z-50 flex flex-col"
@@ -1020,14 +982,6 @@ export default function StoryEditClient({
             >
               <View className="h-4 w-4" />
               ინტერაქტიული რედაქტორი
-            </TabsTrigger>
-            <TabsTrigger
-              value="visual"
-              className="flex items-center gap-2"
-              disabled={isPending}
-            >
-              <Play className="h-4 w-4" />
-              ვიზუალური რედაქტორი
             </TabsTrigger>
           </TabsList>
 
@@ -1384,17 +1338,6 @@ export default function StoryEditClient({
                   </div>
                 )}
               </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="visual">
-            <div className={editorClass}>
-              <VisualEditor
-                flowData={flowData}
-                onFlowDataChange={handleFlowDataChange}
-                isFullscreen={isFullscreen}
-                onToggleFullscreen={toggleFullscreen}
-              />
             </div>
           </TabsContent>
         </Tabs>

@@ -156,14 +156,12 @@ function FlowGraphContent(props: FlowGraphProps) {
         position: { x, y },
         data: {
           label: (
-            <div className="text-center">
+            <div className="text-center text-white">
               <div className="font-bold text-sm mb-1">
                 {getNodeIcon()} {nodeId}
-                {isStart && (
-                  <span className="ml-2 text-green-600">დაწყება</span>
-                )}
+                {isStart && <span className="ml-2">დაწყება</span>}
               </div>
-              <div className="text-xs text-gray-600 line-clamp-2">
+              <div className="text-xs line-clamp-2">
                 {node.text.length > 40
                   ? `${node.text.substring(0, 40)}...`
                   : node.text}
