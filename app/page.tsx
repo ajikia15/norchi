@@ -15,11 +15,12 @@ async function getPageData() {
 
 async function StoriesGrid({ stories }: { stories: Story[] }) {
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+
+    return `${day}/${month}/${year}`;
   };
 
   const getNodeCount = (story: Story) => {

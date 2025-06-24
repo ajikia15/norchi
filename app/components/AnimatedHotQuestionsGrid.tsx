@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 
 import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { isMobile } from "../lib/isMobile";
 import ArticleDialog from "./ArticleDialog";
 import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
 
@@ -386,11 +385,20 @@ export default function AnimatedHotQuestionsGrid({
   );
 
   useEffect(() => {
-    const userAgent = navigator.userAgent || "";
-    const isMobileDevice = isMobile(userAgent);
+    // Use media query for mobile detection to avoid hydration mismatches
+    const mediaQuery = window.matchMedia("(max-width: 768px)");
+    const isMobileDevice = mediaQuery.matches;
     setMobile(isMobileDevice);
     // Delay loading completion to prevent flash
     setTimeout(() => setIsLoading(false), 100);
+
+    // Listen for media query changes
+    const handleChange = (e: MediaQueryListEvent) => {
+      setMobile(e.matches);
+    };
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   // Stop carousel when a card is clicked and restart when all cards are closed
