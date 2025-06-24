@@ -17,6 +17,336 @@ interface AnimatedHotQuestionsGridProps {
   topics: HotTopic[];
 }
 
+interface CardRowProps {
+  topics: HotTopic[];
+  direction: 0 | 1; // 0 = left-to-right, 1 = right-to-left
+  openedCards: Set<string>;
+  everOpenedCards: Set<string>;
+  toggleCard: (topicId: string) => void;
+  setArticleDialogTopic: (topic: HotTopic) => void;
+  startIndex: number;
+}
+
+function CardRow({
+  topics,
+  direction,
+  openedCards,
+  everOpenedCards,
+  toggleCard,
+  setArticleDialogTopic,
+  startIndex,
+}: CardRowProps) {
+  const animationDirection = direction === 0 ? -1 : 1; // -1 for left-to-right, 1 for right-to-left
+
+  return (
+    <>
+      {topics.map((topic, positionInRow) => {
+        const globalIndex = startIndex + positionInRow;
+        const dropDelay = positionInRow * 0.15;
+
+        const isOpen = openedCards.has(topic.id);
+        const isLightOn = everOpenedCards.has(topic.id);
+
+        return (
+          <motion.div
+            key={topic.id}
+            className="relative h-[22rem] w-full sm:w-80 lg:w-72"
+            initial={{
+              x: animationDirection * (400 - globalIndex * 3),
+              y: globalIndex * 2,
+              rotateY: -animationDirection * 90,
+              zIndex: 50 - globalIndex,
+            }}
+            animate={{
+              x: 0,
+              y: 0,
+              rotateY: 0,
+            }}
+            transition={{
+              delay: dropDelay,
+              type: "spring",
+              stiffness: 200,
+              damping: 25,
+              mass: 0.6,
+            }}
+            style={{
+              filter: `drop-shadow(${globalIndex * 2}px ${globalIndex * 2}px ${
+                globalIndex * 4
+              }px rgba(0,0,0,0.15))`,
+              perspective: "1000px",
+            }}
+          >
+            {/* Answer Content Behind Door */}
+            <motion.div
+              className={`absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300 p-4 lg:p-5 flex flex-col overflow-hidden shadow-inner ${
+                isOpen ? "cursor-pointer" : "pointer-events-none"
+              }`}
+              onClick={isOpen ? () => toggleCard(topic.id) : undefined}
+            >
+              {/* Dynamic Shadow Overlay */}
+              <motion.div
+                className="pointer-events-none absolute inset-0 rounded-lg bg-black"
+                animate={{
+                  opacity: isOpen ? 0 : 0.7,
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+              />
+
+              {/* Door Edge Shadow */}
+              <motion.div
+                className="pointer-events-none absolute right-0 top-0 h-full w-8 rounded-r-lg bg-gradient-to-l from-black/50 to-transparent"
+                animate={{
+                  opacity: isOpen ? 0 : 0.8,
+                  scaleX: isOpen ? 0 : 1,
+                }}
+                transition={{
+                  duration: 0.8,
+                  ease: [0.25, 0.46, 0.45, 0.94],
+                }}
+                style={{
+                  transformOrigin: "right center",
+                }}
+              />
+
+              {/* Content above shadows */}
+              <div className="relative z-10 flex h-full flex-col">
+                <div className="relative min-h-0 flex-1 overflow-hidden">
+                  <div className="prose prose-sm max-w-none text-gray-700">
+                    <ReactMarkdown>{topic.answer}</ReactMarkdown>
+                  </div>
+                  {isOpen && (
+                    <motion.div
+                      className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.4, duration: 0.3 }}
+                    />
+                  )}
+                </div>
+
+                {/* Bottom section with tags and read button */}
+                <motion.div
+                  className="mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : 20 }}
+                  transition={{ delay: isOpen ? 0.2 : 0, duration: 0.3 }}
+                >
+                  {/* Tags */}
+                  {topic.tagData && topic.tagData.length > 0 && (
+                    <div
+                      className="scrollbar-hide relative flex min-h-0 flex-1 items-center overflow-x-auto overflow-y-hidden"
+                      style={{
+                        maskImage:
+                          "linear-gradient(to right, black 85%, transparent 100%)",
+                        WebkitMaskImage:
+                          "linear-gradient(to right, black 85%, transparent 100%)",
+                      }}
+                    >
+                      <div className="flex w-max gap-1">
+                        {topic.tagData.map((tag, tagIndex) => (
+                          <motion.div
+                            key={tag.id}
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{
+                              opacity: isOpen ? 1 : 0,
+                              scale: isOpen ? 1 : 0.8,
+                            }}
+                            transition={{
+                              delay: isOpen ? 0.3 + tagIndex * 0.05 : 0,
+                              duration: 0.2,
+                            }}
+                          >
+                            <Badge
+                              variant="outline"
+                              style={{
+                                borderColor: tag.color,
+                                color: tag.color,
+                              }}
+                              className="text-xs"
+                            >
+                              {tag.emoji} {tag.label}
+                            </Badge>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Read button */}
+                  <motion.div
+                    className="flex-shrink-0"
+                    initial={{ opacity: 0, x: 20, scale: 0.8 }}
+                    animate={{
+                      opacity: isOpen ? 1 : 0,
+                      x: isOpen ? 0 : 20,
+                      scale: isOpen ? 1 : 0.8,
+                    }}
+                    transition={{ delay: isOpen ? 0.25 : 0, duration: 0.3 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="touch-manipulation shadow-sm transition-shadow hover:shadow-md"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setArticleDialogTopic(topic);
+                      }}
+                      style={{ touchAction: "manipulation" }}
+                    >
+                      წაკითხვა <ArrowRight className="ml-1 h-3 w-3" />
+                    </Button>
+                  </motion.div>
+                </motion.div>
+              </div>
+            </motion.div>
+
+            {/* Door */}
+            <motion.div
+              className={`absolute inset-0 z-20 ${
+                isOpen ? "pointer-events-none" : "cursor-pointer"
+              }`}
+              style={{
+                transformStyle: "preserve-3d",
+                transformOrigin: "right center",
+              }}
+              animate={{
+                rotateY: isOpen ? 120 : 0,
+              }}
+              transition={{
+                duration: isOpen ? 0.5 : 0.3,
+                ease: isOpen ? [0.25, 0.46, 0.45, 0.94] : [0.4, 0.0, 0.2, 1],
+              }}
+              onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
+            >
+              {/* Door Panel */}
+              <motion.div
+                className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 bg-white p-4 shadow-lg lg:p-5"
+                style={{
+                  backfaceVisibility: "hidden",
+                }}
+              >
+                {/* Door Handle */}
+                <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 transform rounded-r-md bg-gradient-to-r from-green-400 to-green-600 shadow-md"></div>
+
+                {/* Question title - perfectly centered */}
+                <div className="flex flex-grow items-center justify-center text-center">
+                  <div className="relative">
+                    {/* Lightbulb above question */}
+                    <motion.div className="absolute -top-16 left-1/2 -translate-x-1/2 transform">
+                      <motion.div
+                        className="relative"
+                        animate={{
+                          filter: isLightOn
+                            ? "drop-shadow(0 0 20px #f59e0b)"
+                            : "none",
+                        }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                      >
+                        <motion.div
+                          className="relative"
+                          animate={{
+                            scale: isLightOn ? 1.15 : 1,
+                          }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                        >
+                          {/* Main lightbulb icon */}
+                          <motion.div
+                            animate={{
+                              color: isLightOn ? "#f59e0b" : "#9ca3af",
+                            }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            <Lightbulb size={32} />
+                          </motion.div>
+
+                          {/* Single strong glow layer */}
+                          <AnimatePresence>
+                            {isLightOn && (
+                              <motion.div
+                                className="pointer-events-none absolute inset-0"
+                                initial={{
+                                  opacity: 0,
+                                  filter: "blur(20px)",
+                                }}
+                                animate={{
+                                  opacity: 0.8,
+                                  filter: "blur(0px)",
+                                }}
+                                exit={{
+                                  opacity: 0,
+                                  filter: "blur(20px)",
+                                }}
+                                transition={{ duration: 0.4, ease: "easeOut" }}
+                              >
+                                <Lightbulb
+                                  size={32}
+                                  className="text-yellow-300"
+                                />
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </motion.div>
+                      </motion.div>
+                    </motion.div>
+
+                    {/* Question with light effect */}
+                    <motion.h3
+                      className="text-lg font-semibold leading-tight text-gray-900 lg:text-xl"
+                      animate={{
+                        color: isLightOn ? "#1f2937" : "#374151",
+                      }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      {topic.title}
+                    </motion.h3>
+                  </div>
+                </div>
+
+                {/* Primary tag - positioned at bottom center */}
+                {topic.tagData && topic.tagData.length > 0 && (
+                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 transform">
+                    <Badge
+                      variant="outline"
+                      style={{
+                        borderColor: topic.tagData[0].color,
+                        color: topic.tagData[0].color,
+                      }}
+                      className="bg-transparent text-xs"
+                    >
+                      {topic.tagData[0].emoji} {topic.tagData[0].label}
+                    </Badge>
+                  </div>
+                )}
+              </motion.div>
+            </motion.div>
+
+            {/* Wall/Background when door is open */}
+            <AnimatePresence>
+              {isOpen && (
+                <motion.div
+                  className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-b from-stone-200 to-stone-300"
+                  style={{
+                    transform: "translateZ(-50px)",
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 0.8 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.4 }}
+                />
+              )}
+            </AnimatePresence>
+          </motion.div>
+        );
+      })}
+    </>
+  );
+}
+
 export default function AnimatedHotQuestionsGrid({
   topics,
 }: AnimatedHotQuestionsGridProps) {
@@ -261,330 +591,51 @@ export default function AnimatedHotQuestionsGrid({
     );
   }
 
-  // Desktop version with original animation
+  // Desktop version - super simple with CardRow components
+  const cardsPerRow = 4;
+  const firstRowTopics = topics.slice(0, cardsPerRow);
+  const secondRowTopics = topics.slice(cardsPerRow, cardsPerRow * 2);
+  const thirdRowTopics = topics.slice(cardsPerRow * 2, cardsPerRow * 3);
+  const fourthRowTopics = topics.slice(cardsPerRow * 3, cardsPerRow * 4);
+
   return (
     <div className="flex flex-wrap justify-center gap-4 lg:gap-6">
-      {topics.map((topic, index) => {
-        // Calculate which row this card is in (assuming ~4 cards per row for layout)
-        // This creates alternating animation directions for each row
-        const cardsPerRow = 4; // Reasonable assumption for most screen sizes
-        const rowIndex = Math.floor(index / cardsPerRow);
-        const positionInRow = index % cardsPerRow; // Position within the row
-        const isEvenRow = rowIndex % 2 === 0;
-
-        // Both rows start at the same time, but cards within each row follow the convoy effect
-        const dropDelay = positionInRow * 0.15; // Delay based on position within row, not overall index
-
-        const isOpen = openedCards.has(topic.id);
-        const isLightOn = everOpenedCards.has(topic.id); // Light stays on once it's been turned on
-
-        // Alternate animation direction: even rows from left, odd rows from right
-        const animationDirection = isEvenRow ? -1 : 1; // -1 for left-to-right, 1 for right-to-left
-
-        return (
-          <motion.div
-            key={topic.id}
-            className="relative h-[22rem] w-full sm:w-80 lg:w-72"
-            initial={{
-              // Cards stacked with visible layering like fanned cards
-              x: animationDirection * (400 - index * 3), // Direction based on row
-              y: index * 2, // Small y offset
-              rotateY: -animationDirection * 90, // Rotation direction flipped for alternating rows
-              zIndex: topics.length - index,
-            }}
-            animate={{
-              // Spring to final flex position
-              x: 0,
-              y: 0, // Reset y offset
-              rotateY: 0,
-            }}
-            transition={{
-              delay: dropDelay,
-              type: "spring",
-              stiffness: 200,
-              damping: 25,
-              mass: 0.6,
-            }}
-            style={{
-              // Add shadow for better depth perception
-              filter: `drop-shadow(${index * 2}px ${index * 2}px ${
-                index * 4
-              }px rgba(0,0,0,0.15))`,
-              perspective: "1000px",
-            }}
-          >
-            {/* Answer Content Behind Door */}
-            <motion.div
-              className={`absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300 p-4 lg:p-5 flex flex-col overflow-hidden shadow-inner ${
-                isOpen ? "cursor-pointer" : "pointer-events-none"
-              }`}
-              onClick={isOpen ? () => toggleCard(topic.id) : undefined}
-            >
-              {/* Dynamic Shadow Overlay */}
-              <motion.div
-                className="pointer-events-none absolute inset-0 rounded-lg bg-black"
-                animate={{
-                  opacity: isOpen ? 0 : 0.7,
-                }}
-                transition={{
-                  duration: 0.8,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-              />
-
-              {/* Door Edge Shadow */}
-              <motion.div
-                className="pointer-events-none absolute right-0 top-0 h-full w-8 rounded-r-lg bg-gradient-to-l from-black/50 to-transparent"
-                animate={{
-                  opacity: isOpen ? 0 : 0.8,
-                  scaleX: isOpen ? 0 : 1,
-                }}
-                transition={{
-                  duration: 0.8,
-                  ease: [0.25, 0.46, 0.45, 0.94],
-                }}
-                style={{
-                  transformOrigin: "right center",
-                }}
-              />
-
-              {/* Content above shadows */}
-              <div className="relative z-10 flex h-full flex-col">
-                <div className="relative min-h-0 flex-1 overflow-hidden">
-                  <div className="prose prose-sm max-w-none text-gray-700">
-                    <ReactMarkdown>{topic.answer}</ReactMarkdown>
-                  </div>
-                  {/* Blur effect when door is open to show there's more content */}
-                  {isOpen && (
-                    <motion.div
-                      className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 0.4, duration: 0.3 }}
-                    />
-                  )}
-                </div>
-
-                {/* Bottom section with tags and read button */}
-                <motion.div
-                  className="mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: isOpen ? 1 : 0, y: isOpen ? 0 : 20 }}
-                  transition={{ delay: isOpen ? 0.2 : 0, duration: 0.3 }}
-                >
-                  {/* Tags */}
-                  {topic.tagData && topic.tagData.length > 0 && (
-                    <div
-                      className="scrollbar-hide relative flex min-h-0 flex-1 items-center overflow-x-auto overflow-y-hidden"
-                      style={{
-                        maskImage:
-                          "linear-gradient(to right, black 85%, transparent 100%)",
-                        WebkitMaskImage:
-                          "linear-gradient(to right, black 85%, transparent 100%)",
-                      }}
-                    >
-                      <div className="flex w-max gap-1">
-                        {topic.tagData.map((tag, tagIndex) => (
-                          <motion.div
-                            key={tag.id}
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{
-                              opacity: isOpen ? 1 : 0,
-                              scale: isOpen ? 1 : 0.8,
-                            }}
-                            transition={{
-                              delay: isOpen ? 0.3 + tagIndex * 0.05 : 0,
-                              duration: 0.2,
-                            }}
-                          >
-                            <Badge
-                              variant="outline"
-                              style={{
-                                borderColor: tag.color,
-                                color: tag.color,
-                              }}
-                              className="text-xs"
-                            >
-                              {tag.emoji} {tag.label}
-                            </Badge>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Read button - always show */}
-                  {
-                    <motion.div
-                      className="flex-shrink-0"
-                      initial={{ opacity: 0, x: 20, scale: 0.8 }}
-                      animate={{
-                        opacity: isOpen ? 1 : 0,
-                        x: isOpen ? 0 : 20,
-                        scale: isOpen ? 1 : 0.8,
-                      }}
-                      transition={{ delay: isOpen ? 0.25 : 0, duration: 0.3 }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="touch-manipulation shadow-sm transition-shadow hover:shadow-md"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setArticleDialogTopic(topic);
-                        }}
-                        style={{ touchAction: "manipulation" }}
-                      >
-                        წაკითხვა <ArrowRight className="ml-1 h-3 w-3" />
-                      </Button>
-                    </motion.div>
-                  }
-                </motion.div>
-              </div>
-            </motion.div>
-
-            {/* Door */}
-            <motion.div
-              className={`absolute inset-0 z-20 ${
-                isOpen ? "pointer-events-none" : "cursor-pointer"
-              }`}
-              style={{
-                transformStyle: "preserve-3d",
-                transformOrigin: "right center", // Door hinge on the right
-              }}
-              animate={{
-                rotateY: isOpen ? 120 : 0, // Open towards us (positive angle) when hinge is on right
-              }}
-              transition={{
-                duration: isOpen ? 0.5 : 0.3, // Faster closing animation
-                ease: isOpen ? [0.25, 0.46, 0.45, 0.94] : [0.4, 0.0, 0.2, 1], // Different easing for close
-              }}
-              onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
-            >
-              {/* Door Panel */}
-              <motion.div
-                className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 bg-white p-4 shadow-lg lg:p-5"
-                style={{
-                  backfaceVisibility: "hidden",
-                }}
-              >
-                {/* Draggable area (left half for mobile only) - removed for desktop */}
-
-                {/* Door Handle */}
-                <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 transform rounded-r-md bg-gradient-to-r from-green-400 to-green-600 shadow-md"></div>
-
-                {/* Question title - perfectly centered */}
-                <div className="flex flex-grow items-center justify-center text-center">
-                  <div className="relative">
-                    {/* Lightbulb above question */}
-                    <motion.div className="absolute -top-16 left-1/2 -translate-x-1/2 transform">
-                      <motion.div
-                        className="relative"
-                        animate={{
-                          filter: isLightOn
-                            ? "drop-shadow(0 0 20px #f59e0b)"
-                            : "none",
-                        }}
-                        transition={{ duration: 0.3, ease: "easeInOut" }}
-                      >
-                        <motion.div
-                          className="relative"
-                          animate={{
-                            scale: isLightOn ? 1.15 : 1,
-                          }}
-                          transition={{ duration: 0.3, ease: "easeInOut" }}
-                        >
-                          {/* Main lightbulb icon */}
-                          <motion.div
-                            animate={{
-                              color: isLightOn ? "#f59e0b" : "#9ca3af",
-                            }}
-                            transition={{ duration: 0.3 }}
-                          >
-                            <Lightbulb size={32} />
-                          </motion.div>
-
-                          {/* Single strong glow layer */}
-                          <AnimatePresence>
-                            {isLightOn && (
-                              <motion.div
-                                className="pointer-events-none absolute inset-0"
-                                initial={{
-                                  opacity: 0,
-                                  filter: "blur(20px)",
-                                }}
-                                animate={{
-                                  opacity: 0.8,
-                                  filter: "blur(0px)",
-                                }}
-                                exit={{
-                                  opacity: 0,
-                                  filter: "blur(20px)",
-                                }}
-                                transition={{ duration: 0.4, ease: "easeOut" }}
-                              >
-                                <Lightbulb
-                                  size={32}
-                                  className="text-yellow-300"
-                                />
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </motion.div>
-                      </motion.div>
-                    </motion.div>
-
-                    {/* Question with light effect */}
-                    <motion.h3
-                      className="text-lg font-semibold leading-tight text-gray-900 lg:text-xl"
-                      animate={{
-                        color: isLightOn ? "#1f2937" : "#374151",
-                      }}
-                      transition={{ duration: 0.3 }}
-                    >
-                      {topic.title}
-                    </motion.h3>
-                  </div>
-                </div>
-
-                {/* Primary tag - positioned at bottom center */}
-                {topic.tagData && topic.tagData.length > 0 && (
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 transform">
-                    <Badge
-                      variant="outline"
-                      style={{
-                        borderColor: topic.tagData[0].color,
-                        color: topic.tagData[0].color,
-                      }}
-                      className="bg-transparent text-xs"
-                    >
-                      {topic.tagData[0].emoji} {topic.tagData[0].label}
-                    </Badge>
-                  </div>
-                )}
-              </motion.div>
-            </motion.div>
-
-            {/* Wall/Background when door is open */}
-            <AnimatePresence>
-              {isOpen && (
-                <motion.div
-                  className="absolute inset-0 -z-10 rounded-lg bg-gradient-to-b from-stone-200 to-stone-300"
-                  style={{
-                    transform: "translateZ(-50px)",
-                  }}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 0.8 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.4 }}
-                />
-              )}
-            </AnimatePresence>
-          </motion.div>
-        );
-      })}
+      <CardRow
+        topics={firstRowTopics}
+        direction={0}
+        openedCards={openedCards}
+        everOpenedCards={everOpenedCards}
+        toggleCard={toggleCard}
+        setArticleDialogTopic={setArticleDialogTopic}
+        startIndex={0}
+      />
+      <CardRow
+        topics={secondRowTopics}
+        direction={1}
+        openedCards={openedCards}
+        everOpenedCards={everOpenedCards}
+        toggleCard={toggleCard}
+        setArticleDialogTopic={setArticleDialogTopic}
+        startIndex={cardsPerRow}
+      />
+      <CardRow
+        topics={thirdRowTopics}
+        direction={0}
+        openedCards={openedCards}
+        everOpenedCards={everOpenedCards}
+        toggleCard={toggleCard}
+        setArticleDialogTopic={setArticleDialogTopic}
+        startIndex={cardsPerRow * 2}
+      />
+      <CardRow
+        topics={fourthRowTopics}
+        direction={1}
+        openedCards={openedCards}
+        everOpenedCards={everOpenedCards}
+        toggleCard={toggleCard}
+        setArticleDialogTopic={setArticleDialogTopic}
+        startIndex={cardsPerRow * 3}
+      />
 
       {/* Article Dialog */}
       {articleDialogTopic && (
