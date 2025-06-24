@@ -207,16 +207,6 @@ export default function StoryEditClient({
   ) => {
     if (!flowData) return;
 
-    const currentNodeWithChanges = node;
-    const updatedFlowData = {
-      ...flowData,
-      nodes: {
-        ...flowData.nodes,
-        [currentNodeWithChanges.id]: currentNodeWithChanges,
-      },
-      startNodeId: flowData.startNodeId || currentNodeWithChanges.id,
-    };
-
     const newNodeId = `node_${Date.now()}`;
     let newNode: Node;
 
@@ -256,38 +246,35 @@ export default function StoryEditClient({
       return;
     }
 
-    const updatedCurrentNode = { ...currentNodeWithChanges };
+    // Deep copy the node from the editor state to avoid reference issues.
+    const updatedCurrentNode = JSON.parse(JSON.stringify(node));
 
-    if (currentField.startsWith("question_option_")) {
-      const optionIndex = parseInt(currentField.split("_")[2], 10);
+    if (currentField.startsWith("option-")) {
+      const optionIndex = parseInt(currentField.split("-")[1], 10);
       if (
         updatedCurrentNode.type === "question" &&
         updatedCurrentNode.options[optionIndex]
       ) {
-        const newOptions = [...updatedCurrentNode.options];
-        newOptions[optionIndex] = {
-          ...newOptions[optionIndex],
-          nextNodeId: newNodeId,
-        };
-        updatedCurrentNode.options = newOptions;
+        updatedCurrentNode.options[optionIndex].nextNodeId = newNodeId;
       }
-    } else if (currentField === "callout_return") {
+    } else if (currentField === "returnToNodeId") {
       if (updatedCurrentNode.type === "callout") {
         updatedCurrentNode.returnToNodeId = newNodeId;
       }
-    } else if (currentField === "infocard_next") {
+    } else if (currentField === "nextNodeId") {
       if (updatedCurrentNode.type === "infocard") {
         updatedCurrentNode.nextNodeId = newNodeId;
       }
     }
 
     const finalFlowData: FlowData = {
-      ...updatedFlowData,
+      ...flowData,
       nodes: {
-        ...updatedFlowData.nodes,
+        ...flowData.nodes,
         [updatedCurrentNode.id]: updatedCurrentNode,
         [newNodeId]: newNode,
       },
+      startNodeId: flowData.startNodeId || updatedCurrentNode.id,
     };
 
     handleFlowDataChange(finalFlowData);
