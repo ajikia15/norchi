@@ -4,15 +4,27 @@ import AdminClient from "./AdminClient";
 import AdminSkeleton from "../components/AdminSkeleton";
 
 async function AdminContent() {
-  // Use optimized parallel data loading
-  const { storiesData, hotTopicsData } = await loadAllData();
+  try {
+    // Use optimized parallel data loading with error handling
+    const { storiesData, hotTopicsData } = await loadAllData();
 
-  return (
-    <AdminClient
-      initialStoriesData={storiesData}
-      initialHotTopicsData={hotTopicsData}
-    />
-  );
+    return (
+      <AdminClient
+        initialStoriesData={storiesData}
+        initialHotTopicsData={hotTopicsData}
+      />
+    );
+  } catch (error) {
+    console.error("Failed to load admin data:", error);
+
+    // Return AdminClient with empty data instead of throwing
+    return (
+      <AdminClient
+        initialStoriesData={{ stories: {}, currentStoryId: "" }}
+        initialHotTopicsData={{ topics: {}, tags: {} }}
+      />
+    );
+  }
 }
 
 export default function AdminPage() {

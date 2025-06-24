@@ -1,6 +1,6 @@
 "use client";
 
-import { useTransition } from "react";
+import { useTransition, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { StoriesData, HotTopicsData } from "../types";
 import {
@@ -24,6 +24,24 @@ interface AdminClientProps {
   initialHotTopicsData: HotTopicsData;
 }
 
+// Utility function for file downloads
+function downloadJsonFile(data: unknown, filename: string) {
+  const dataStr = JSON.stringify(data, null, 2);
+  const dataBlob = new Blob([dataStr], { type: "application/json" });
+  const url = URL.createObjectURL(dataBlob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.style.display = "none";
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+}
+
 export default function AdminClient({
   initialStoriesData,
   initialHotTopicsData,
@@ -31,13 +49,21 @@ export default function AdminClient({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const activeTab = searchParams.get("tab") || "stories";
+
+  const [activeTab, setActiveTab] = useState("stories");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const tabFromUrl = searchParams.get("tab") || "stories";
+    setActiveTab(tabFromUrl);
+  }, [searchParams]);
 
   const handleTabChange = (value: string) => {
+    setActiveTab(value);
     router.push(`/admin?tab=${value}`);
   };
 
-  // Story handlers
   const handleStorySelect = (storyId: string) => {
     router.push(`/admin/story/edit/${storyId}`);
   };
@@ -53,11 +79,10 @@ export default function AdminClient({
 
         const result = await createStory(formData);
         if (result.success) {
-          // Refresh the page to get updated data
           router.refresh();
         }
       } catch (error) {
-        console.error("AdminClient: Error creating story:", error);
+        console.error("Error creating story:", error);
         alert("გზის შექმნა ვერ მოხერხდა");
       }
     });
@@ -75,16 +100,14 @@ export default function AdminClient({
     startTransition(async () => {
       try {
         await deleteStoryAction(storyId);
-        // Refresh the page to get updated data
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error deleting story:", error);
+        console.error("Error deleting story:", error);
         alert("გზის წაშლა ვერ მოხერხდა");
       }
     });
   };
 
-  // Tag handlers
   const handleTagCreate = async (
     id: string,
     label: string,
@@ -104,7 +127,7 @@ export default function AdminClient({
           router.refresh();
         }
       } catch (error) {
-        console.error("AdminClient: Error creating tag:", error);
+        console.error("Error creating tag:", error);
         alert("თეგის შექმნა ვერ მოხერხდა");
       }
     });
@@ -126,7 +149,7 @@ export default function AdminClient({
         await updateTag(tagId, formData);
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error updating tag:", error);
+        console.error("Error updating tag:", error);
         alert("თეგის განახლება ვერ მოხერხდა");
       }
     });
@@ -138,13 +161,12 @@ export default function AdminClient({
         await deleteTag(tagId);
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error deleting tag:", error);
+        console.error("Error deleting tag:", error);
         alert("თეგის წაშლა ვერ მოხერხდა");
       }
     });
   };
 
-  // Hot topics handlers
   const handleTopicCreate = async (
     selectedTags: string[],
     title: string,
@@ -159,11 +181,10 @@ export default function AdminClient({
 
         const result = await createHotTopic(formData);
         if (result.success) {
-          // Refresh the page to get updated data
           router.refresh();
         }
       } catch (error) {
-        console.error("AdminClient: Error creating hot topic:", error);
+        console.error("Error creating hot topic:", error);
         alert("ცხელი კითხვის შექმნა ვერ მოხერხდა");
       }
     });
@@ -183,10 +204,9 @@ export default function AdminClient({
         formData.append("answer", answer);
 
         await updateHotTopicAction(topicId, formData);
-        // Refresh the page to get updated data
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error updating hot topic:", error);
+        console.error("Error updating hot topic:", error);
         alert("ცხელი კითხვის განახლება ვერ მოხერხდა");
       }
     });
@@ -196,43 +216,35 @@ export default function AdminClient({
     startTransition(async () => {
       try {
         await deleteHotTopicAction(topicId);
-        // Refresh the page to get updated data
         router.refresh();
       } catch (error) {
-        console.error("AdminClient: Error deleting hot topic:", error);
+        console.error("Error deleting hot topic:", error);
         alert("ცხელი კითხვის წაშლა ვერ მოხერხდა");
       }
     });
   };
 
-  // Export handler
   const handleExportTopics = async () => {
+    if (!mounted) return;
+
     startTransition(async () => {
       try {
         const result = await exportHotTopics();
         if (result.success) {
-          // Create a download link
-          const dataStr = JSON.stringify(result.data, null, 2);
-          const dataBlob = new Blob([dataStr], { type: "application/json" });
-          const url = URL.createObjectURL(dataBlob);
-          const link = document.createElement("a");
-          link.href = url;
-          link.download = result.filename || "hot-topics-export.json";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          URL.revokeObjectURL(url);
+          downloadJsonFile(
+            result.data,
+            result.filename || "hot-topics-export.json"
+          );
         } else {
           alert("ექსპორტი ვერ მოხერხდა");
         }
       } catch (error) {
-        console.error("AdminClient: Error exporting hot topics:", error);
+        console.error("Error exporting hot topics:", error);
         alert("ექსპორტი ვერ მოხერხდა");
       }
     });
   };
 
-  // Import handler
   const handleImportTopic = async (jsonData: string) => {
     startTransition(async () => {
       try {
@@ -247,11 +259,35 @@ export default function AdminClient({
           alert(`იმპორტი ვერ მოხერხდა: ${result.error}`);
         }
       } catch (error) {
-        console.error("AdminClient: Error importing hot topic:", error);
+        console.error("Error importing hot topic:", error);
         alert("იმპორტი ვერ მოხერხდა");
       }
     });
   };
+
+  // Prevent hydration mismatch by not rendering until mounted
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              ნორჩის ადმინისტრატორის პანელი
+            </h1>
+            <p className="text-gray-600">
+              მართეთ თქვენი იდეოლოგიური გამოწვევის სისტემა
+            </p>
+          </div>
+          <Tabs value="stories" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="stories">გზები</TabsTrigger>
+              <TabsTrigger value="hotquestions">ცხელი კითხვები</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
