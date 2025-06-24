@@ -5,7 +5,6 @@ import { Node } from "../types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -17,6 +16,7 @@ import {
 import { cn } from "@/lib/utils";
 import { Plus, Trash2, GripVertical, Save, X } from "lucide-react";
 import CreateNodeDialog from "./CreateNodeDialog";
+import MarkdownEditor from "./MarkdownEditor";
 
 const NO_DESTINATION_VALUE = "__NO_DESTINATION__";
 
@@ -312,9 +312,41 @@ export default function NodeEditor({
       </SelectItem>
     );
 
+    // Add specific node creation options
     options.push(
-      <SelectItem key="create-new" value="create-new" className="text-blue-600">
-        ახალი კვანძის შექმნა...
+      <SelectItem
+        key="__CREATE_QUESTION"
+        value="__CREATE_QUESTION"
+        className="text-blue-600"
+      >
+        ❓ ახალი კითხვის შექმნა
+      </SelectItem>
+    );
+    options.push(
+      <SelectItem
+        key="__CREATE_END"
+        value="__CREATE_END"
+        className="text-blue-600"
+      >
+        🏁 ახალი დასასრულის შექმნა
+      </SelectItem>
+    );
+    options.push(
+      <SelectItem
+        key="__CREATE_CALLOUT"
+        value="__CREATE_CALLOUT"
+        className="text-blue-600"
+      >
+        ⚠️ ახალი შენიშვნის შექმნა
+      </SelectItem>
+    );
+    options.push(
+      <SelectItem
+        key="__CREATE_INFOCARD"
+        value="__CREATE_INFOCARD"
+        className="text-blue-600"
+      >
+        💡 ახალი ინფო ბარათის შექმნა
       </SelectItem>
     );
 
@@ -378,12 +410,11 @@ export default function NodeEditor({
 
           <div>
             <Label htmlFor="node-text">კვანძის ტექსტი</Label>
-            <Textarea
-              id="node-text"
+            <MarkdownEditor
+              key={editedNode.id}
               value={editedNode.text}
-              onChange={(e) => handleTextChange(e.target.value)}
+              onChange={(value) => handleTextChange(value)}
               placeholder="შეიყვანეთ კვანძის ტექსტი (Markdown მხარდაჭერილია)"
-              className="min-h-[120px]"
             />
           </div>
 
@@ -423,12 +454,16 @@ export default function NodeEditor({
                       />
                       <Select
                         value={getSelectValue(option.nextNodeId)}
-                        onValueChange={(value) =>
-                          handleCreateNewNode(
-                            value,
-                            `options[${index}].nextNodeId`
-                          )
-                        }
+                        onValueChange={(value) => {
+                          if (
+                            !handleCreateNewNode(
+                              value,
+                              `question_option_${index}`
+                            )
+                          ) {
+                            handleOptionChange(index, "nextNodeId", value);
+                          }
+                        }}
                         onOpenChange={() =>
                           onNodeHover && onNodeHover(option.nextNodeId || null)
                         }
@@ -471,9 +506,15 @@ export default function NodeEditor({
                 <Label htmlFor="returnToNodeId">დაბრუნება</Label>
                 <Select
                   value={getSelectValue(editedNode.returnToNodeId)}
-                  onValueChange={(value) =>
-                    handleCreateNewNode(value, "returnToNodeId")
-                  }
+                  onValueChange={(value) => {
+                    if (!handleCreateNewNode(value, "callout_return")) {
+                      setEditedNode({
+                        ...editedNode,
+                        returnToNodeId:
+                          value === NO_DESTINATION_VALUE ? "" : value,
+                      });
+                    }
+                  }}
                   onOpenChange={() =>
                     onNodeHover &&
                     onNodeHover(editedNode.returnToNodeId || null)
@@ -521,9 +562,14 @@ export default function NodeEditor({
                 <Label htmlFor="nextNodeId">შემდეგი კვანძი</Label>
                 <Select
                   value={getSelectValue(editedNode.nextNodeId)}
-                  onValueChange={(value) =>
-                    handleCreateNewNode(value, "nextNodeId")
-                  }
+                  onValueChange={(value) => {
+                    if (!handleCreateNewNode(value, "infocard_next")) {
+                      setEditedNode({
+                        ...editedNode,
+                        nextNodeId: value === NO_DESTINATION_VALUE ? "" : value,
+                      });
+                    }
+                  }}
                   onOpenChange={() =>
                     onNodeHover && onNodeHover(editedNode.nextNodeId || null)
                   }
