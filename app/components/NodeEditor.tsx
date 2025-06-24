@@ -12,8 +12,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { Plus, Trash2, GripVertical, Save, X } from "lucide-react";
 import CreateNodeDialog from "./CreateNodeDialog";
 import MarkdownEditor from "./MarkdownEditor";
@@ -27,6 +27,7 @@ interface NodeEditorProps {
   onCancel: () => void;
   onNodeHover?: (nodeId: string | null) => void;
   onCreateAndConnect?: (
+    node: Node,
     nodeType: string,
     nodeName: string,
     currentField: string
@@ -76,10 +77,7 @@ export default function NodeEditor({
         id: editedNode.id,
         type: "question",
         text: editedNode.text,
-        options: [
-          { label: "Option 1", nextNodeId: "" },
-          { label: "Option 2", nextNodeId: "" },
-        ],
+        options: editedNode.type === "question" ? editedNode.options : [],
       });
     } else if (type === "end") {
       setEditedNode({
@@ -197,8 +195,8 @@ export default function NodeEditor({
     }
 
     if (editedNode.type === "question") {
-      if (editedNode.options.length < 2) {
-        alert("კითხვას უნდა ჰქონდეს მინიმუმ 2 ოფცია");
+      if (editedNode.options.length < 1) {
+        alert("კითხვას უნდა ჰქონდეს მინიმუმ 1 ოფცია");
         return;
       }
 
@@ -250,311 +248,254 @@ export default function NodeEditor({
     }
   };
 
-  // Helper function to format node for display in dropdowns
   const formatNodeForDisplay = (nodeId: string): string => {
-    const node = allNodes[nodeId];
-    if (!node) return nodeId;
-
-    const icon = getNodeTypeIcon(node.type);
-    const truncatedText =
-      node.text.length > 30 ? node.text.substring(0, 30) + "..." : node.text;
-    const capitalizedType =
-      node.type.charAt(0).toUpperCase() + node.type.slice(1);
-
-    return `${icon} ${truncatedText} (${capitalizedType})`;
+    const targetNode = allNodes[nodeId];
+    if (!targetNode) return `Node not found: ${nodeId}`;
+    const icon = getNodeTypeIcon(targetNode.type);
+    const text =
+      targetNode.text.length > 40
+        ? `${targetNode.text.substring(0, 40)}...`
+        : targetNode.text;
+    return `${icon} ${text}`;
   };
 
-  // Helper function to get value for current dropdown selection
   const getSelectValue = (nodeId: string | undefined): string => {
     return nodeId || NO_DESTINATION_VALUE;
   };
 
-  // Helper function to get display text for current selection
-  const getSelectDisplayValue = (nodeId: string | undefined): string => {
-    if (!nodeId) return "-- No destination --";
-    return formatNodeForDisplay(nodeId);
-  };
-
-  // Helper function to handle special create actions
   const handleCreateNewNode = (value: string, currentField: string) => {
-    if (value.startsWith("__CREATE_")) {
-      const nodeType = value.replace("__CREATE_", "").toLowerCase();
+    if (value.startsWith("create-")) {
+      const nodeType = value.replace("create-", "");
       setCreateDialog({
         isOpen: true,
-        nodeType,
+        nodeType: nodeType,
         currentField,
       });
-      return true;
+      return undefined;
     }
-    return false;
+    return value;
   };
 
-  // Handle dialog confirmation
   const handleCreateConfirm = (nodeType: string, nodeName: string) => {
-    // Auto-save current changes before creating new connected node
-    if (hasUnsavedChanges) {
-      onSave(editedNode);
+    if (onCreateAndConnect) {
+      onCreateAndConnect(
+        editedNode,
+        nodeType,
+        nodeName,
+        createDialog.currentField
+      );
     }
-    onCreateAndConnect?.(nodeType, nodeName, createDialog.currentField);
+    setCreateDialog({ isOpen: false, nodeType: "", currentField: "" });
   };
 
-  // Create options for dropdowns
-  const getDropdownOptions = () => {
-    const options = availableNodes.map((id) => (
-      <SelectItem key={id} value={id}>
-        {formatNodeForDisplay(id)}
+  const renderNodeOptions = (currentField: string) => {
+    const nodeOptions = availableNodes.map((nodeId) => (
+      <SelectItem key={nodeId} value={nodeId}>
+        {formatNodeForDisplay(nodeId)}
       </SelectItem>
     ));
 
-    options.unshift(
-      <SelectItem key={NO_DESTINATION_VALUE} value={NO_DESTINATION_VALUE}>
-        <span className="text-gray-400">დანიშნულების გარეშე</span>
+    const createOptions = [
+      { value: "create-question", label: "Create new Question..." },
+      { value: "create-callout", label: "Create new Callout..." },
+      { value: "create-infocard", label: "Create new Infocard..." },
+      { value: "create-end", label: "Create new End..." },
+    ].map((opt) => (
+      <SelectItem key={opt.value} value={opt.value}>
+        <div className="flex items-center gap-2">
+          <Plus className="h-4 w-4 text-green-500" />
+          {opt.label}
+        </div>
       </SelectItem>
-    );
+    ));
 
-    // Add specific node creation options
-    options.push(
-      <SelectItem
-        key="__CREATE_QUESTION"
-        value="__CREATE_QUESTION"
-        className="text-blue-600"
-      >
-        ❓ ახალი კითხვის შექმნა
-      </SelectItem>
-    );
-    options.push(
-      <SelectItem
-        key="__CREATE_END"
-        value="__CREATE_END"
-        className="text-blue-600"
-      >
-        🏁 ახალი დასასრულის შექმნა
-      </SelectItem>
-    );
-    options.push(
-      <SelectItem
-        key="__CREATE_CALLOUT"
-        value="__CREATE_CALLOUT"
-        className="text-blue-600"
-      >
-        ⚠️ ახალი შენიშვნის შექმნა
-      </SelectItem>
-    );
-    options.push(
-      <SelectItem
-        key="__CREATE_INFOCARD"
-        value="__CREATE_INFOCARD"
-        className="text-blue-600"
-      >
-        💡 ახალი ინფო ბარათის შექმნა
-      </SelectItem>
-    );
+    const handleSelectChange = (value: string) => {
+      const result = handleCreateNewNode(value, currentField);
+      if (result !== undefined) {
+        if (currentField.startsWith("option-")) {
+          const index = parseInt(currentField.split("-")[1], 10);
+          handleOptionChange(index, "nextNodeId", result);
+        } else {
+          setEditedNode((prev) => ({
+            ...prev,
+            [currentField]: result === NO_DESTINATION_VALUE ? "" : result,
+          }));
+        }
+      }
+    };
 
-    return options;
+    return {
+      nodeOptions,
+      createOptions,
+      handleSelectChange,
+    };
   };
 
   return (
     <div className="flex h-full flex-col">
-      <div className="mb-6 flex-shrink-0">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{getNodeTypeIcon(editedNode.type)}</span>
-            <span className="text-sm font-medium capitalize">
-              {editedNode.type}
-            </span>
-            {hasUnsavedChanges && (
-              <span className="ml-2 text-xs text-amber-600">
-                ● უშენახავი ცვლილებები
-              </span>
-            )}
-          </div>
-          <div className="flex gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSave}
-              disabled={!hasUnsavedChanges}
-              className="gap-1"
-            >
-              <Save className="h-4 w-4" />
-              შენახვა
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleCancel}
-              className="gap-1"
-            >
-              <X className="h-4 w-4" />
-              გაუქმება
-            </Button>
-          </div>
+      <div className="flex items-center justify-between border-b p-4">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">{getNodeTypeIcon(editedNode.type)}</span>
+          <h2 className="text-xl font-semibold">Edit Node</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleSave}
+            disabled={!hasUnsavedChanges}
+            className="gap-2"
+          >
+            <Save className="h-4 w-4" /> Save
+          </Button>
+          <Button onClick={handleCancel} variant="ghost" size="icon">
+            <X className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
-      <div className="flex-grow overflow-y-auto">
+      <div className="flex-grow overflow-y-auto p-4">
         <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="node-type">კვანძის ტიპი</Label>
-              <Select
-                value={editedNode.type}
-                onValueChange={(
-                  value: "question" | "end" | "callout" | "infocard"
-                ) => handleTypeChange(value)}
-              >
-                <SelectTrigger id="node-type">
-                  <SelectValue placeholder="აირჩიეთ ტიპი" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="question">❓ კითხვა</SelectItem>
-                  <SelectItem value="end">🏁 დასასრული</SelectItem>
-                  <SelectItem value="callout">⚠️ შენიშვნა</SelectItem>
-                  <SelectItem value="infocard">💡 ინფო ბარათი</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="node-id">კვანძის ID</Label>
-              <Input id="node-id" value={editedNode.id} disabled />
-            </div>
+          {/* Node Type */}
+          <div>
+            <Label>Node Type</Label>
+            <Select
+              value={editedNode.type}
+              onValueChange={(
+                value: "question" | "end" | "callout" | "infocard"
+              ) => handleTypeChange(value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select node type..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="question">Question</SelectItem>
+                <SelectItem value="end">End</SelectItem>
+                <SelectItem value="callout">Callout</SelectItem>
+                <SelectItem value="infocard">Info Card</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
+          {/* Node Text */}
           <div>
-            <Label htmlFor="node-text">კვანძის ტექსტი</Label>
+            <Label htmlFor="node-text">Text (Markdown supported)</Label>
             <MarkdownEditor
               key={editedNode.id}
               value={editedNode.text}
-              onChange={(value) => handleTextChange(value)}
-              placeholder="შეიყვანეთ კვანძის ტექსტი (Markdown მხარდაჭერილია)"
+              onChange={handleTextChange}
             />
           </div>
 
+          {/* Question Options */}
           {editedNode.type === "question" && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Label>ოფციები</Label>
-                <Button variant="outline" size="sm" onClick={addOption}>
-                  <Plus className="h-4 w-4" />
-                  ოფციის დამატება
-                </Button>
-              </div>
-              <div
-                className="space-y-2"
-                onDragOver={handleDragOver}
-                onDrop={(e) => handleDrop(e, editedNode.options.length)}
-              >
-                {editedNode.options.map((option, index) => (
-                  <div
-                    key={index}
-                    draggable
-                    onDragStart={(e) => handleDragStart(e, index)}
-                    onDrop={(e) => handleDrop(e, index)}
-                    className={cn(
-                      "flex items-center gap-2 p-2 border rounded-md bg-white",
-                      draggedIndex === index && "opacity-50"
-                    )}
-                  >
-                    <GripVertical className="h-5 w-5 flex-shrink-0 cursor-move text-gray-400" />
-                    <div className="grid flex-grow grid-cols-1 gap-2 md:grid-cols-2">
-                      <Input
-                        value={option.label}
-                        onChange={(e) =>
-                          handleOptionChange(index, "label", e.target.value)
-                        }
-                        placeholder={`ოფცია ${index + 1}`}
-                      />
-                      <Select
-                        value={getSelectValue(option.nextNodeId)}
-                        onValueChange={(value) => {
-                          if (
-                            !handleCreateNewNode(
-                              value,
-                              `question_option_${index}`
-                            )
-                          ) {
-                            handleOptionChange(index, "nextNodeId", value);
-                          }
-                        }}
-                        onOpenChange={() =>
-                          onNodeHover && onNodeHover(option.nextNodeId || null)
-                        }
-                      >
-                        <SelectTrigger
-                          onMouseOver={() =>
-                            onNodeHover &&
-                            onNodeHover(option.nextNodeId || null)
-                          }
-                          onMouseLeave={() => onNodeHover && onNodeHover(null)}
-                        >
-                          <SelectValue placeholder="აირჩიეთ დანიშნულება">
-                            {getSelectDisplayValue(option.nextNodeId)}
-                          </SelectValue>
-                        </SelectTrigger>
-                        <SelectContent>
-                          <div className="max-h-60 overflow-y-auto">
-                            {getDropdownOptions()}
-                          </div>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeOption(index)}
-                      className="flex-shrink-0"
+            <div>
+              <Label>Options</Label>
+              <div className="mt-2 space-y-4">
+                {editedNode.options.map((option, index) => {
+                  const { nodeOptions, createOptions, handleSelectChange } =
+                    renderNodeOptions(`option-${index}`);
+
+                  return (
+                    <div
+                      key={index}
+                      className="flex items-start gap-2 rounded-lg border bg-stone-50/50 p-3 dark:bg-stone-800/20"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragOver={handleDragOver}
+                      onDrop={(e) => handleDrop(e, index)}
+                      onMouseEnter={() =>
+                        onNodeHover && onNodeHover(option.nextNodeId)
+                      }
+                      onMouseLeave={() => onNodeHover && onNodeHover(null)}
+                      style={{
+                        opacity: draggedIndex === index ? 0.5 : 1,
+                        cursor: "move",
+                      }}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ))}
+                      <GripVertical className="mt-2 h-5 w-5 flex-shrink-0 text-gray-400" />
+                      <div className="flex-grow space-y-2">
+                        <Input
+                          placeholder={`Option ${index + 1} text`}
+                          value={option.label}
+                          onChange={(e) =>
+                            handleOptionChange(index, "label", e.target.value)
+                          }
+                          className="bg-white dark:bg-stone-800"
+                        />
+                        <Select
+                          value={getSelectValue(option.nextNodeId)}
+                          onValueChange={handleSelectChange}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select next node..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {createOptions}
+                            <SelectItem value={NO_DESTINATION_VALUE}>
+                              No destination
+                            </SelectItem>
+                            <SelectSeparator />
+                            {nodeOptions}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeOption(index)}
+                        className="mt-1 flex-shrink-0 text-red-500 hover:text-red-600"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  );
+                })}
               </div>
+              <Button
+                onClick={addOption}
+                variant="outline"
+                className="mt-4 w-full gap-2"
+              >
+                <Plus className="h-4 w-4" /> Add Option
+              </Button>
             </div>
           )}
 
+          {/* Callout Specific Fields */}
           {editedNode.type === "callout" && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="returnToNodeId">დაბრუნება</Label>
+                <Label htmlFor="callout-return">Return To Node</Label>
                 <Select
                   value={getSelectValue(editedNode.returnToNodeId)}
                   onValueChange={(value) => {
-                    if (!handleCreateNewNode(value, "callout_return")) {
-                      setEditedNode({
-                        ...editedNode,
-                        returnToNodeId:
-                          value === NO_DESTINATION_VALUE ? "" : value,
-                      });
-                    }
+                    const { handleSelectChange } =
+                      renderNodeOptions("returnToNodeId");
+                    handleSelectChange(value);
                   }}
-                  onOpenChange={() =>
-                    onNodeHover &&
-                    onNodeHover(editedNode.returnToNodeId || null)
-                  }
                 >
-                  <SelectTrigger
-                    id="returnToNodeId"
-                    onMouseOver={() =>
-                      onNodeHover &&
-                      onNodeHover(editedNode.returnToNodeId || null)
+                  <SelectTrigger id="callout-return">
+                    <SelectValue placeholder="Select a node to return to..." />
+                  </SelectTrigger>
+                  <SelectContent
+                    onMouseEnter={() =>
+                      onNodeHover && onNodeHover(editedNode.returnToNodeId)
                     }
                     onMouseLeave={() => onNodeHover && onNodeHover(null)}
                   >
-                    <SelectValue placeholder="აირჩიეთ დანიშნულება">
-                      {getSelectDisplayValue(editedNode.returnToNodeId)}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <div className="max-h-60 overflow-y-auto">
-                      {getDropdownOptions()}
-                    </div>
+                    {renderNodeOptions("returnToNodeId").createOptions}
+                    <SelectItem value={NO_DESTINATION_VALUE}>
+                      No destination
+                    </SelectItem>
+                    <SelectSeparator />
+                    {renderNodeOptions("returnToNodeId").nodeOptions}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="callout-button-label">ღილაკის ტექსტი</Label>
+                <Label htmlFor="callout-button">Button Label</Label>
                 <Input
-                  id="callout-button-label"
+                  id="callout-button"
+                  placeholder="e.g., Try Again"
                   value={editedNode.buttonLabel}
                   onChange={(e) =>
                     setEditedNode({
@@ -562,52 +503,47 @@ export default function NodeEditor({
                       buttonLabel: e.target.value,
                     })
                   }
-                  placeholder="მაგ., სცადეთ თავიდან"
                 />
               </div>
             </div>
           )}
 
+          {/* Infocard Specific Fields */}
           {editedNode.type === "infocard" && (
             <div className="space-y-4">
               <div>
-                <Label htmlFor="nextNodeId">შემდეგი კვანძი</Label>
+                <Label htmlFor="infocard-next">Next Node</Label>
                 <Select
                   value={getSelectValue(editedNode.nextNodeId)}
                   onValueChange={(value) => {
-                    if (!handleCreateNewNode(value, "infocard_next")) {
-                      setEditedNode({
-                        ...editedNode,
-                        nextNodeId: value === NO_DESTINATION_VALUE ? "" : value,
-                      });
-                    }
+                    const { handleSelectChange } =
+                      renderNodeOptions("nextNodeId");
+                    handleSelectChange(value);
                   }}
-                  onOpenChange={() =>
-                    onNodeHover && onNodeHover(editedNode.nextNodeId || null)
-                  }
                 >
-                  <SelectTrigger
-                    id="nextNodeId"
-                    onMouseOver={() =>
-                      onNodeHover && onNodeHover(editedNode.nextNodeId || null)
+                  <SelectTrigger id="infocard-next">
+                    <SelectValue placeholder="Select next node..." />
+                  </SelectTrigger>
+                  <SelectContent
+                    onMouseEnter={() =>
+                      onNodeHover && onNodeHover(editedNode.nextNodeId)
                     }
                     onMouseLeave={() => onNodeHover && onNodeHover(null)}
                   >
-                    <SelectValue placeholder="აირჩიეთ დანიშნულება">
-                      {getSelectDisplayValue(editedNode.nextNodeId)}
-                    </SelectValue>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <div className="max-h-60 overflow-y-auto">
-                      {getDropdownOptions()}
-                    </div>
+                    {renderNodeOptions("nextNodeId").createOptions}
+                    <SelectItem value={NO_DESTINATION_VALUE}>
+                      No destination
+                    </SelectItem>
+                    <SelectSeparator />
+                    {renderNodeOptions("nextNodeId").nodeOptions}
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label htmlFor="infocard-button-label">ღილაკის ტექსტი</Label>
+                <Label htmlFor="infocard-button">Button Label</Label>
                 <Input
-                  id="infocard-button-label"
+                  id="infocard-button"
+                  placeholder="e.g., Continue"
                   value={editedNode.buttonLabel}
                   onChange={(e) =>
                     setEditedNode({
@@ -615,7 +551,6 @@ export default function NodeEditor({
                       buttonLabel: e.target.value,
                     })
                   }
-                  placeholder="მაგ., გაგრძელება"
                 />
               </div>
             </div>
@@ -625,9 +560,11 @@ export default function NodeEditor({
 
       <CreateNodeDialog
         isOpen={createDialog.isOpen}
-        onClose={() => setCreateDialog({ ...createDialog, isOpen: false })}
-        onConfirm={handleCreateConfirm}
         nodeType={createDialog.nodeType}
+        onClose={() =>
+          setCreateDialog({ isOpen: false, nodeType: "", currentField: "" })
+        }
+        onConfirm={handleCreateConfirm}
       />
     </div>
   );

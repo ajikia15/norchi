@@ -200,13 +200,14 @@ export default function StoryEditClient({
   }, [interactiveEditorIsFullscreen]);
 
   const handleCreateAndConnect = (
+    node: Node,
     nodeType: string,
     nodeName: string,
     currentField: string
   ) => {
-    if (!flowData || !editingNode) return;
+    if (!flowData) return;
 
-    const currentNodeWithChanges = editingNode;
+    const currentNodeWithChanges = node;
     const updatedFlowData = {
       ...flowData,
       nodes: {
@@ -258,12 +259,17 @@ export default function StoryEditClient({
     const updatedCurrentNode = { ...currentNodeWithChanges };
 
     if (currentField.startsWith("question_option_")) {
-      const optionIndex = parseInt(currentField.split("_")[2]);
+      const optionIndex = parseInt(currentField.split("_")[2], 10);
       if (
         updatedCurrentNode.type === "question" &&
         updatedCurrentNode.options[optionIndex]
       ) {
-        updatedCurrentNode.options[optionIndex].nextNodeId = newNodeId;
+        const newOptions = [...updatedCurrentNode.options];
+        newOptions[optionIndex] = {
+          ...newOptions[optionIndex],
+          nextNodeId: newNodeId,
+        };
+        updatedCurrentNode.options = newOptions;
       }
     } else if (currentField === "callout_return") {
       if (updatedCurrentNode.type === "callout") {
