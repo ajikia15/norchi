@@ -14,19 +14,37 @@ import {
   BackgroundVariant,
   MarkerType,
   Connection,
+  ReactFlowProvider,
+  useReactFlow,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { FlowData } from "../types";
 
 interface FlowGraphProps {
   flowData: FlowData;
+  selectedNodeId?: string | null;
+  hoveredNodeId?: string | null;
+  onNodeClick?: (nodeId: string) => void;
+  onPaneClick?: () => void;
+  onNodeDrop?: (nodeType: string, position: { x: number; y: number }) => void;
 }
 
 const nodeWidth = 200;
 const nodeHeight = 80;
 const levelHeight = 150;
 
-export default function FlowGraph({ flowData }: FlowGraphProps) {
+function FlowGraphContent(props: FlowGraphProps) {
+  const {
+    flowData,
+    selectedNodeId,
+    hoveredNodeId,
+    onNodeClick,
+    onPaneClick,
+    onNodeDrop,
+  } = props;
+
+  const reactFlowInstance = useReactFlow();
+
   // Convert our flow data to React Flow format
   const { nodes, edges } = useMemo(() => {
     const flowNodes: FlowNode[] = [];
@@ -38,28 +56,47 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
     const nodeLevel: Record<string, number> = {};
     const levelWidth: Record<number, number> = {};
 
-    // BFS to assign levels
-    const queue = [{ id: flowData.startNodeId, level: 0 }];
-    visited.add(flowData.startNodeId);
-    nodeLevel[flowData.startNodeId] = 0;
+    if (flowData.startNodeId && flowData.nodes[flowData.startNodeId]) {
+      const queue = [{ id: flowData.startNodeId, level: 0 }];
+      visited.add(flowData.startNodeId);
+      nodeLevel[flowData.startNodeId] = 0;
 
-    while (queue.length > 0) {
-      const { id, level } = queue.shift()!;
+      while (queue.length > 0) {
+        const { id, level } = queue.shift()!;
 
-      levelWidth[level] = (levelWidth[level] || 0) + 1;
+        levelWidth[level] = (levelWidth[level] || 0) + 1;
 
-      const node = flowData.nodes[id];
-      if (node && node.type === "question") {
-        for (const option of node.options) {
-          if (
-            option.nextNodeId &&
-            !visited.has(option.nextNodeId) &&
-            flowData.nodes[option.nextNodeId]
-          ) {
-            visited.add(option.nextNodeId);
-            nodeLevel[option.nextNodeId] = level + 1;
-            queue.push({ id: option.nextNodeId, level: level + 1 });
+        const node = flowData.nodes[id];
+        if (node && node.type === "question") {
+          for (const option of node.options) {
+            if (
+              option.nextNodeId &&
+              !visited.has(option.nextNodeId) &&
+              flowData.nodes[option.nextNodeId]
+            ) {
+              visited.add(option.nextNodeId);
+              nodeLevel[option.nextNodeId] = level + 1;
+              queue.push({ id: option.nextNodeId, level: level + 1 });
+            }
           }
+        } else if (
+          node.type === "infocard" &&
+          node.nextNodeId &&
+          !visited.has(node.nextNodeId) &&
+          flowData.nodes[node.nextNodeId]
+        ) {
+          visited.add(node.nextNodeId);
+          nodeLevel[node.nextNodeId] = level + 1;
+          queue.push({ id: node.nextNodeId, level: level + 1 });
+        } else if (
+          node.type === "callout" &&
+          node.returnToNodeId &&
+          !visited.has(node.returnToNodeId) &&
+          flowData.nodes[node.returnToNodeId]
+        ) {
+          visited.add(node.returnToNodeId);
+          nodeLevel[node.returnToNodeId] = level + 1;
+          queue.push({ id: node.returnToNodeId, level: level + 1 });
         }
       }
     }
@@ -75,10 +112,12 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
       levelCounters[level] = position + 1;
 
       // Calculate x position to center nodes in each level
-      const x = (position - (levelCount - 1) / 2) * (nodeWidth + 50);
+      const x = (position - (levelCount - 1) / 2) * (nodeWidth + 100);
       const y = level * levelHeight;
 
       const isStart = nodeId === flowData.startNodeId;
+      const isSelected = nodeId === selectedNodeId;
+      const isHovered = nodeId === hoveredNodeId;
 
       const getNodeColor = () => {
         if (isStart) return "#22c55e"; // Green for start
@@ -135,11 +174,21 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
         style: {
           background: getNodeColor(),
           color: "white",
-          border: "1px solid #1e293b",
+          border: isSelected
+            ? "3px solid #fbbf24"
+            : isHovered
+            ? "3px solid #9ca3af"
+            : "1px solid #1e293b",
           borderRadius: "8px",
           width: nodeWidth,
           height: nodeHeight,
           fontSize: "12px",
+          transition: "all 0.2s ease-in-out",
+          boxShadow: isSelected
+            ? "0 0 20px rgba(251, 191, 36, 0.7)"
+            : isHovered
+            ? "0 0 15px rgba(156, 163, 175, 0.7)"
+            : "none",
         },
       });
 
@@ -233,7 +282,7 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
     });
 
     return { nodes: flowNodes, edges: flowEdges };
-  }, [flowData]);
+  }, [flowData, selectedNodeId, hoveredNodeId]);
 
   const [reactFlowNodes, setNodes, onNodesChange] = useNodesState(nodes);
   const [reactFlowEdges, setEdges, onEdgesChange] = useEdgesState(edges);
@@ -243,20 +292,56 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
     [setEdges]
   );
 
+  const handleNodeClick = useCallback(
+    (_: React.MouseEvent, node: FlowNode) => {
+      onNodeClick?.(node.id);
+    },
+    [onNodeClick]
+  );
+
+  const handleDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const handleDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+      const type = event.dataTransfer.getData("application/reactflow");
+      if (!type || !onNodeDrop || !reactFlowInstance) {
+        return;
+      }
+      const position = reactFlowInstance.screenToFlowPosition({
+        x: event.clientX,
+        y: event.clientY,
+      });
+      onNodeDrop(type, position);
+    },
+    [reactFlowInstance, onNodeDrop]
+  );
+
   // Update nodes and edges when flowData changes
   useMemo(() => {
     setNodes(nodes);
     setEdges(edges);
   }, [nodes, edges, setNodes, setEdges]);
 
+  const isInteractive = !!onNodeClick;
+
   return (
-    <div className="w-full h-[600px] border border-gray-300 rounded-lg">
+    <div
+      className="w-full h-full"
+      onDrop={isInteractive ? handleDrop : undefined}
+      onDragOver={isInteractive ? handleDragOver : undefined}
+    >
       <ReactFlow
         nodes={reactFlowNodes}
         edges={reactFlowEdges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onNodeClick={isInteractive ? handleNodeClick : undefined}
+        onPaneClick={onPaneClick}
         connectionMode={ConnectionMode.Loose}
         fitView
         attributionPosition="bottom-left"
@@ -265,5 +350,13 @@ export default function FlowGraph({ flowData }: FlowGraphProps) {
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
     </div>
+  );
+}
+
+export default function FlowGraph(props: FlowGraphProps) {
+  return (
+    <ReactFlowProvider>
+      <FlowGraphContent {...props} />
+    </ReactFlowProvider>
   );
 }

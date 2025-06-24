@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Node } from "../types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -354,33 +354,45 @@ export default function NodeEditor({
   };
 
   return (
-    <Card className="flex flex-col h-full">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex justify-between items-center">
-          <CardTitle>კვანძის რედაქტორი</CardTitle>
-          <div>
+    <div className="flex h-full flex-col">
+      <div className="mb-6 flex-shrink-0">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">{getNodeTypeIcon(editedNode.type)}</span>
+            <span className="text-sm font-medium capitalize">
+              {editedNode.type}
+            </span>
+            {hasUnsavedChanges && (
+              <span className="ml-2 text-xs text-amber-600">
+                ● უშენახავი ცვლილებები
+              </span>
+            )}
+          </div>
+          <div className="flex gap-1">
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={handleSave}
               disabled={!hasUnsavedChanges}
-              aria-label="Save changes"
+              className="gap-1"
             >
-              <Save className="h-5 w-5" />
+              <Save className="h-4 w-4" />
+              შენახვა
             </Button>
             <Button
               variant="ghost"
-              size="icon"
+              size="sm"
               onClick={handleCancel}
-              aria-label="Cancel editing"
+              className="gap-1"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
+              გაუქმება
             </Button>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="flex-grow overflow-y-auto pr-2">
+      <div className="flex-grow overflow-y-auto">
         <div className="space-y-6">
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -420,10 +432,10 @@ export default function NodeEditor({
 
           {editedNode.type === "question" && (
             <div className="space-y-4">
-              <div className="flex justify-between items-center">
+              <div className="flex items-center justify-between">
                 <Label>ოფციები</Label>
                 <Button variant="outline" size="sm" onClick={addOption}>
-                  <Plus className="h-4 w-4 " />
+                  <Plus className="h-4 w-4" />
                   ოფციის დამატება
                 </Button>
               </div>
@@ -443,8 +455,8 @@ export default function NodeEditor({
                       draggedIndex === index && "opacity-50"
                     )}
                   >
-                    <GripVertical className="h-5 w-5 text-gray-400 cursor-move flex-shrink-0" />
-                    <div className="flex-grow grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <GripVertical className="h-5 w-5 flex-shrink-0 cursor-move text-gray-400" />
+                    <div className="grid flex-grow grid-cols-1 gap-2 md:grid-cols-2">
                       <Input
                         value={option.label}
                         onChange={(e) =>
@@ -609,18 +621,6 @@ export default function NodeEditor({
             </div>
           )}
         </div>
-      </CardContent>
-
-      <div className="p-4 border-t flex-shrink-0">
-        <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={handleCancel}>
-            გაუქმება
-          </Button>
-          <Button onClick={handleSave} disabled={!hasUnsavedChanges}>
-            <Save className="h-4 w-4 " />
-            ცვლილებების შენახვა
-          </Button>
-        </div>
       </div>
 
       <CreateNodeDialog
@@ -629,6 +629,6 @@ export default function NodeEditor({
         onConfirm={handleCreateConfirm}
         nodeType={createDialog.nodeType}
       />
-    </Card>
+    </div>
   );
 }

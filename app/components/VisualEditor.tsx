@@ -22,8 +22,15 @@ import CustomNode from "./CustomNode";
 import ConnectionDialog from "./ConnectionDialog";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import NodeEditor from "./NodeEditor";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Maximize2, Minimize2, Settings } from "lucide-react";
 
 interface VisualEditorProps {
   flowData: FlowData;
@@ -48,6 +55,8 @@ function VisualEditorContent({
     Record<string, { x: number; y: number }>
   >({});
   const [hasInitialLayout, setHasInitialLayout] = useState(false);
+  const [isPaletteMinimized, setIsPaletteMinimized] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [connectionDialog, setConnectionDialog] = useState<{
     isOpen: boolean;
     sourceNodeId: string;
@@ -70,6 +79,7 @@ function VisualEditorContent({
   const handleEditNode = useCallback((node: Node) => {
     setEditingNode(node);
     setSelectedNodeId(node.id);
+    setIsSheetOpen(true);
   }, []);
 
   const handleSaveNode = useCallback(
@@ -89,6 +99,7 @@ function VisualEditorContent({
 
   const handleCancelEdit = useCallback(() => {
     setEditingNode(null);
+    setIsSheetOpen(false);
   }, []);
 
   // Handle node deletion
@@ -132,6 +143,7 @@ function VisualEditorContent({
     if (selectedNodeId === nodeId) {
       setSelectedNodeId(null);
       setEditingNode(null);
+      setIsSheetOpen(false);
     }
 
     setDeleteDialog({ isOpen: false, nodeToDelete: null });
@@ -164,69 +176,74 @@ function VisualEditorContent({
     return () => document.removeEventListener("keydown", handleKeyDownEvent);
   }, [handleKeyDown]);
 
-  // Convert flow data to ReactFlow format
+  // Convert flow data to ReactFlow format with improved layout
   const { nodes, edges } = useMemo(() => {
     const flowNodes: FlowNode[] = [];
     const flowEdges: Edge[] = [];
     const nodeIds = Object.keys(flowData.nodes);
 
-    // Simple auto-layout algorithm
+    // Use FlowGraph's proven layout algorithm
     const visited = new Set<string>();
     const nodeLevel: Record<string, number> = {};
     const levelWidth: Record<number, number> = {};
 
-    // BFS to assign levels
-    const queue = [{ id: flowData.startNodeId || nodeIds[0], level: 0 }];
-    if (flowData.startNodeId) {
-      visited.add(flowData.startNodeId);
-      nodeLevel[flowData.startNodeId] = 0;
-    }
+    // BFS to assign levels starting from start node
+    const startNodeId = flowData.startNodeId || nodeIds[0];
+    if (startNodeId) {
+      const queue = [{ id: startNodeId, level: 0 }];
+      visited.add(startNodeId);
+      nodeLevel[startNodeId] = 0;
 
-    while (queue.length > 0) {
-      const { id, level } = queue.shift()!;
-      levelWidth[level] = (levelWidth[level] || 0) + 1;
+      while (queue.length > 0) {
+        const { id, level } = queue.shift()!;
+        levelWidth[level] = (levelWidth[level] || 0) + 1;
 
-      const node = flowData.nodes[id];
-      if (node && node.type === "question") {
-        for (const option of node.options) {
-          if (
-            option.nextNodeId &&
-            !visited.has(option.nextNodeId) &&
-            flowData.nodes[option.nextNodeId]
-          ) {
-            visited.add(option.nextNodeId);
-            nodeLevel[option.nextNodeId] = level + 1;
-            queue.push({ id: option.nextNodeId, level: level + 1 });
+        const node = flowData.nodes[id];
+        if (node && node.type === "question") {
+          for (const option of node.options) {
+            if (
+              option.nextNodeId &&
+              !visited.has(option.nextNodeId) &&
+              flowData.nodes[option.nextNodeId]
+            ) {
+              visited.add(option.nextNodeId);
+              nodeLevel[option.nextNodeId] = level + 1;
+              queue.push({ id: option.nextNodeId, level: level + 1 });
+            }
           }
-        }
-      } else if (node && node.type === "infocard" && node.nextNodeId) {
-        if (!visited.has(node.nextNodeId) && flowData.nodes[node.nextNodeId]) {
-          visited.add(node.nextNodeId);
-          nodeLevel[node.nextNodeId] = level + 1;
-          queue.push({ id: node.nextNodeId, level: level + 1 });
-        }
-      } else if (node && node.type === "callout" && node.returnToNodeId) {
-        if (
-          !visited.has(node.returnToNodeId) &&
-          flowData.nodes[node.returnToNodeId]
-        ) {
-          visited.add(node.returnToNodeId);
-          nodeLevel[node.returnToNodeId] = level + 1;
-          queue.push({ id: node.returnToNodeId, level: level + 1 });
+        } else if (node && node.type === "infocard" && node.nextNodeId) {
+          if (
+            !visited.has(node.nextNodeId) &&
+            flowData.nodes[node.nextNodeId]
+          ) {
+            visited.add(node.nextNodeId);
+            nodeLevel[node.nextNodeId] = level + 1;
+            queue.push({ id: node.nextNodeId, level: level + 1 });
+          }
+        } else if (node && node.type === "callout" && node.returnToNodeId) {
+          if (
+            !visited.has(node.returnToNodeId) &&
+            flowData.nodes[node.returnToNodeId]
+          ) {
+            visited.add(node.returnToNodeId);
+            nodeLevel[node.returnToNodeId] = level + 1;
+            queue.push({ id: node.returnToNodeId, level: level + 1 });
+          }
         }
       }
     }
 
-    // Position nodes - use stored positions or auto-layout for new nodes
+    // Position nodes with much larger spacing to prevent overlap
+    const nodeWidth = 200;
+    const horizontalSpacing = nodeWidth + 200; // Much larger spacing: 400px total
+    const levelHeight = 300; // Much larger vertical spacing
     const levelCounters: Record<number, number> = {};
-    const nodeWidth = 250;
-    const levelHeight = 200;
 
     nodeIds.forEach((nodeId) => {
       const node = flowData.nodes[nodeId];
       let nodePosition: { x: number; y: number };
 
-      // Use stored position if available, otherwise calculate with auto-layout
+      // Use stored position if available, otherwise calculate with increased spacing
       if (nodePositions[nodeId]) {
         nodePosition = nodePositions[nodeId];
       } else {
@@ -235,9 +252,10 @@ function VisualEditorContent({
         const position = levelCounters[level] || 0;
         levelCounters[level] = position + 1;
 
-        // Calculate x position to center nodes in each level
-        const x = (position - (levelCount - 1) / 2) * (nodeWidth + 100);
+        // Calculate x position to center nodes in each level with more spacing
+        const x = (position - (levelCount - 1) / 2) * horizontalSpacing;
         const y = level * levelHeight;
+
         nodePosition = { x, y };
 
         // Store the initial position
@@ -254,92 +272,97 @@ function VisualEditorContent({
           node,
           isSelected: selectedNodeId === nodeId,
           onEdit: handleEditNode,
-          onClick: handleEditNode, // Click to edit
-          onAddConnection: () => {}, // Placeholder for future functionality
+          onClick: handleEditNode,
+          onAddConnection: () => {},
         },
         selected: selectedNodeId === nodeId,
       });
 
-      // Create edges based on node type
+      // Create edges with FlowGraph's styling approach
       if (node.type === "question") {
         node.options.forEach((option, optionIndex) => {
           if (option.nextNodeId && flowData.nodes[option.nextNodeId]) {
+            const isLoop = option.nextNodeId === nodeId;
+
             flowEdges.push({
               id: `${nodeId}-${option.nextNodeId}-${optionIndex}`,
               source: nodeId,
               target: option.nextNodeId,
               sourceHandle: `option-${optionIndex}`,
-              label: option.label,
-              type: "smoothstep",
+              label:
+                option.label.length > 15
+                  ? `${option.label.substring(0, 15)}...`
+                  : option.label,
+              type: isLoop ? "straight" : "smoothstep",
+              animated: false,
               style: {
-                stroke: "#6b7280",
+                stroke: isLoop ? "#ef4444" : "#6b7280",
                 strokeWidth: 2,
               },
               labelStyle: {
-                fontSize: "11px",
+                fontSize: "10px",
                 fill: "#374151",
-                background: "rgba(255, 255, 255, 0.9)",
-                padding: "2px 6px",
+                background: "rgba(255, 255, 255, 0.8)",
+                padding: "2px 4px",
                 borderRadius: "4px",
-                border: "1px solid #e5e7eb",
               },
               markerEnd: {
                 type: MarkerType.ArrowClosed,
-                color: "#6b7280",
+                color: isLoop ? "#ef4444" : "#6b7280",
               },
             });
           }
         });
-      } else if (node.type === "callout" && node.returnToNodeId) {
-        if (flowData.nodes[node.returnToNodeId]) {
-          flowEdges.push({
-            id: `${nodeId}-${node.returnToNodeId}`,
-            source: nodeId,
-            target: node.returnToNodeId,
-            label: node.buttonLabel || "Try Again",
-            type: "straight",
-            style: {
-              stroke: "#ef4444",
-              strokeWidth: 2,
-              strokeDasharray: "5,5",
-            },
-            labelStyle: {
-              fontSize: "11px",
-              fill: "#ef4444",
-              background: "rgba(255, 255, 255, 0.9)",
-              padding: "2px 6px",
-              borderRadius: "4px",
-              border: "1px solid #fecaca",
-            },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              color: "#ef4444",
-            },
-          });
-        }
       } else if (node.type === "infocard" && node.nextNodeId) {
         if (flowData.nodes[node.nextNodeId]) {
           flowEdges.push({
             id: `${nodeId}-${node.nextNodeId}`,
             source: nodeId,
             target: node.nextNodeId,
-            label: node.buttonLabel || "Continue",
+            label: node.buttonLabel || "გაგრძელება",
             type: "smoothstep",
+            animated: false,
             style: {
               stroke: "#10b981",
               strokeWidth: 2,
             },
             labelStyle: {
-              fontSize: "11px",
+              fontSize: "10px",
               fill: "#10b981",
               background: "rgba(255, 255, 255, 0.9)",
-              padding: "2px 6px",
+              padding: "2px 4px",
               borderRadius: "4px",
-              border: "1px solid #d1fae5",
             },
             markerEnd: {
               type: MarkerType.ArrowClosed,
               color: "#10b981",
+            },
+          });
+        }
+      } else if (node.type === "callout" && node.returnToNodeId) {
+        if (flowData.nodes[node.returnToNodeId]) {
+          flowEdges.push({
+            id: `${nodeId}-${node.returnToNodeId}`,
+            source: nodeId,
+            target: node.returnToNodeId,
+            label: node.buttonLabel || "სცადეთ თავიდან",
+            type: "straight",
+            animated: false,
+            style: {
+              stroke: "#ef4444",
+              strokeWidth: 2,
+              strokeDasharray: "5,5",
+            },
+            labelStyle: {
+              fontSize: "10px",
+              fill: "#ef4444",
+              background: "rgba(255, 255, 255, 0.9)",
+              padding: "2px 4px",
+              borderRadius: "4px",
+            },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              color: "#ef4444",
             },
           });
         }
@@ -547,6 +570,7 @@ function VisualEditorContent({
       // Auto-edit the new node
       setEditingNode(newNode);
       setSelectedNodeId(nodeId);
+      setIsSheetOpen(true);
     },
     [flowData, onFlowDataChange]
   );
@@ -571,76 +595,117 @@ function VisualEditorContent({
   // If there are no nodes, show an empty state
   if (Object.keys(flowData.nodes).length === 0) {
     return (
-      <div className="w-full h-full flex-grow flex items-center justify-center relative bg-gray-50">
-        <NodePalette />
-        <div className="text-center">
-          <h3 className="text-xl font-semibold text-gray-800">ცარიელი ტილო</h3>
-          <p className="text-gray-500 mt-2">
-            გადმოათრიეთ კვანძი მარცხენა პალიტრიდან დასაწყებად.
-          </p>
+      <div className="flex flex-col h-full min-h-[600px]">
+        {/* Top Header with Node Palette */}
+        <div className="flex-shrink-0 bg-white border-b border-gray-200">
+          <div className="p-3">
+            <div className="flex items-center justify-between">
+              <NodePalette orientation="horizontal" />
+              <div className="flex items-center gap-2">
+                {onToggleFullscreen && (
+                  <Button
+                    onClick={onToggleFullscreen}
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    title={
+                      isFullscreen ? "Exit fullscreen" : "Enter fullscreen"
+                    }
+                  >
+                    {isFullscreen ? (
+                      <Minimize2 className="h-4 w-4" />
+                    ) : (
+                      <Maximize2 className="h-4 w-4" />
+                    )}
+                    {isFullscreen ? "დააპატარავე" : "გაადიდე"}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Canvas - Empty State */}
+        <div
+          className="flex-1 min-h-0 flex items-center justify-center relative bg-gray-50"
+          style={{ minHeight: "500px" }}
+        >
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-800">
+              ცარიელი ტილო
+            </h3>
+            <p className="text-gray-500 mt-2">
+              გადმოათრიეთ კვანძი ზედა პალიტრიდან დასაწყებად.
+            </p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex gap-4 h-full min-h-[600px]">
-      {/* Left Sidebar - Node Palette */}
-      <div className="flex-shrink-0 w-64 flex flex-col">
-        <div className="flex-1">
-          <NodePalette />
-        </div>
-        {/* Fullscreen Button */}
-        {onToggleFullscreen && (
-          <div className="mt-4 px-2">
-            <Button
-              onClick={onToggleFullscreen}
-              variant="outline"
-              size="sm"
-              className="w-full justify-start gap-2 text-sm shadow-sm"
-              title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
-            >
-              <div className="w-4 h-4 flex items-center justify-center">
-                {isFullscreen ? (
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 9V4.5M9 9H4.5M9 9L3.5 3.5M15 9h4.5M15 9V4.5M15 9l5.5-5.5M9 15v4.5M9 15H4.5M9 15l-5.5 5.5M15 15h4.5M15 15v4.5m0-4.5l5.5 5.5"
-                    />
-                  </svg>
+    <div className="flex flex-col h-full min-h-[700px]">
+      {/* Top Header with Node Palette */}
+      <div className="flex-shrink-0 bg-white border-b border-gray-200">
+        <div className="p-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              {!isPaletteMinimized && <NodePalette orientation="horizontal" />}
+              <Button
+                onClick={() => setIsPaletteMinimized(!isPaletteMinimized)}
+                variant="ghost"
+                size="sm"
+                className="text-gray-600 hover:text-gray-800"
+              >
+                {isPaletteMinimized ? (
+                  <>
+                    <Maximize2 className="h-4 w-4 mr-2" />
+                    ჩვენება
+                  </>
                 ) : (
-                  <svg
-                    className="w-3 h-3"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M3 7V4a1 1 0 011-1h3m0 0V1m0 2h2M7 21H4a1 1 0 01-1-1v-3m0 0H1m2 0v-2M21 7V4a1 1 0 00-1-1h-3m0 0V1m0 2h-2M17 21h3a1 1 0 001-1v-3m0 0h2m-2 0v-2"
-                    />
-                  </svg>
+                  <>
+                    <Minimize2 className="h-4 w-4 mr-2" />
+                    დამალვა
+                  </>
                 )}
-              </div>
-              <span>{isFullscreen ? "დააპატარავე" : "გაადიდე"}</span>
-            </Button>
+              </Button>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setIsSheetOpen(true)}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                disabled={!selectedNodeId}
+              >
+                <Settings className="h-4 w-4" />
+                კვანძის პარამეტრები
+              </Button>
+              {onToggleFullscreen && (
+                <Button
+                  onClick={onToggleFullscreen}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2"
+                  title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+                >
+                  {isFullscreen ? (
+                    <Minimize2 className="h-4 w-4" />
+                  ) : (
+                    <Maximize2 className="h-4 w-4" />
+                  )}
+                  {isFullscreen ? "დააპატარავე" : "გაადიდე"}
+                </Button>
+              )}
+            </div>
           </div>
-        )}
+        </div>
       </div>
 
       {/* Main Canvas */}
-      <div className="flex-1 relative min-w-0">
+      <div className="flex-1 min-h-0" style={{ minHeight: "500px" }}>
         <div
-          className="w-full h-full border border-gray-300 rounded-lg overflow-hidden bg-gray-50"
+          className="w-full h-full border-0 overflow-hidden bg-gray-50"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
@@ -669,42 +734,46 @@ function VisualEditorContent({
         </div>
       </div>
 
-      {/* Right Sidebar - Node Editor */}
-      <div className="w-96 flex-shrink-0">
-        <Card className="min-w-[400px] max-w-[400px] h-full shadow-lg border-l-2 bg-white/60 backdrop-blur-sm flex flex-col">
-          <CardHeader className="pb-4 flex-shrink-0">
-            <CardTitle className="text-lg">
-              {editingNode ? "Edit Node" : "Node Properties"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0 flex-1 overflow-hidden flex flex-col">
-            <div className="flex-1 overflow-y-auto pr-2">
-              {editingNode ? (
-                <NodeEditor
-                  key={editingNode.id}
-                  node={editingNode}
-                  allNodes={flowData.nodes}
-                  onSave={handleSaveNode}
-                  onCancel={handleCancelEdit}
-                />
-              ) : (
-                <div className="flex flex-col items-center justify-center text-center h-full p-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                    <div className="w-8 h-8 rounded-sm border-2 border-dashed border-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    აირჩიეთ კვანძი
-                  </h3>
-                  <p className="text-muted-foreground max-w-sm">
-                    დააკლიკეთ კვანძს ვიზუალურ რედაქტორში, რომ ნახოთ მისი
-                    დეტალები და შეიტანოთ ცვლილებები.
-                  </p>
+      {/* Right Panel Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent className="w-[500px] sm:max-w-[500px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
+              {editingNode ? "კვანძის რედაქტირება" : "კვანძის თვისებები"}
+            </SheetTitle>
+            <SheetDescription>
+              {editingNode
+                ? "შეცვალეთ კვანძის თვისებები და შინაარსი"
+                : "აირჩიეთ კვანძი რედაქტირებისთვის"}
+            </SheetDescription>
+          </SheetHeader>
+
+          <div className="mt-6">
+            {editingNode ? (
+              <NodeEditor
+                key={editingNode.id}
+                node={editingNode}
+                allNodes={flowData.nodes}
+                onSave={handleSaveNode}
+                onCancel={handleCancelEdit}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center text-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <div className="w-8 h-8 rounded-sm border-2 border-dashed border-gray-400" />
                 </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  აირჩიეთ კვანძი
+                </h3>
+                <p className="text-muted-foreground max-w-sm">
+                  დააკლიკეთ კვანძს ვიზუალურ რედაქტორში, რომ ნახოთ მისი დეტალები
+                  და შეიტანოთ ცვლილებები.
+                </p>
+              </div>
+            )}
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Connection Dialog */}
       <ConnectionDialog
