@@ -1,13 +1,13 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Home, Settings, Users } from "lucide-react";
 import Logo from "./Logo";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
 
   const isAdmin = pathname.startsWith("/admin");
   const isHome = pathname === "/";
@@ -23,25 +23,27 @@ export default function Navbar() {
           <div className="flex items-center gap-6">
             {/* Main Navigation */}
             <div className="flex items-center gap-4">
-              <Button
-                variant={isHome ? "default" : "ghost"}
-                size="sm"
-                onClick={() => router.push("/")}
-                className="gap-2"
-              >
-                <Home className="h-4 w-4" />
-                მთავარი
-              </Button>
+              <Link href="/">
+                <Button
+                  variant={isHome ? "default" : "ghost"}
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Home className="h-4 w-4" />
+                  მთავარი
+                </Button>
+              </Link>
 
-              <Button
-                variant={isAdmin ? "default" : "ghost"}
-                size="sm"
-                onClick={() => router.push("/admin")}
-                className="gap-2"
-              >
-                <Settings className="h-4 w-4" />
-                ადმინი
-              </Button>
+              <Link href="/admin">
+                <Button
+                  variant={isAdmin ? "default" : "ghost"}
+                  size="sm"
+                  className="gap-2"
+                >
+                  <Settings className="h-4 w-4" />
+                  ადმინი
+                </Button>
+              </Link>
 
               <Button variant="ghost" size="sm" className="gap-2" disabled>
                 <Users className="h-4 w-4" />

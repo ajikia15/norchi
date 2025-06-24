@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Story, FlowData, Node } from "@/app/types";
 import { updateStory } from "@/app/lib/actions";
 import NodeList from "@/app/components/NodeList";
@@ -398,16 +399,17 @@ export default function StoryEditClient({
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                onClick={() => router.push(`/story/${storyId}`)}
-                variant="outline"
-                size="sm"
-                className="shadow-sm"
-                disabled={isPending}
-              >
-                <Play className="h-4 w-4 " />
-                Test Flow
-              </Button>
+              <Link href={`/story/${storyId}`}>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shadow-sm"
+                  disabled={isPending}
+                >
+                  <Play className="h-4 w-4 " />
+                  Test Flow
+                </Button>
+              </Link>
               <Button
                 onClick={handleSave}
                 disabled={!hasUnsavedChanges || isPending}
