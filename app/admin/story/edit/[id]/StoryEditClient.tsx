@@ -794,71 +794,6 @@ export default function StoryEditClient({
                 </Card>
               </div>
             </TabsContent>
-
-            <TabsContent value="interactive">
-              <div
-                className={
-                  interactiveEditorIsFullscreen
-                    ? "fixed inset-0 bg-white z-50 flex flex-col"
-                    : "relative flex flex-col h-full"
-                }
-              >
-                <div className="flex flex-shrink-0 items-center justify-between border-b border-gray-200 bg-gray-50 p-2">
-                  <NodePalette orientation="horizontal" />
-                  <Button
-                    onClick={toggleInteractiveEditorFullscreen}
-                    variant="outline"
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {interactiveEditorIsFullscreen ? (
-                      <Minimize className="h-4 w-4" />
-                    ) : (
-                      <Maximize className="h-4 w-4" />
-                    )}
-                    {interactiveEditorIsFullscreen
-                      ? "დაპატარავება"
-                      : "გადიდება"}
-                  </Button>
-                </div>
-                <div className="flex min-h-0 flex-grow gap-4 p-4">
-                  <div className="h-full flex-1 overflow-hidden rounded-lg border">
-                    <FlowGraph
-                      flowData={flowData}
-                      selectedNodeId={selectedNodeId}
-                      hoveredNodeId={hoveredNodeId}
-                      onNodeClick={(nodeId: string) => {
-                        const node = flowData.nodes[nodeId];
-                        if (node) {
-                          handleEditNode(node);
-                        }
-                      }}
-                      onPaneClick={handleCancelEdit}
-                      onNodeDrop={handleNodeDrop}
-                    />
-                  </div>
-                  {editingNode && (
-                    <div className="w-[450px] flex-shrink-0">
-                      <Card className="flex h-full flex-col">
-                        <CardHeader>
-                          <CardTitle>კვანძის რედაქტირება</CardTitle>
-                        </CardHeader>
-                        <CardContent className="flex-grow overflow-y-auto">
-                          <NodeEditor
-                            node={editingNode}
-                            allNodes={flowData.nodes}
-                            onSave={handleSaveNode}
-                            onCancel={handleCancelEdit}
-                            onNodeHover={handleNodeHover}
-                            onCreateAndConnect={handleCreateAndConnect}
-                          />
-                        </CardContent>
-                      </Card>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </TabsContent>
           </Tabs>
         </div>
       </div>
@@ -1237,14 +1172,6 @@ export default function StoryEditClient({
                 </CardContent>
               </Card>
             </div>
-          </TabsContent>
-
-          <TabsContent value="flowgraph">
-            <Card>
-              <CardContent className="p-6">
-                <FlowGraph flowData={flowData} />
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="interactive">
