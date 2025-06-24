@@ -1,11 +1,11 @@
 import { Suspense } from "react";
 import { loadHotTopicsData } from "../lib/storage";
 import dynamic from "next/dynamic";
-
 const AnimatedHotQuestionsGrid = dynamic(
   () => import("./AnimatedHotQuestionsGrid"),
   {
     ssr: false,
+    // No loading component needed - individual cards will show skeletons
   }
 );
 
@@ -15,18 +15,6 @@ async function HotQuestionsGrid() {
   const topics = Object.values(hotTopicsData.topics);
 
   return <AnimatedHotQuestionsGrid topics={topics} />;
-}
-
-function HotQuestionsLoading() {
-  return (
-    <div className="max-w-7xl mx-auto px-6 text-center">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="h-80 bg-gray-200 rounded-lg animate-pulse" />
-        ))}
-      </div>
-    </div>
-  );
 }
 
 // This component is kept for backward compatibility but is now optimized
@@ -51,7 +39,7 @@ export default function HotQuestionsSection() {
           </p>
         </div> */}
 
-        <Suspense fallback={<HotQuestionsLoading />}>
+        <Suspense fallback={<div className="min-h-[24rem]" />}>
           <HotQuestionsGrid />
         </Suspense>
       </div>

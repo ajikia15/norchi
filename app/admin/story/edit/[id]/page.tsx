@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { loadStoriesData } from "@/app/lib/storage";
 import StoryEditClient from "./StoryEditClient";
+import StoryLoadingSkeleton from "@/app/components/StoryLoadingSkeleton";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -24,15 +25,7 @@ async function StoryEditContent({ params }: PageProps) {
 
 export default function StoryEditPage({ params }: PageProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-50 to-white">
-          <div className="text-2xl font-semibold text-gray-600 animate-pulse">
-            გზის რედაქტორის ჩატვირთვა...
-          </div>
-        </div>
-      }
-    >
+    <Suspense fallback={<StoryLoadingSkeleton />}>
       <StoryEditContent params={params} />
     </Suspense>
   );

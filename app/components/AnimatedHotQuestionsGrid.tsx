@@ -12,6 +12,7 @@ import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { isMobile } from "../lib/isMobile";
 import ArticleDialog from "./ArticleDialog";
+import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
 
 interface AnimatedHotQuestionsGridProps {
   topics: HotTopic[];
@@ -357,9 +358,10 @@ export default function AnimatedHotQuestionsGrid({
   const [articleDialogTopic, setArticleDialogTopic] = useState<HotTopic | null>(
     null
   );
-  const [mobile, setMobile] = useState(false);
+  const [mobile, setMobile] = useState<boolean | null>(null); // null = loading state
   const [carouselStopped, setCarouselStopped] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Embla Carousel setup with autoplay
   const autoplayRef = useRef(
@@ -380,17 +382,20 @@ export default function AnimatedHotQuestionsGrid({
       containScroll: "trimSnaps",
       slidesToScroll: 1,
     },
-    mobile ? [autoplayRef.current] : []
+    mobile === true ? [autoplayRef.current] : []
   );
 
   useEffect(() => {
     const userAgent = navigator.userAgent || "";
-    setMobile(isMobile(userAgent));
+    const isMobileDevice = isMobile(userAgent);
+    setMobile(isMobileDevice);
+    // Delay loading completion to prevent flash
+    setTimeout(() => setIsLoading(false), 100);
   }, []);
 
   // Stop carousel when a card is clicked and restart when all cards are closed
   useEffect(() => {
-    if (mobile && emblaApi) {
+    if (mobile === true && emblaApi && !isLoading) {
       if (carouselStopped) {
         autoplayRef.current.stop();
       } else if (openedCards.size === 0) {
@@ -398,11 +403,11 @@ export default function AnimatedHotQuestionsGrid({
         autoplayRef.current.play();
       }
     }
-  }, [mobile, emblaApi, carouselStopped, openedCards.size]);
+  }, [mobile, emblaApi, carouselStopped, openedCards.size, isLoading]);
 
   // Track current slide index
   useEffect(() => {
-    if (mobile && emblaApi) {
+    if (mobile === true && emblaApi && !isLoading) {
       const onSelect = () => {
         setSelectedIndex(emblaApi.selectedScrollSnap());
       };
@@ -413,7 +418,7 @@ export default function AnimatedHotQuestionsGrid({
         emblaApi.off("select", onSelect);
       };
     }
-  }, [mobile, emblaApi]);
+  }, [mobile, emblaApi, isLoading]);
 
   const toggleCard = useCallback(
     (topicId: string) => {
@@ -441,131 +446,157 @@ export default function AnimatedHotQuestionsGrid({
     [mobile]
   );
 
-  // Render mobile carousel version
-  if (mobile) {
+  // Show mobile version if mobile is detected or if we're still detecting
+  // This prevents layout shifts during mobile detection
+  if (mobile === true || (mobile === null && isLoading)) {
     return (
       <div className="w-full">
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex">
-            {topics.map((topic) => {
-              const isOpen = openedCards.has(topic.id);
-              const isLightOn = everOpenedCards.has(topic.id);
+            {isLoading || mobile === null
+              ? // Show skeleton cards while loading or detecting device
+                Array.from({ length: 3 }).map((_, index) => (
+                  <div
+                    key={`skeleton-${index}`}
+                    className="min-w-0 flex-[0_0_85%] pl-4"
+                  >
+                    <HotQuestionCardSkeleton />
+                  </div>
+                ))
+              : // Show actual cards when loaded and device detected
+                topics.map((topic) => {
+                  const isOpen = openedCards.has(topic.id);
+                  const isLightOn = everOpenedCards.has(topic.id);
 
-              return (
-                <div key={topic.id} className="min-w-0 flex-[0_0_85%] pl-4">
-                  <div className="relative h-[22rem] w-full">
-                    {/* Answer Content Behind Door */}
-                    <div
-                      className={`absolute inset-0 bg-gray-100 rounded-lg border-2 border-gray-300 p-4 flex flex-col overflow-hidden ${
-                        isOpen ? "cursor-pointer" : "pointer-events-none"
-                      }`}
-                      style={{
-                        opacity: isOpen ? 1 : 0.3,
-                        transition: "opacity 0.3s ease",
-                      }}
-                      onClick={isOpen ? () => toggleCard(topic.id) : undefined}
-                    >
-                      <div className="relative z-10 flex h-full flex-col">
-                        <div className="relative min-h-0 flex-1 overflow-hidden">
-                          <div className="prose prose-sm max-w-none text-gray-700">
-                            <ReactMarkdown>{topic.answer}</ReactMarkdown>
-                          </div>
-                          {isOpen && (
-                            <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent" />
-                          )}
-                        </div>
-
-                        <div className="mt-3 flex flex-shrink-0 items-center justify-center border-t border-gray-200 pt-3">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="mx-4 w-full touch-manipulation shadow-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setArticleDialogTopic(topic);
-                            }}
-                            style={{ touchAction: "manipulation" }}
-                          >
-                            წაიკითხე ბოლომდე{" "}
-                            <ArrowRight className="ml-1 h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Door - Ultra simplified */}
-                    <div
-                      className={`absolute inset-0 z-20 ${
-                        isOpen ? "pointer-events-none" : "cursor-pointer"
-                      }`}
-                      style={{
-                        transformOrigin: "right center",
-                        transform: isOpen ? "rotateY(120deg)" : "rotateY(0deg)",
-                        transition: "transform 0.5s ease-out",
-                        backfaceVisibility: "hidden",
-                      }}
-                      onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
-                    >
-                      {/* Door Panel */}
-                      <div className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 bg-white p-4 shadow-lg">
-                        {/* Door Handle */}
-                        <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 rounded-r-md bg-green-500"></div>
-
-                        {/* Question title - centered */}
-                        <div className="flex flex-grow items-center justify-center text-center">
-                          <div className="relative">
-                            {/* Lightbulb - ultra simplified */}
-                            <div className="absolute -top-16 left-1/2 -translate-x-1/2">
-                              <Lightbulb
-                                size={32}
-                                className={
-                                  isLightOn ? "text-amber-500" : "text-gray-400"
-                                }
-                                style={{
-                                  filter: isLightOn
-                                    ? "drop-shadow(0 0 10px #f59e0b)"
-                                    : "none",
-                                  transition: "all 0.3s ease",
-                                }}
-                              />
+                  return (
+                    <div key={topic.id} className="min-w-0 flex-[0_0_85%] pl-4">
+                      <div className="relative h-[22rem] w-full">
+                        {/* Answer Content Behind Door */}
+                        <div
+                          className={`absolute inset-0 bg-gray-100 rounded-lg border-2 border-gray-300 p-4 flex flex-col overflow-hidden ${
+                            isOpen ? "cursor-pointer" : "pointer-events-none"
+                          }`}
+                          style={{
+                            opacity: isOpen ? 1 : 0.3,
+                            transition: "opacity 0.3s ease",
+                          }}
+                          onClick={
+                            isOpen ? () => toggleCard(topic.id) : undefined
+                          }
+                        >
+                          <div className="relative z-10 flex h-full flex-col">
+                            <div className="relative min-h-0 flex-1 overflow-hidden">
+                              <div className="prose prose-sm max-w-none text-gray-700">
+                                <ReactMarkdown>{topic.answer}</ReactMarkdown>
+                              </div>
+                              {isOpen && (
+                                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent" />
+                              )}
                             </div>
 
-                            <h3
-                              className={`text-lg font-semibold leading-tight ${
-                                isLightOn ? "text-gray-900" : "text-gray-600"
-                              }`}
-                            >
-                              {topic.title}
-                            </h3>
+                            <div className="mt-3 flex flex-shrink-0 items-center justify-center border-t border-gray-200 pt-3">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                className="mx-4 w-full touch-manipulation shadow-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setArticleDialogTopic(topic);
+                                }}
+                                style={{ touchAction: "manipulation" }}
+                              >
+                                წაიკითხე ბოლომდე{" "}
+                                <ArrowRight className="ml-1 h-3 w-3" />
+                              </Button>
+                            </div>
                           </div>
                         </div>
 
-                        {/* Primary tag */}
-                        {topic.tagData && topic.tagData.length > 0 && (
-                          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                            <Badge
-                              variant="outline"
-                              style={{
-                                borderColor: topic.tagData[0].color,
-                                color: topic.tagData[0].color,
-                              }}
-                              className="bg-transparent text-xs"
-                            >
-                              {topic.tagData[0].emoji} {topic.tagData[0].label}
-                            </Badge>
+                        {/* Door - Ultra simplified */}
+                        <div
+                          className={`absolute inset-0 z-20 ${
+                            isOpen ? "pointer-events-none" : "cursor-pointer"
+                          }`}
+                          style={{
+                            transformOrigin: "right center",
+                            transform: isOpen
+                              ? "rotateY(120deg)"
+                              : "rotateY(0deg)",
+                            transition: "transform 0.5s ease-out",
+                            backfaceVisibility: "hidden",
+                          }}
+                          onClick={
+                            !isOpen ? () => toggleCard(topic.id) : undefined
+                          }
+                        >
+                          {/* Door Panel */}
+                          <div className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 bg-white p-4 shadow-lg">
+                            {/* Door Handle */}
+                            <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 rounded-r-md bg-green-500"></div>
+
+                            {/* Question title - centered */}
+                            <div className="flex flex-grow items-center justify-center text-center">
+                              <div className="relative">
+                                {/* Lightbulb - ultra simplified */}
+                                <div className="absolute -top-16 left-1/2 -translate-x-1/2">
+                                  <Lightbulb
+                                    size={32}
+                                    className={
+                                      isLightOn
+                                        ? "text-amber-500"
+                                        : "text-gray-400"
+                                    }
+                                    style={{
+                                      filter: isLightOn
+                                        ? "drop-shadow(0 0 10px #f59e0b)"
+                                        : "none",
+                                      transition: "all 0.3s ease",
+                                    }}
+                                  />
+                                </div>
+
+                                <h3
+                                  className={`text-lg font-semibold leading-tight ${
+                                    isLightOn
+                                      ? "text-gray-900"
+                                      : "text-gray-600"
+                                  }`}
+                                >
+                                  {topic.title}
+                                </h3>
+                              </div>
+                            </div>
+
+                            {/* Primary tag */}
+                            {topic.tagData && topic.tagData.length > 0 && (
+                              <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+                                <Badge
+                                  variant="outline"
+                                  style={{
+                                    borderColor: topic.tagData[0].color,
+                                    color: topic.tagData[0].color,
+                                  }}
+                                  className="bg-transparent text-xs"
+                                >
+                                  {topic.tagData[0].emoji}{" "}
+                                  {topic.tagData[0].label}
+                                </Badge>
+                              </div>
+                            )}
                           </div>
-                        )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                })}
           </div>
         </div>
         {/* Carousel Indicators */}
         <div className="mt-6 flex justify-center space-x-2">
-          {topics.map((_, index) => (
+          {(isLoading || mobile === null
+            ? Array.from({ length: 3 })
+            : topics
+          ).map((_, index) => (
             <button
               key={index}
               className={`h-2 w-2 rounded-full transition-all duration-300 ${
@@ -573,8 +604,11 @@ export default function AnimatedHotQuestionsGrid({
                   ? "bg-green-500 w-8"
                   : "bg-gray-300 hover:bg-gray-400"
               }`}
-              onClick={() => emblaApi?.scrollTo(index)}
+              onClick={() =>
+                !(isLoading || mobile === null) && emblaApi?.scrollTo(index)
+              }
               aria-label={`Go to slide ${index + 1}`}
+              disabled={isLoading || mobile === null}
             />
           ))}
         </div>

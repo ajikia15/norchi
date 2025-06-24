@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
 import Link from "next/link";
 import HotQuestionsClientSection from "./components/HotQuestionsClientSection";
+import StoriesGridSkeleton from "./components/StoriesGridSkeleton";
 
 // Optimized parallel data loading
 async function getPageData() {
@@ -99,17 +100,6 @@ async function StoriesGrid({ stories }: { stories: Story[] }) {
   }
 }
 
-// Optimized loading fallbacks
-function StoriesLoadingFallback() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="h-64 bg-gray-200 rounded-lg animate-pulse" />
-      ))}
-    </div>
-  );
-}
-
 // Main page component with optimized data loading
 export default async function HomePage() {
   // Load all data in parallel at the top level
@@ -142,7 +132,9 @@ export default async function HomePage() {
 
       {/* Story Grid - now with pre-loaded data */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <Suspense fallback={<StoriesLoadingFallback />}>
+        <Suspense
+          fallback={<StoriesGridSkeleton cardsCount={stories.length} />}
+        >
           <StoriesGrid stories={stories} />
         </Suspense>
       </div>
