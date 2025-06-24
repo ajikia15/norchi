@@ -1133,6 +1133,7 @@ export default function StoryEditClient({
                       allNodes={flowData.nodes}
                       onSave={handleSaveNode}
                       onCancel={handleCancelEdit}
+                      onDelete={handleDeleteNode}
                       onNodeHover={handleNodeHover}
                       onCreateAndConnect={handleCreateAndConnect}
                     />
@@ -1227,6 +1228,7 @@ export default function StoryEditClient({
                           allNodes={flowData.nodes}
                           onSave={handleSaveNode}
                           onCancel={handleCancelEdit}
+                          onDelete={handleDeleteNode}
                           onNodeHover={handleNodeHover}
                           onCreateAndConnect={handleCreateAndConnect}
                         />

@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Trash2, GripVertical, Save, X } from "lucide-react";
 import CreateNodeDialog from "./CreateNodeDialog";
+import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import MarkdownEditor from "./MarkdownEditor";
 
 const NO_DESTINATION_VALUE = "__NO_DESTINATION__";
@@ -25,6 +26,7 @@ interface NodeEditorProps {
   allNodes: Record<string, Node>;
   onSave: (node: Node) => void;
   onCancel: () => void;
+  onDelete?: (nodeId: string) => void;
   onNodeHover?: (nodeId: string | null) => void;
   onCreateAndConnect?: (
     node: Node,
@@ -39,11 +41,13 @@ export default function NodeEditor({
   allNodes,
   onSave,
   onCancel,
+  onDelete,
   onNodeHover,
   onCreateAndConnect,
 }: NodeEditorProps) {
   const [editedNode, setEditedNode] = useState<Node>(node);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [createDialog, setCreateDialog] = useState<{
     isOpen: boolean;
     nodeType: string;
@@ -64,6 +68,17 @@ export default function NodeEditor({
   const hasUnsavedChanges = useMemo(() => {
     return JSON.stringify(editedNode) !== JSON.stringify(node);
   }, [editedNode, node]);
+
+  const handleDelete = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    if (onDelete) {
+      onDelete(node.id);
+    }
+    setDeleteDialogOpen(false);
+  };
 
   const handleTextChange = (text: string) => {
     setEditedNode({ ...editedNode, text });
@@ -349,6 +364,9 @@ export default function NodeEditor({
           <Button onClick={handleCancel} variant="ghost" size="icon">
             <X className="h-5 w-5" />
           </Button>
+          <Button onClick={handleDelete} variant="ghost" size="icon">
+            <Trash2 className="h-5 w-5" />
+          </Button>
         </div>
       </div>
 
@@ -565,6 +583,13 @@ export default function NodeEditor({
           setCreateDialog({ isOpen: false, nodeType: "", currentField: "" })
         }
         onConfirm={handleCreateConfirm}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        nodeToDelete={node}
       />
     </div>
   );
