@@ -8,7 +8,7 @@ import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { ArrowRight, Lightbulb } from "lucide-react";
+import { ArrowRight, Lightbulb, Bookmark } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ResponsiveArticleDialog from "./ResponsiveArticleDialog";
 import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
@@ -131,7 +131,7 @@ function AnimatedCard({
             </div>
           </div>
 
-          {/* Bottom section with tags and read button */}
+          {/* Bottom section with bookmark and read button */}
           <motion.div
             className="relative mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3"
             initial={{ opacity: 0, y: 20 }}
@@ -147,50 +147,26 @@ function AnimatedCard({
                 transition={{ delay: 0.4, duration: 0.3 }}
               />
             )}
-            {/* Tags */}
-            {topic.tagData && topic.tagData.length > 0 && (
-              <div
-                className="scrollbar-hide relative flex min-h-0 flex-1 items-center overflow-x-auto overflow-y-hidden"
-                style={{
-                  maskImage:
-                    "linear-gradient(to right, black 85%, transparent 100%)",
-                  WebkitMaskImage:
-                    "linear-gradient(to right, black 85%, transparent 100%)",
-                }}
-              >
-                <div className="flex w-max gap-1">
-                  {topic.tagData.map((tag, tagIndex) => (
-                    <motion.div
-                      key={tag.id}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      animate={{
-                        opacity: isOpen ? 1 : 0,
-                        scale: isOpen ? 1 : 0.8,
-                      }}
-                      transition={{
-                        delay: isOpen ? 0.3 + tagIndex * 0.05 : 0,
-                        duration: 0.2,
-                      }}
-                    >
-                      <Badge
-                        variant="outline"
-                        style={{
-                          borderColor: tag.color,
-                          color: tag.color,
-                        }}
-                        className="text-xs"
-                      >
-                        {tag.emoji} {tag.label}
-                      </Badge>
-                    </motion.div>
-                  ))}
-                </div>
-              </div>
-            )}
+
+            {/* Bookmark button */}
+            <motion.div
+              className="flex-shrink-0"
+              initial={{ opacity: 0, x: -20, scale: 0.8 }}
+              animate={{
+                opacity: isOpen ? 1 : 0,
+                x: isOpen ? 0 : -20,
+                scale: isOpen ? 1 : 0.8,
+              }}
+              transition={{ delay: isOpen ? 0.25 : 0, duration: 0.3 }}
+            >
+              <Button variant="ghost" size="sm" className="px-2">
+                <Bookmark className="h-4 w-4" />
+              </Button>
+            </motion.div>
 
             {/* Read button */}
             <motion.div
-              className="flex-shrink-0"
+              className="flex-1"
               initial={{ opacity: 0, x: 20, scale: 0.8 }}
               animate={{
                 opacity: isOpen ? 1 : 0,
@@ -204,14 +180,14 @@ function AnimatedCard({
               <Button
                 variant="outline"
                 size="sm"
-                className="touch-manipulation shadow-sm transition-shadow hover:shadow-md"
+                className="w-full touch-manipulation shadow-sm transition-shadow hover:shadow-md"
                 onClick={(e) => {
                   e.stopPropagation();
                   setArticleDialogTopic(topic);
                 }}
                 style={{ touchAction: "manipulation" }}
               >
-                წაიკითხე <ArrowRight className="ml-1 h-3 w-3" />
+                წაიკითხე ბოლომდე <ArrowRight className="ml-1 h-3 w-3" />
               </Button>
             </motion.div>
           </motion.div>
@@ -461,15 +437,26 @@ export default function AnimatedHotQuestionsGrid({
                             </div>
                           </div>
 
-                          <div className="relative mt-3 flex flex-shrink-0 items-center justify-center border-t border-gray-200 pt-3">
+                          <div className="relative mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3">
                             {/* Blur effect now part of bottom section */}
                             {openedCards.has(topic.id) && (
                               <div className="pointer-events-none absolute -top-8 left-0 right-0 h-8 bg-gradient-to-t from-gray-100 to-transparent" />
                             )}
+
+                            {/* Bookmark button */}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-shrink-0 px-2"
+                            >
+                              <Bookmark className="h-4 w-4" />
+                            </Button>
+
+                            {/* Read button */}
                             <Button
                               variant="outline"
                               size="sm"
-                              className="mx-4 w-full touch-manipulation shadow-sm"
+                              className="flex-1 touch-manipulation shadow-sm"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setArticleDialogTopic(topic);
