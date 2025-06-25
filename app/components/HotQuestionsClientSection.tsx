@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { HotTopic } from "../types";
 import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
@@ -10,17 +10,19 @@ const AnimatedHotQuestionsGrid = dynamic(
   () => import("./AnimatedHotQuestionsGrid"),
   {
     ssr: false,
-    // No loading component needed - individual cards will show skeletons
   }
 );
 
+/**
+ * Skeleton component that matches the exact layout of the real content
+ * to prevent layout shifts during loading
+ */
 function HotQuestionsLoadingSkeleton({ topicsCount }: { topicsCount: number }) {
-  // Calculate how many cards to show on mobile (max 3 visible in carousel)
   const mobileCardsCount = Math.min(topicsCount, 3);
 
   return (
     <>
-      {/* Mobile skeleton */}
+      {/* Mobile skeleton - carousel layout */}
       <div className="block md:hidden">
         <div className="overflow-hidden">
           <div className="flex">
@@ -42,7 +44,7 @@ function HotQuestionsLoadingSkeleton({ topicsCount }: { topicsCount: number }) {
         )}
       </div>
 
-      {/* Desktop skeleton - matches exact real component structure */}
+      {/* Desktop skeleton - flex-wrap grid layout */}
       <div className="hidden md:flex flex-wrap justify-center gap-4 lg:gap-6">
         {Array.from({ length: topicsCount }).map((_, index) => (
           <div
@@ -75,29 +77,47 @@ interface HotQuestionsClientSectionProps {
   topics: HotTopic[];
 }
 
+/**
+ * Hot Questions section with CSS Grid stacking technique to prevent layout shifts.
+ * Uses overlapping skeleton and real content in the same grid area for seamless transitions.
+ */
 export default function HotQuestionsClientSection({
   topics,
 }: HotQuestionsClientSectionProps) {
+  const [contentLoaded, setContentLoaded] = useState(false);
+
+  // Handle skeleton-to-content transition
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setContentLoaded(true);
+    }, 200);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <section className="py-8 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
         <h2 className="text-xl text-gray-400 text-center mb-8">
           შეუღე კარი სიმართლეს
         </h2>
-        {/* CSS Grid stacking container - both skeleton and real content occupy the same grid area */}
+
+        {/* CSS Grid stacking - both layers occupy [grid-area:1/1] */}
         <div className="grid">
-          {/* Skeleton layer - always present but hidden when content loads */}
+          {/* Skeleton layer - fades out when content loads */}
           <div
-            className="[grid-area:1/1] transition-opacity duration-500"
-            data-skeleton-layer
+            className={`[grid-area:1/1] transition-opacity duration-500 ${
+              contentLoaded ? "opacity-0" : "opacity-100"
+            }`}
           >
             <HotQuestionsLoadingSkeleton topicsCount={topics.length} />
           </div>
 
-          {/* Real content layer - overlaps skeleton in same grid area */}
+          {/* Real content layer - fades in when ready */}
           <div
-            className="[grid-area:1/1] transition-opacity duration-500 opacity-0"
-            data-content-layer
+            className={`[grid-area:1/1] transition-opacity duration-500 ${
+              contentLoaded ? "opacity-100" : "opacity-0"
+            }`}
           >
             <Suspense fallback={null}>
               <AnimatedHotQuestionsGrid topics={topics} />

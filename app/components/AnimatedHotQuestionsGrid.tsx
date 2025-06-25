@@ -306,6 +306,11 @@ function AnimatedCard({
   );
 }
 
+/**
+ * Animated grid component for hot questions with responsive layout.
+ * Features beautiful entrance animations, mobile carousel, and desktop grid layout.
+ * Restored intersection observer animations for optimal user experience.
+ */
 export default function AnimatedHotQuestionsGrid({
   topics,
 }: AnimatedHotQuestionsGridProps) {
@@ -316,11 +321,10 @@ export default function AnimatedHotQuestionsGrid({
   const [articleDialogTopic, setArticleDialogTopic] = useState<HotTopic | null>(
     null
   );
-  const [mobile, setMobile] = useState<boolean | null>(null); // null = loading state
+  const [mobile, setMobile] = useState<boolean | null>(null);
   const [carouselStopped, setCarouselStopped] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [contentReady, setContentReady] = useState(false);
 
   // Embla Carousel setup with autoplay
   const autoplayRef = useRef(
@@ -350,12 +354,8 @@ export default function AnimatedHotQuestionsGrid({
     const isMobileDevice = mediaQuery.matches;
     setMobile(isMobileDevice);
 
-    // Minimal delay to prevent flash while allowing content to appear quickly
-    setTimeout(() => {
-      setIsLoading(false);
-      // Mark content as ready after a brief delay to ensure smooth transition
-      setTimeout(() => setContentReady(true), 100);
-    }, 50);
+    // Brief delay to ensure smooth initial render
+    setTimeout(() => setIsLoading(false), 100);
 
     // Listen for media query changes
     const handleChange = (e: MediaQueryListEvent) => {
@@ -366,39 +366,24 @@ export default function AnimatedHotQuestionsGrid({
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
-  // Hide skeleton when content is ready
-  useEffect(() => {
-    if (contentReady) {
-      const skeletonElement = document.querySelector("[data-skeleton-layer]");
-      const contentElement = document.querySelector("[data-content-layer]");
-
-      if (skeletonElement && contentElement) {
-        (skeletonElement as HTMLElement).style.opacity = "0";
-        (contentElement as HTMLElement).style.opacity = "1";
-      }
-    }
-  }, [contentReady]);
-
-  // Stop carousel when a card is clicked and restart when all cards are closed
+  // Carousel control effects
   useEffect(() => {
     if (mobile === true && emblaApi && !isLoading) {
       if (carouselStopped) {
         autoplayRef.current.stop();
       } else if (openedCards.size === 0) {
-        // Restart autoplay if no cards are open
         autoplayRef.current.play();
       }
     }
   }, [mobile, emblaApi, carouselStopped, openedCards.size, isLoading]);
 
-  // Track current slide index
   useEffect(() => {
     if (mobile === true && emblaApi && !isLoading) {
       const onSelect = () => {
         setSelectedIndex(emblaApi.selectedScrollSnap());
       };
       emblaApi.on("select", onSelect);
-      onSelect(); // Set initial index
+      onSelect();
 
       return () => {
         emblaApi.off("select", onSelect);
