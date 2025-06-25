@@ -92,11 +92,7 @@ export default function TagFilter({
                 key={tag.id}
                 className={`
                   relative p-4 rounded-lg border-2 transition-all duration-200 min-w-0
-                  ${
-                    isSelected
-                      ? "shadow-md transform scale-105"
-                      : "border-gray-200 bg-white"
-                  }
+                  ${isSelected ? "shadow-md" : "border-gray-200 bg-white"}
                   ${isLoading ? "pointer-events-none opacity-70" : ""}
                 `}
                 style={
@@ -126,7 +122,7 @@ export default function TagFilter({
                   stiffness: 400,
                   damping: 25,
                 }}
-                whileTap={!isLoading ? { scale: 0.95 } : {}}
+                whileTap={!isLoading ? { scale: 0.98 } : {}}
                 disabled={isLoading}
               >
                 {/* Subtle pulse animation for selected tags */}

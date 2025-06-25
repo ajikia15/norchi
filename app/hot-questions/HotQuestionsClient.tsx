@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useTransition, useCallback } from "react";
+import { useMemo, useTransition, useCallback, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { HotTopic } from "../types";
 import TagFilter, { PREDEFINED_TAGS } from "./TagFilter";
 import HotQuestionsGrid from "./HotQuestionsGrid";
+import HotQuestionsGridSkeleton from "./HotQuestionsGridSkeleton";
 import { getTagsFromSearchParams, updateTagsInURL } from "../lib/url-utils";
 
 interface HotQuestionsClientProps {
@@ -18,14 +19,21 @@ export default function HotQuestionsClient({
   const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
 
+  // Track optimistic updates during transitions
+  const [pendingTags, setPendingTags] = useState<string[] | null>(null);
+
   // Get selected tags from URL
-  const selectedTags = useMemo(() => {
+  const urlSelectedTags = useMemo(() => {
     return getTagsFromSearchParams(searchParams);
   }, [searchParams]);
 
-  // Filter topics based on selected tags
+  // Use pending tags during transition, otherwise use URL tags
+  const selectedTags =
+    isPending && pendingTags !== null ? pendingTags : urlSelectedTags;
+
+  // Filter topics based on actual URL selected tags (not optimistic)
   const filteredTopics = useMemo(() => {
-    if (selectedTags.length === 0) {
+    if (urlSelectedTags.length === 0) {
       return topics;
     }
 
@@ -36,7 +44,7 @@ export default function HotQuestionsClient({
       }
 
       // Convert predefined tag IDs to actual tag labels for comparison
-      const selectedTagLabels = selectedTags
+      const selectedTagLabels = urlSelectedTags
         .map((tagId) => {
           const predefinedTag = PREDEFINED_TAGS.find((t) => t.id === tagId);
           return predefinedTag?.label;
@@ -46,7 +54,7 @@ export default function HotQuestionsClient({
       // Check if any of the topic's tags match any of the selected tags
       return topic.tagData.some((tag) => selectedTagLabels.includes(tag.label));
     });
-  }, [topics, selectedTags]);
+  }, [topics, urlSelectedTags]);
 
   // Function to update URL with new tag selection
   const updateURL = useCallback(
@@ -54,8 +62,13 @@ export default function HotQuestionsClient({
       const queryString = updateTagsInURL(searchParams, newTags);
       const newURL = queryString ? `?${queryString}` : window.location.pathname;
 
+      // Set optimistic state
+      setPendingTags(newTags);
+
       startTransition(() => {
         router.replace(newURL, { scroll: false });
+        // Clear pending state after transition
+        setPendingTags(null);
       });
     },
     [router, searchParams]
@@ -90,17 +103,11 @@ export default function HotQuestionsClient({
 
       {/* Results Grid */}
       <div className="relative">
-        {/* Results overlay when loading */}
-        {isPending && (
-          <div className="absolute inset-0 bg-white/80 backdrop-blur-md rounded-xl z-50 flex items-center justify-center">
-            <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
-              <p className="text-sm text-gray-600">კითხვების ძებნა...</p>
-            </div>
-          </div>
+        {isPending ? (
+          <HotQuestionsGridSkeleton />
+        ) : (
+          <HotQuestionsGrid topics={filteredTopics} />
         )}
-
-        <HotQuestionsGrid topics={filteredTopics} />
       </div>
     </div>
   );
