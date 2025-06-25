@@ -8,7 +8,7 @@ import {
   useTransform,
   AnimatePresence,
 } from "framer-motion";
-import { Node } from "../types";
+import { Node, InfocardNode, CalloutNode } from "../types";
 import {
   ArrowLeft,
   ArrowRight,
@@ -254,10 +254,10 @@ export default function GameCard({
 
   if (node.type === "question") {
     return (
-      <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 z-50">
+      <div className="fixed inset-0 z-50 h-full w-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
         {/* Header with Logo and Progress Bar - Fixed at top */}
-        <div className="absolute top-0 left-0 right-0 z-60 bg-gradient-to-b from-black/10 to-transparent pt-2 pb-4">
-          <div className="max-w-7xl mx-auto px-6">
+        <div className="z-60 absolute left-0 right-0 top-0 bg-gradient-to-b from-black/10 to-transparent pb-4 pt-2">
+          <div className="mx-auto max-w-7xl px-6">
             <div className="flex items-center justify-between">
               {/* Logo */}
               <Logo
@@ -268,7 +268,7 @@ export default function GameCard({
               />
 
               {/* Progress Bar */}
-              <div className="flex-1 mx-4">
+              <div className="mx-4 flex-1">
                 <StoryProgressBar
                   currentStep={currentStep}
                   totalSteps={totalSteps}
@@ -281,7 +281,7 @@ export default function GameCard({
 
         {/* Enhanced background overlays with neutral feedback */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 flex items-center justify-start pl-8 md:pl-20"
+          className="absolute inset-0 flex items-center justify-start bg-gradient-to-r from-blue-400 to-blue-600 pl-8 md:pl-20"
           style={{ opacity: leftOverlay }}
         >
           <motion.div
@@ -294,18 +294,18 @@ export default function GameCard({
             }}
             transition={{ duration: 0.3 }}
           >
-            <ArrowLeft className="h-12 w-12 md:h-20 md:w-20 mb-2 md:mb-4" />
-            <span className="text-xl md:text-3xl font-bold">
+            <ArrowLeft className="mb-2 h-12 w-12 md:mb-4 md:h-20 md:w-20" />
+            <span className="text-xl font-bold md:text-3xl">
               {node.options[0]?.label || "მარცხნივ"}
             </span>
-            <span className="text-sm md:text-lg opacity-90 mt-1 md:mt-2">
+            <span className="mt-1 text-sm opacity-90 md:mt-2 md:text-lg">
               გადაფურცლეთ მარცხნივ
             </span>
           </motion.div>
         </motion.div>
 
         <motion.div
-          className="absolute inset-0 bg-gradient-to-l from-purple-400 to-purple-600 flex items-center justify-end pr-8 md:pr-20"
+          className="absolute inset-0 flex items-center justify-end bg-gradient-to-l from-purple-400 to-purple-600 pr-8 md:pr-20"
           style={{ opacity: rightOverlay }}
         >
           <motion.div
@@ -318,11 +318,11 @@ export default function GameCard({
             }}
             transition={{ duration: 0.3 }}
           >
-            <ArrowRight className="h-12 w-12 md:h-20 md:w-20 mb-2 md:mb-4" />
-            <span className="text-xl md:text-3xl font-bold">
+            <ArrowRight className="mb-2 h-12 w-12 md:mb-4 md:h-20 md:w-20" />
+            <span className="text-xl font-bold md:text-3xl">
               {node.options[1]?.label || "მარჯვნივ"}
             </span>
-            <span className="text-sm md:text-lg opacity-90 mt-1 md:mt-2">
+            <span className="mt-1 text-sm opacity-90 md:mt-2 md:text-lg">
               გადაფურცლეთ მარჯვნივ
             </span>
           </motion.div>
@@ -330,16 +330,16 @@ export default function GameCard({
 
         {/* Threshold indicators for better UX feedback */}
         <motion.div
-          className="absolute left-4 md:left-8 top-1/2 transform -translate-y-1/2 w-1 md:w-2 h-16 md:h-24 bg-white/30 rounded-full"
+          className="absolute left-4 top-1/2 h-16 w-1 -translate-y-1/2 transform rounded-full bg-white/30 md:left-8 md:h-24 md:w-2"
           style={{ opacity: leftThresholdOpacity }}
         />
         <motion.div
-          className="absolute right-4 md:right-8 top-1/2 transform -translate-y-1/2 w-1 md:w-2 h-16 md:h-24 bg-white/30 rounded-full"
+          className="absolute right-4 top-1/2 h-16 w-1 -translate-y-1/2 transform rounded-full bg-white/30 md:right-8 md:h-24 md:w-2"
           style={{ opacity: rightThresholdOpacity }}
         />
 
         {/* Main Content Container */}
-        <div className="relative w-full h-full flex flex-col items-center justify-center p-4 md:p-6 pt-20 md:pt-24">
+        <div className="relative flex h-full w-full flex-col items-center justify-center p-4 pt-20 md:p-6 md:pt-24">
           {/* Main Card with Enhanced Animations */}
           <AnimatePresence mode="wait">
             <motion.div
@@ -395,7 +395,7 @@ export default function GameCard({
             >
               {/* Enhanced glow effect with threshold awareness */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent rounded-3xl"
+                className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/20 to-transparent"
                 style={{
                   opacity: glowOpacity,
                 }}
@@ -413,17 +413,17 @@ export default function GameCard({
                 }}
               />
 
-              <div className="flex flex-col h-full relative z-10">
+              <div className="relative z-10 flex h-full flex-col">
                 {/* Card Content */}
-                <div className="flex-1 flex flex-col items-center justify-center p-4 md:p-8">
+                <div className="flex flex-1 flex-col items-center justify-center p-4 md:p-8">
                   <motion.div
-                    className="bg-white rounded-full p-4 md:p-6 shadow-lg mb-4 md:mb-8"
+                    className="mb-4 rounded-full bg-white p-4 shadow-lg md:mb-8 md:p-6"
                     whileHover={{ rotate: 360 }}
                     transition={{ duration: 0.5 }}
                   >
                     {getNodeIcon()}
                   </motion.div>
-                  <h2 className="text-lg md:text-2xl font-bold text-slate-800 text-center leading-relaxed px-2">
+                  <h2 className="px-2 text-center text-lg font-bold leading-relaxed text-slate-800 md:text-2xl">
                     {node.text}
                   </h2>
                 </div>
@@ -433,7 +433,7 @@ export default function GameCard({
 
           {/* Elegant Pill-Style Choice Buttons */}
           <motion.div
-            className="mt-4 md:mt-8 w-full max-w-xs md:max-w-2xl px-2 md:px-4 space-y-4 md:space-y-6"
+            className="mt-4 w-full max-w-xs space-y-4 px-2 md:mt-8 md:max-w-2xl md:space-y-6 md:px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
@@ -446,15 +446,15 @@ export default function GameCard({
                     handleOptionClick(0);
                   }}
                   disabled={isTransitioning || !node.options[0].nextNodeId}
-                  className="flex-1 relative group cursor-pointer touch-manipulation"
+                  className="group relative flex-1 cursor-pointer touch-manipulation"
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                  <div className="relative bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-full px-4 py-3 md:px-6 md:py-4 transition-all duration-200">
+                  <div className="relative rounded-full border border-gray-300 bg-white px-4 py-3 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 md:px-6 md:py-4">
                     <div className="flex items-center justify-center gap-2 md:gap-3">
-                      <div className="bg-gray-100 group-hover:bg-gray-200 rounded-full p-1.5 md:p-2 transition-colors duration-200">
-                        <ArrowLeft className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+                      <div className="rounded-full bg-gray-100 p-1.5 transition-colors duration-200 group-hover:bg-gray-200 md:p-2">
+                        <ArrowLeft className="h-4 w-4 text-gray-600 md:h-5 md:w-5" />
                       </div>
-                      <span className="font-medium text-gray-700 text-sm md:text-base">
+                      <span className="text-sm font-medium text-gray-700 md:text-base">
                         {node.options[0].label}
                       </span>
                     </div>
@@ -469,15 +469,15 @@ export default function GameCard({
                     handleOptionClick(2);
                   }}
                   disabled={isTransitioning}
-                  className="relative group cursor-pointer touch-manipulation"
+                  className="group relative cursor-pointer touch-manipulation"
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                  <div className="relative bg-amber-50 hover:bg-amber-100 border border-amber-300 hover:border-amber-400 rounded-full px-3 py-2.5 md:px-4 md:py-3 transition-all duration-200">
+                  <div className="relative rounded-full border border-amber-300 bg-amber-50 px-3 py-2.5 transition-all duration-200 hover:border-amber-400 hover:bg-amber-100 md:px-4 md:py-3">
                     <div className="flex items-center justify-center gap-1.5 md:gap-2">
-                      <div className="bg-amber-100 group-hover:bg-amber-200 rounded-full p-1 md:p-1.5 transition-colors duration-200">
-                        <ArrowDown className="h-3 w-3 md:h-4 md:w-4 text-amber-600" />
+                      <div className="rounded-full bg-amber-100 p-1 transition-colors duration-200 group-hover:bg-amber-200 md:p-1.5">
+                        <ArrowDown className="h-3 w-3 text-amber-600 md:h-4 md:w-4" />
                       </div>
-                      <span className="font-medium text-amber-700 text-xs md:text-sm">
+                      <span className="text-xs font-medium text-amber-700 md:text-sm">
                         {node.options[2].label}
                       </span>
                     </div>
@@ -492,16 +492,16 @@ export default function GameCard({
                     handleOptionClick(1);
                   }}
                   disabled={isTransitioning || !node.options[1].nextNodeId}
-                  className="flex-1 relative group cursor-pointer touch-manipulation"
+                  className="group relative flex-1 cursor-pointer touch-manipulation"
                   transition={{ type: "spring", stiffness: 300, damping: 25 }}
                 >
-                  <div className="relative bg-white hover:bg-gray-50 border border-gray-300 hover:border-gray-400 rounded-full px-4 py-3 md:px-6 md:py-4 transition-all duration-200">
+                  <div className="relative rounded-full border border-gray-300 bg-white px-4 py-3 transition-all duration-200 hover:border-gray-400 hover:bg-gray-50 md:px-6 md:py-4">
                     <div className="flex items-center justify-center gap-2 md:gap-3">
-                      <span className="font-medium text-gray-700 text-sm md:text-base">
+                      <span className="text-sm font-medium text-gray-700 md:text-base">
                         {node.options[1].label}
                       </span>
-                      <div className="bg-gray-100 group-hover:bg-gray-200 rounded-full p-1.5 md:p-2 transition-colors duration-200">
-                        <ArrowRight className="h-4 w-4 md:h-5 md:w-5 text-gray-600" />
+                      <div className="rounded-full bg-gray-100 p-1.5 transition-colors duration-200 group-hover:bg-gray-200 md:p-2">
+                        <ArrowRight className="h-4 w-4 text-gray-600 md:h-5 md:w-5" />
                       </div>
                     </div>
                   </div>
@@ -511,11 +511,11 @@ export default function GameCard({
 
             {/* Enhanced instruction text with pulsing animation */}
             <motion.div
-              className="text-center space-y-1 md:space-y-2"
+              className="space-y-1 text-center md:space-y-2"
               animate={{ opacity: [0.7, 1, 0.7] }}
               transition={{ duration: 2, repeat: Infinity }}
             >
-              <p className="text-xs md:text-sm text-slate-600 font-medium">
+              <p className="text-xs font-medium text-slate-600 md:text-sm">
                 გააკეთეთ თქვენი არჩევანი
               </p>
               <p className="text-xs text-slate-400">
@@ -530,10 +530,10 @@ export default function GameCard({
 
   // Non-question nodes (end, callout, infocard) - Enhanced
   return (
-    <div className="fixed inset-0 w-full h-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 z-50">
+    <div className="fixed inset-0 z-50 h-full w-full overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
       {/* Header with Logo and Progress Bar - Fixed at top */}
-      <div className="absolute top-0 left-0 right-0 z-60 bg-gradient-to-b from-black/10 to-transparent pt-2 pb-4">
-        <div className="max-w-7xl mx-auto px-6">
+      <div className="z-60 absolute left-0 right-0 top-0 bg-gradient-to-b from-black/10 to-transparent pb-4 pt-2">
+        <div className="mx-auto max-w-7xl px-6">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <Logo
@@ -544,7 +544,7 @@ export default function GameCard({
             />
 
             {/* Progress Bar */}
-            <div className="flex-1 mx-4">
+            <div className="mx-4 flex-1">
               <StoryProgressBar
                 currentStep={currentStep}
                 totalSteps={totalSteps}
@@ -555,7 +555,7 @@ export default function GameCard({
         </div>
       </div>
 
-      <div className="relative w-full h-full flex items-center justify-center p-4 md:p-6 pt-20 md:pt-24">
+      <div className="relative flex h-full w-full items-center justify-center p-4 pt-20 md:p-6 md:pt-24">
         <AnimatePresence mode="wait">
           <motion.div
             key={node.id}
@@ -576,17 +576,17 @@ export default function GameCard({
           >
             <div className="p-8 text-center">
               <motion.div
-                className="flex items-center justify-center mb-6"
+                className="mb-6 flex items-center justify-center"
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: "spring", stiffness: 300 }}
               >
-                <div className="bg-white rounded-full p-6 shadow-lg">
+                <div className="rounded-full bg-white p-6 shadow-lg">
                   {getNodeIcon()}
                 </div>
               </motion.div>
               <motion.div
-                className="text-2xl font-bold text-slate-800 leading-relaxed mb-8"
+                className="mb-8 text-2xl font-bold leading-relaxed text-slate-800"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
@@ -608,7 +608,7 @@ export default function GameCard({
                       <motion.button
                         onClick={handleContinue}
                         disabled={isTransitioning}
-                        className="flex-1 relative overflow-hidden group h-14 rounded-2xl shadow-lg border-0"
+                        className="group relative h-14 flex-1 overflow-hidden rounded-2xl border-0 shadow-lg"
                         whileHover={{ y: -2 }}
                         transition={{
                           type: "spring",
@@ -616,16 +616,18 @@ export default function GameCard({
                           damping: 25,
                         }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 group-hover:from-slate-700 group-hover:to-slate-800 transition-all duration-300" />
-                        <span className="relative z-10 text-white font-semibold">
-                          {(node as any).buttonLabel || "გაგრძელება"}
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 transition-all duration-300 group-hover:from-slate-700 group-hover:to-slate-800" />
+                        <span className="relative z-10 font-semibold text-white">
+                          {node.type === "infocard"
+                            ? (node as InfocardNode).buttonLabel || "გაგრძელება"
+                            : "გაგრძელება"}
                         </span>
                       </motion.button>
 
                       {/* Expand to Read Button */}
                       <motion.button
                         onClick={() => setShowInfoDialog(true)}
-                        className="px-6 relative overflow-hidden group h-14 rounded-2xl shadow-lg border-2 border-violet-300 bg-white hover:bg-violet-50"
+                        className="group relative h-14 overflow-hidden rounded-2xl border-2 border-violet-300 bg-white px-6 shadow-lg hover:bg-violet-50"
                         whileHover={{ y: -2 }}
                         transition={{
                           type: "spring",
@@ -635,7 +637,7 @@ export default function GameCard({
                       >
                         <div className="flex items-center gap-2">
                           <Info className="h-5 w-5 text-violet-600" />
-                          <span className="text-violet-700 font-semibold">
+                          <span className="font-semibold text-violet-700">
                             ვრცლად
                           </span>
                         </div>
@@ -645,7 +647,7 @@ export default function GameCard({
                     <motion.button
                       onClick={handleContinue}
                       disabled={isTransitioning}
-                      className="relative overflow-hidden group w-full h-14 rounded-2xl shadow-lg border-0"
+                      className="group relative h-14 w-full overflow-hidden rounded-2xl border-0 shadow-lg"
                       whileHover={{ y: -2 }}
                       transition={{
                         type: "spring",
@@ -653,15 +655,16 @@ export default function GameCard({
                         damping: 25,
                       }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 group-hover:from-slate-700 group-hover:to-slate-800 transition-all duration-300" />
-                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                      <span className="relative z-10 text-white font-semibold">
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 transition-all duration-300 group-hover:from-slate-700 group-hover:to-slate-800" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                      <span className="relative z-10 font-semibold text-white">
                         {node.type === "callout"
-                          ? (node as any).buttonLabel || "სცადეთ თავიდან"
-                          : (node as any).buttonLabel || "გაგრძელება"}
+                          ? (node as CalloutNode).buttonLabel ||
+                            "სცადეთ თავიდან"
+                          : "გაგრძელება"}
                       </span>
                       <motion.div
-                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100"
                         initial={false}
                         animate={{ rotate: [0, 360] }}
                         transition={{

@@ -1,7 +1,7 @@
 "use client";
 
-import { useRef, useEffect, useState } from "react";
-import { X, ArrowRight, Info } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowRight, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sheet";
 import ReactMarkdown from "react-markdown";
 import { Node } from "../types";
-import { useScrollLock } from "../lib/useScrollLock";
 
 interface InfoCardDialogProps {
   node: Node;
@@ -27,11 +26,7 @@ export default function InfoCardDialog({
   onClose,
   onContinue,
 }: InfoCardDialogProps) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [isMobile, setIsMobile] = useState<boolean | null>(null);
-
-  // Use scroll lock for custom dialog
-  useScrollLock(isOpen && !isMobile);
+  const [isMobile, setIsMobile] = useState<boolean>(false);
 
   // Detect mobile device
   useEffect(() => {
@@ -45,52 +40,6 @@ export default function InfoCardDialog({
 
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
-
-  // Handle custom dialog for desktop
-  useEffect(() => {
-    if (isMobile === false) {
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-
-      if (isOpen && !dialog.open) {
-        dialog.showModal();
-      } else if (!isOpen && dialog.open) {
-        dialog.close();
-      }
-    }
-  }, [isOpen, isMobile]);
-
-  useEffect(() => {
-    if (isMobile === false) {
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-
-      const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === "Escape") {
-          onClose();
-        }
-      };
-
-      const handleBackdropClick = (e: MouseEvent) => {
-        if (e.target === dialog) {
-          onClose();
-        }
-      };
-
-      dialog.addEventListener("click", handleBackdropClick);
-      document.addEventListener("keydown", handleEscape);
-
-      return () => {
-        dialog.removeEventListener("click", handleBackdropClick);
-        document.removeEventListener("keydown", handleEscape);
-      };
-    }
-  }, [onClose, isMobile]);
-
-  // Show skeleton while detecting device
-  if (isMobile === null) {
-    return null;
-  }
 
   // Mobile version with drawer
   if (isMobile) {
@@ -136,60 +85,46 @@ export default function InfoCardDialog({
     );
   }
 
-  // Desktop version with custom dialog
+  // Desktop version with dialog
   return (
-    <dialog
-      ref={dialogRef}
-      className="open:animate-in open:fade-in-0 m-0 h-full max-h-none w-full max-w-none bg-transparent p-0 backdrop:bg-black/80 backdrop:backdrop-blur-sm open:duration-300"
-    >
-      <div className="flex min-h-screen items-center justify-center p-4 md:p-6 lg:p-8">
-        <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-          {/* Header */}
-          <div className="sticky top-0 z-20 border-b border-gray-100 bg-white/95 backdrop-blur-md">
-            <div className="flex items-center justify-between p-6">
-              <div className="flex items-center gap-3">
-                <div className="bg-violet-100 rounded-full p-2">
-                  <Info className="h-5 w-5 text-violet-600" />
-                </div>
-                <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
-                  საინფორმაციო მასალა
-                </h1>
+    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex min-h-screen items-center justify-center p-4 md:p-6 lg:p-8 animate-in fade-in-0 duration-300">
+      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-300">
+        {/* Header */}
+        <div className="sticky top-0 z-20 border-b border-gray-100 bg-white/95 backdrop-blur-md">
+          <div className="flex items-center p-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-violet-100 rounded-full p-2">
+                <Info className="h-5 w-5 text-violet-600" />
               </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onClose}
-                className="h-10 w-10 flex-shrink-0 rounded-full p-0"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Content */}
-          <div className="max-h-[calc(90vh-180px)] overflow-y-auto">
-            <div className="px-6 py-8 md:px-8 lg:px-12">
-              <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
-                <ReactMarkdown>{node.text}</ReactMarkdown>
-              </div>
-            </div>
-          </div>
-
-          {/* Footer with Continue Button */}
-          <div className="sticky bottom-0 border-t border-gray-100 bg-white p-6">
-            <div className="flex gap-3 justify-end">
-              <Button variant="outline" onClick={onClose}>
-                უკან დაბრუნება
-              </Button>
-              <Button onClick={onContinue} className="flex items-center gap-2">
-                გაგრძელება
-                <ArrowRight className="h-4 w-4" />
-              </Button>
+              <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
+                საინფორმაციო მასალა
+              </h1>
             </div>
           </div>
         </div>
+
+        {/* Content */}
+        <div className="max-h-[calc(90vh-180px)] overflow-y-auto">
+          <div className="px-6 py-8 md:px-8 lg:px-12">
+            <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+              <ReactMarkdown>{node.text}</ReactMarkdown>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer with Continue Button */}
+        <div className="sticky bottom-0 border-t border-gray-100 bg-white p-6">
+          <div className="flex gap-3 justify-end">
+            <Button variant="outline" onClick={onClose}>
+              უკან დაბრუნება
+            </Button>
+            <Button onClick={onContinue} className="flex items-center gap-2">
+              გაგრძელება
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </div>
-    </dialog>
+    </div>
   );
 }
