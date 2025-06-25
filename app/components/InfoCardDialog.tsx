@@ -47,11 +47,11 @@ export default function InfoCardDialog({
       <Sheet open={isOpen} onOpenChange={onClose}>
         <SheetContent
           side="bottom"
-          className="flex flex-col max-h-[85vh] overflow-hidden"
+          className="flex max-h-[85vh] flex-col overflow-hidden"
         >
           <SheetHeader className="flex-shrink-0 pb-4">
             <div className="flex items-center gap-3">
-              <div className="bg-violet-100 rounded-full p-2">
+              <div className="rounded-full bg-violet-100 p-2">
                 <Info className="h-5 w-5 text-violet-600" />
               </div>
               <SheetTitle className="text-lg">საინფორმაციო მასალა</SheetTitle>
@@ -59,21 +59,21 @@ export default function InfoCardDialog({
           </SheetHeader>
 
           {/* Scrollable content area with proper spacing */}
-          <div className="flex-1 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 min-h-0 py-2">
-            <div className="prose prose-sm max-w-none text-gray-800 leading-relaxed px-1">
+          <div className="scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 min-h-0 flex-1 overflow-y-auto py-2">
+            <div className="prose prose-sm max-w-none px-1 leading-relaxed text-gray-800">
               <ReactMarkdown>{node.text}</ReactMarkdown>
             </div>
           </div>
 
           {/* Fixed footer */}
-          <SheetFooter className="flex-shrink-0 pt-6 border-t border-gray-200 mt-4">
-            <div className="flex gap-3 w-full">
+          <SheetFooter className="mt-4 flex-shrink-0 border-t border-gray-200 pt-6">
+            <div className="flex w-full gap-3">
               <Button variant="outline" onClick={onClose} className="flex-1">
                 უკან დაბრუნება
               </Button>
               <Button
                 onClick={onContinue}
-                className="flex-1 flex items-center justify-center gap-2"
+                className="flex flex-1 items-center justify-center gap-2"
               >
                 გაგრძელება
                 <ArrowRight className="h-4 w-4" />
@@ -87,13 +87,13 @@ export default function InfoCardDialog({
 
   // Desktop version with dialog
   return (
-    <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex min-h-screen items-center justify-center p-4 md:p-6 lg:p-8 animate-in fade-in-0 duration-300">
-      <div className="relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className="animate-in fade-in-0 fixed inset-0 z-50 flex min-h-screen items-center justify-center bg-black/80 p-4 backdrop-blur-sm duration-300 md:p-6 lg:p-8">
+      <div className="animate-in zoom-in-95 relative max-h-[90vh] w-full max-w-4xl overflow-hidden rounded-2xl bg-white shadow-2xl duration-300">
         {/* Header */}
         <div className="sticky top-0 z-20 border-b border-gray-100 bg-white/95 backdrop-blur-md">
           <div className="flex items-center p-6">
             <div className="flex items-center gap-3">
-              <div className="bg-violet-100 rounded-full p-2">
+              <div className="rounded-full bg-violet-100 p-2">
                 <Info className="h-5 w-5 text-violet-600" />
               </div>
               <h1 className="text-xl font-bold text-gray-900 md:text-2xl">
@@ -106,7 +106,7 @@ export default function InfoCardDialog({
         {/* Content */}
         <div className="max-h-[calc(90vh-180px)] overflow-y-auto">
           <div className="px-6 py-8 md:px-8 lg:px-12">
-            <div className="prose prose-lg max-w-none text-gray-800 leading-relaxed">
+            <div className="prose prose-lg max-w-none leading-relaxed text-gray-800">
               <ReactMarkdown>{node.text}</ReactMarkdown>
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function InfoCardDialog({
 
         {/* Footer with Continue Button */}
         <div className="sticky bottom-0 border-t border-gray-100 bg-white p-6">
-          <div className="flex gap-3 justify-end">
+          <div className="flex justify-end gap-3">
             <Button variant="outline" onClick={onClose}>
               უკან დაბრუნება
             </Button>
