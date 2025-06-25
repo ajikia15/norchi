@@ -12,6 +12,7 @@ import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ResponsiveArticleDialog from "./ResponsiveArticleDialog";
 import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
+import DoorHandleIcon from "./DoorHandleIcon";
 
 interface AnimatedHotQuestionsGridProps {
   topics: HotTopic[];
@@ -247,10 +248,12 @@ function AnimatedCard({
         <div className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 border-gray-300 bg-gradient-to-br from-white to-gray-50 p-4 shadow-lg lg:p-5">
           {/* Door Handle */}
           <motion.div
-            className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 rounded-r-md bg-gradient-to-r from-green-600 to-green-400"
-            whileHover={{ scale: 1.1 }}
+            className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400"
+            whileHover={{ scale: 1.1, color: "rgb(34 197 94)" }}
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          ></motion.div>
+          >
+            <DoorHandleIcon width={20} height={20} />
+          </motion.div>
 
           {/* Question title - centered */}
           <div className="flex flex-grow items-center justify-center text-center">
@@ -275,7 +278,7 @@ function AnimatedCard({
                 />
               </div>
 
-              <h3 className="text-lg font-semibold leading-tight text-gray-900">
+              <h3 className="px-6 text-lg font-semibold leading-tight text-gray-900">
                 {topic.title}
               </h3>
             </div>
@@ -283,22 +286,18 @@ function AnimatedCard({
 
           {/* Primary tag */}
           {topic.tagData && topic.tagData.length > 0 && topic.tagData[0] && (
-            <motion.div
-              className="absolute bottom-4 left-1/2 -translate-x-1/2"
-              whileHover={{ scale: 1.05 }}
-              transition={{ type: "spring", stiffness: 300, damping: 10 }}
+            <Badge
+              variant="outline"
+              style={
+                {
+                  // borderColor: topic.tagData[0].color,
+                  // color: topic.tagData[0].color,
+                }
+              }
+              className="absolute bottom-4 left-1/2 -translate-x-1/2 border-gray-400 bg-white/80 text-xs shadow-sm backdrop-blur-sm"
             >
-              <Badge
-                variant="outline"
-                style={{
-                  borderColor: topic.tagData[0].color,
-                  color: topic.tagData[0].color,
-                }}
-                className="bg-white/80 text-xs shadow-sm backdrop-blur-sm"
-              >
-                {topic.tagData[0].emoji} {topic.tagData[0].label}
-              </Badge>
-            </motion.div>
+              {topic.tagData[0].emoji} {topic.tagData[0].label}
+            </Badge>
           )}
         </div>
       </motion.div>
@@ -508,7 +507,9 @@ export default function AnimatedHotQuestionsGrid({
                         {/* Door Panel */}
                         <div className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 bg-white p-4 shadow-lg">
                           {/* Door Handle */}
-                          <div className="absolute left-2 top-1/2 z-10 h-8 w-2 -translate-y-1/2 rounded-r-md bg-green-500"></div>
+                          <div className="absolute left-3 top-1/2 z-10 -translate-y-1/2 text-gray-400">
+                            <DoorHandleIcon width={20} height={20} />
+                          </div>
 
                           {/* Question title - centered */}
                           <div className="flex flex-grow items-center justify-center text-center">
