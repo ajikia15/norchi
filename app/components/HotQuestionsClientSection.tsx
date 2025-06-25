@@ -14,32 +14,37 @@ const AnimatedHotQuestionsGrid = dynamic(
   }
 );
 
-function HotQuestionsLoadingSkeleton() {
-  return (
-    <div className="max-w-7xl mx-auto px-6">
-      <Skeleton className="h-6 w-48 mx-auto mb-12" />
+function HotQuestionsLoadingSkeleton({ topicsCount }: { topicsCount: number }) {
+  // Calculate how many cards to show on mobile (max 3 visible in carousel)
+  const mobileCardsCount = Math.min(topicsCount, 3);
 
+  return (
+    <>
       {/* Mobile skeleton */}
       <div className="block md:hidden">
         <div className="overflow-hidden">
           <div className="flex">
-            {Array.from({ length: 3 }).map((_, index) => (
+            {Array.from({ length: mobileCardsCount }).map((_, index) => (
               <div key={index} className="min-w-0 flex-[0_0_85%] pl-4">
                 <HotQuestionCardSkeleton />
               </div>
             ))}
           </div>
         </div>
-        <div className="mt-6 flex justify-center space-x-2">
-          {Array.from({ length: 3 }).map((_, index) => (
-            <Skeleton key={index} className="h-2 w-2 rounded-full" />
-          ))}
-        </div>
+        {topicsCount > 1 && (
+          <div className="mt-6 flex justify-center space-x-2">
+            {Array.from({ length: Math.min(topicsCount, 5) }).map(
+              (_, index) => (
+                <Skeleton key={index} className="h-2 w-2 rounded-full" />
+              )
+            )}
+          </div>
+        )}
       </div>
 
-      {/* Desktop skeleton */}
+      {/* Desktop skeleton - matches exact real component structure */}
       <div className="hidden md:flex flex-wrap justify-center gap-4 lg:gap-6">
-        {Array.from({ length: 8 }).map((_, index) => (
+        {Array.from({ length: topicsCount }).map((_, index) => (
           <div
             key={index}
             className="relative h-[22rem] w-full sm:w-80 lg:w-72"
@@ -62,7 +67,7 @@ function HotQuestionsLoadingSkeleton() {
           </div>
         ))}
       </div>
-    </div>
+    </>
   );
 }
 
@@ -74,14 +79,31 @@ export default function HotQuestionsClientSection({
   topics,
 }: HotQuestionsClientSectionProps) {
   return (
-    <section className="py-12 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
+    <section className="py-8 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-xl text-gray-400 text-center mb-12">
+        <h2 className="text-xl text-gray-400 text-center mb-8">
           შეუღე კარი სიმართლეს
         </h2>
-        <Suspense fallback={<HotQuestionsLoadingSkeleton />}>
-          <AnimatedHotQuestionsGrid topics={topics} />
-        </Suspense>
+        {/* CSS Grid stacking container - both skeleton and real content occupy the same grid area */}
+        <div className="grid">
+          {/* Skeleton layer - always present but hidden when content loads */}
+          <div
+            className="[grid-area:1/1] transition-opacity duration-500"
+            data-skeleton-layer
+          >
+            <HotQuestionsLoadingSkeleton topicsCount={topics.length} />
+          </div>
+
+          {/* Real content layer - overlaps skeleton in same grid area */}
+          <div
+            className="[grid-area:1/1] transition-opacity duration-500 opacity-0"
+            data-content-layer
+          >
+            <Suspense fallback={null}>
+              <AnimatedHotQuestionsGrid topics={topics} />
+            </Suspense>
+          </div>
+        </div>
       </div>
     </section>
   );

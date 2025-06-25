@@ -320,6 +320,7 @@ export default function AnimatedHotQuestionsGrid({
   const [carouselStopped, setCarouselStopped] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [contentReady, setContentReady] = useState(false);
 
   // Embla Carousel setup with autoplay
   const autoplayRef = useRef(
@@ -348,8 +349,13 @@ export default function AnimatedHotQuestionsGrid({
     const mediaQuery = window.matchMedia("(max-width: 768px)");
     const isMobileDevice = mediaQuery.matches;
     setMobile(isMobileDevice);
-    // Delay loading completion to prevent flash
-    setTimeout(() => setIsLoading(false), 100);
+
+    // Minimal delay to prevent flash while allowing content to appear quickly
+    setTimeout(() => {
+      setIsLoading(false);
+      // Mark content as ready after a brief delay to ensure smooth transition
+      setTimeout(() => setContentReady(true), 100);
+    }, 50);
 
     // Listen for media query changes
     const handleChange = (e: MediaQueryListEvent) => {
@@ -359,6 +365,19 @@ export default function AnimatedHotQuestionsGrid({
 
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
+
+  // Hide skeleton when content is ready
+  useEffect(() => {
+    if (contentReady) {
+      const skeletonElement = document.querySelector("[data-skeleton-layer]");
+      const contentElement = document.querySelector("[data-content-layer]");
+
+      if (skeletonElement && contentElement) {
+        (skeletonElement as HTMLElement).style.opacity = "0";
+        (contentElement as HTMLElement).style.opacity = "1";
+      }
+    }
+  }, [contentReady]);
 
   // Stop carousel when a card is clicked and restart when all cards are closed
   useEffect(() => {
