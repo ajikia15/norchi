@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { loadHotTopicsData } from "../lib/storage";
-import HotQuestionsGrid from "./HotQuestionsGrid";
+import HotQuestionsClient from "./HotQuestionsClient";
 import HotQuestionsGridSkeleton from "./HotQuestionsGridSkeleton";
 
 async function getHotTopicsData() {
@@ -25,7 +25,7 @@ export default async function HotQuestionsPage() {
         </div>
 
         <Suspense fallback={<HotQuestionsGridSkeleton />}>
-          <HotQuestionsGrid topics={topics} />
+          <HotQuestionsClient topics={topics} />
         </Suspense>
       </div>
     </div>

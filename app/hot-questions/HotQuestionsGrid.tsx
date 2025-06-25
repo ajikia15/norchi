@@ -5,7 +5,16 @@ import { motion } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, ArrowRight, Lightbulb } from "lucide-react";
+import { ArrowRight, Lightbulb } from "lucide-react";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import ReactMarkdown from "react-markdown";
 import ResponsiveArticleDialog from "../components/ResponsiveArticleDialog";
 
@@ -303,67 +312,82 @@ export default function HotQuestionsGrid({ topics }: HotQuestionsGridProps) {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center space-x-2">
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => goToPage(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage > 1) goToPage(currentPage - 1);
+                }}
+                className={
+                  currentPage === 1 ? "pointer-events-none opacity-50" : ""
+                }
+              />
+            </PaginationItem>
 
-          {/* Page numbers */}
-          {Array.from({ length: totalPages }, (_, index) => {
-            const page = index + 1;
-            const isCurrentPage = page === currentPage;
+            {Array.from({ length: totalPages }, (_, index) => {
+              const page = index + 1;
+              const isCurrentPage = page === currentPage;
 
-            // Show first page, last page, current page, and pages around current
-            const showPage =
-              page === 1 ||
-              page === totalPages ||
-              Math.abs(page - currentPage) <= 1;
+              // Show first page, last page, current page, and pages around current
+              const showPage =
+                page === 1 ||
+                page === totalPages ||
+                Math.abs(page - currentPage) <= 1;
 
-            if (!showPage) {
-              // Show ellipsis for gaps
-              if (page === 2 && currentPage > 4) {
-                return (
-                  <span key={page} className="px-2 text-gray-500">
-                    ...
-                  </span>
-                );
+              if (!showPage) {
+                // Show ellipsis for gaps
+                if (page === 2 && currentPage > 4) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                if (page === totalPages - 1 && currentPage < totalPages - 3) {
+                  return (
+                    <PaginationItem key={page}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                }
+                return null;
               }
-              if (page === totalPages - 1 && currentPage < totalPages - 3) {
-                return (
-                  <span key={page} className="px-2 text-gray-500">
-                    ...
-                  </span>
-                );
-              }
-              return null;
-            }
 
-            return (
-              <Button
-                key={page}
-                variant={isCurrentPage ? "default" : "outline"}
-                size="icon"
-                onClick={() => goToPage(page)}
-              >
-                {page}
-              </Button>
-            );
-          })}
+              return (
+                <PaginationItem key={page}>
+                  <PaginationLink
+                    href="#"
+                    isActive={isCurrentPage}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      goToPage(page);
+                    }}
+                  >
+                    {page}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={() => goToPage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
+            <PaginationItem>
+              <PaginationNext
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (currentPage < totalPages) goToPage(currentPage + 1);
+                }}
+                className={
+                  currentPage === totalPages
+                    ? "pointer-events-none opacity-50"
+                    : ""
+                }
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
       )}
     </>
   );
