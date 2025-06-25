@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useTransition, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { HotTopic } from "../types";
 import TagFilter, { PREDEFINED_TAGS } from "./TagFilter";
 import HotQuestionsGrid from "./HotQuestionsGrid";
+import { getTagsFromSearchParams, updateTagsInURL } from "../lib/url-utils";
 
 interface HotQuestionsClientProps {
   topics: HotTopic[];
@@ -13,7 +14,14 @@ interface HotQuestionsClientProps {
 export default function HotQuestionsClient({
   topics,
 }: HotQuestionsClientProps) {
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // Get selected tags from URL
+  const selectedTags = useMemo(() => {
+    return getTagsFromSearchParams(searchParams);
+  }, [searchParams]);
 
   // Filter topics based on selected tags
   const filteredTopics = useMemo(() => {
@@ -40,85 +48,60 @@ export default function HotQuestionsClient({
     });
   }, [topics, selectedTags]);
 
-  const handleTagToggle = (tagId: string) => {
-    setSelectedTags((prev) =>
-      prev.includes(tagId)
-        ? prev.filter((id) => id !== tagId)
-        : [...prev, tagId]
-    );
-  };
+  // Function to update URL with new tag selection
+  const updateURL = useCallback(
+    (newTags: string[]) => {
+      const queryString = updateTagsInURL(searchParams, newTags);
+      const newURL = queryString ? `?${queryString}` : window.location.pathname;
 
-  const handleClearAll = () => {
-    setSelectedTags([]);
-  };
+      startTransition(() => {
+        router.replace(newURL, { scroll: false });
+      });
+    },
+    [router, searchParams]
+  );
+
+  const handleTagToggle = useCallback(
+    (tagId: string) => {
+      const newSelectedTags = selectedTags.includes(tagId)
+        ? selectedTags.filter((id) => id !== tagId)
+        : [...selectedTags, tagId];
+
+      updateURL(newSelectedTags);
+    },
+    [selectedTags, updateURL]
+  );
+
+  const handleClearAll = useCallback(() => {
+    updateURL([]);
+  }, [updateURL]);
 
   return (
     <div>
       {/* Tag Filter */}
-      <TagFilter
-        selectedTags={selectedTags}
-        onTagToggle={handleTagToggle}
-        onClearAll={handleClearAll}
-      />
-
-      {/* Results Summary */}
-      <div className="mb-6">
-        <div className="flex items-center justify-between">
-          <p className="text-gray-600">
-            {selectedTags.length === 0
-              ? `ყველა კითხვა (${topics.length})`
-              : `გაფილტრული შედეგები: ${filteredTopics.length} კითხვა`}
-          </p>
-
-          <p
-            className={`text-amber-600 text-sm transition-opacity duration-300 ${
-              selectedTags.length > 0 && filteredTopics.length === 0
-                ? "opacity-100"
-                : "opacity-0"
-            }`}
-          >
-            არცერთი კითხვა არ მოიძებნა არჩეული კატეგორიებით
-          </p>
-        </div>
+      <div className="relative">
+        <TagFilter
+          selectedTags={selectedTags}
+          onTagToggle={handleTagToggle}
+          onClearAll={handleClearAll}
+          isLoading={isPending}
+        />
       </div>
 
       {/* Results Grid */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={`${selectedTags.join("-")}-${filteredTopics.length}`}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {filteredTopics.length > 0 ? (
-            <HotQuestionsGrid topics={filteredTopics} />
-          ) : selectedTags.length > 0 ? (
-            // Empty state when no results found
-            <motion.div
-              className="text-center py-16"
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                კითხვები ვერ მოიძებნა
-              </h3>
-              <p className="text-gray-600 mb-6 max-w-md mx-auto">
-                არჩეული კატეგორიებით შესაბამისი კითხვები არ არსებობს. სცადეთ
-                სხვა კატეგორიების არჩევა.
-              </p>
-              <button
-                onClick={handleClearAll}
-                className="text-blue-600 hover:text-blue-800 font-medium"
-              >
-                ყველა ფილტრის გასუფთავება
-              </button>
-            </motion.div>
-          ) : null}
-        </motion.div>
-      </AnimatePresence>
+      <div className="relative">
+        {/* Results overlay when loading */}
+        {isPending && (
+          <div className="absolute inset-0 bg-white/80 backdrop-blur-md rounded-xl z-50 flex items-center justify-center">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-3"></div>
+              <p className="text-sm text-gray-600">კითხვების ძებნა...</p>
+            </div>
+          </div>
+        )}
+
+        <HotQuestionsGrid topics={filteredTopics} />
+      </div>
     </div>
   );
 }
