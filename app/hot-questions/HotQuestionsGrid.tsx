@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import ArticleDialog from "../components/ArticleDialogWithHook";
+import ResponsiveArticleDialog from "../components/ResponsiveArticleDialog";
 
 interface HotQuestionsGridProps {
   topics: HotTopic[];
@@ -269,7 +269,7 @@ function StaticHotQuestionCard({ topic }: { topic: HotTopic }) {
 
       {/* Dialog */}
       {articleDialogTopic && (
-        <ArticleDialog
+        <ResponsiveArticleDialog
           topic={articleDialogTopic}
           isOpen={!!articleDialogTopic}
           onClose={() => setArticleDialogTopic(null)}

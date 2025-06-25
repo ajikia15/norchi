@@ -20,6 +20,8 @@ import {
 } from "lucide-react";
 import StoryProgressBar from "./StoryProgressBar";
 import Logo from "./Logo";
+import ReactMarkdown from "react-markdown";
+import InfoCardDialog from "./InfoCardDialog";
 
 interface GameCardProps {
   node: Node;
@@ -39,6 +41,7 @@ export default function GameCard({
   const [isShaking, setIsShaking] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
   const [hasReachedThreshold, setHasReachedThreshold] = useState(false);
+  const [showInfoDialog, setShowInfoDialog] = useState(false);
 
   // Prevent scrolling when component mounts and restore when unmounts
   useEffect(() => {
@@ -582,14 +585,16 @@ export default function GameCard({
                   {getNodeIcon()}
                 </div>
               </motion.div>
-              <motion.h2
+              <motion.div
                 className="text-2xl font-bold text-slate-800 leading-relaxed mb-8"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                {node.text}
-              </motion.h2>
+                <div className="prose prose-lg max-w-none text-slate-800">
+                  <ReactMarkdown>{node.text}</ReactMarkdown>
+                </div>
+              </motion.div>
 
               {node.type !== "end" && (
                 <motion.div
@@ -597,39 +602,97 @@ export default function GameCard({
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <motion.button
-                    onClick={handleContinue}
-                    disabled={isTransitioning}
-                    className="relative overflow-hidden group w-full h-14 rounded-2xl shadow-lg border-0"
-                    whileHover={{ y: -2 }}
-                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 group-hover:from-slate-700 group-hover:to-slate-800 transition-all duration-300" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <span className="relative z-10 text-white font-semibold">
-                      {node.type === "callout"
-                        ? node.buttonLabel || "სცადეთ თავიდან"
-                        : node.buttonLabel || "გაგრძელება"}
-                    </span>
-                    <motion.div
-                      className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
-                      initial={false}
-                      animate={{ rotate: [0, 360] }}
+                  {node.type === "infocard" ? (
+                    <div className="flex gap-3">
+                      {/* Quick Continue Button */}
+                      <motion.button
+                        onClick={handleContinue}
+                        disabled={isTransitioning}
+                        className="flex-1 relative overflow-hidden group h-14 rounded-2xl shadow-lg border-0"
+                        whileHover={{ y: -2 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25,
+                        }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 group-hover:from-slate-700 group-hover:to-slate-800 transition-all duration-300" />
+                        <span className="relative z-10 text-white font-semibold">
+                          {(node as any).buttonLabel || "გაგრძელება"}
+                        </span>
+                      </motion.button>
+
+                      {/* Expand to Read Button */}
+                      <motion.button
+                        onClick={() => setShowInfoDialog(true)}
+                        className="px-6 relative overflow-hidden group h-14 rounded-2xl shadow-lg border-2 border-violet-300 bg-white hover:bg-violet-50"
+                        whileHover={{ y: -2 }}
+                        transition={{
+                          type: "spring",
+                          stiffness: 400,
+                          damping: 25,
+                        }}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Info className="h-5 w-5 text-violet-600" />
+                          <span className="text-violet-700 font-semibold">
+                            ვრცლად
+                          </span>
+                        </div>
+                      </motion.button>
+                    </div>
+                  ) : (
+                    <motion.button
+                      onClick={handleContinue}
+                      disabled={isTransitioning}
+                      className="relative overflow-hidden group w-full h-14 rounded-2xl shadow-lg border-0"
+                      whileHover={{ y: -2 }}
                       transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "linear",
+                        type: "spring",
+                        stiffness: 400,
+                        damping: 25,
                       }}
                     >
-                      <Sparkles className="h-4 w-4 text-white" />
-                    </motion.div>
-                  </motion.button>
+                      <div className="absolute inset-0 bg-gradient-to-r from-slate-600 to-slate-700 group-hover:from-slate-700 group-hover:to-slate-800 transition-all duration-300" />
+                      <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                      <span className="relative z-10 text-white font-semibold">
+                        {node.type === "callout"
+                          ? (node as any).buttonLabel || "სცადეთ თავიდან"
+                          : (node as any).buttonLabel || "გაგრძელება"}
+                      </span>
+                      <motion.div
+                        className="absolute top-2 right-2 opacity-0 group-hover:opacity-100"
+                        initial={false}
+                        animate={{ rotate: [0, 360] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          ease: "linear",
+                        }}
+                      >
+                        <Sparkles className="h-4 w-4 text-white" />
+                      </motion.div>
+                    </motion.button>
+                  )}
                 </motion.div>
               )}
             </div>
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* InfoCard Dialog */}
+      {node.type === "infocard" && showInfoDialog && (
+        <InfoCardDialog
+          node={node}
+          isOpen={showInfoDialog}
+          onClose={() => setShowInfoDialog(false)}
+          onContinue={() => {
+            setShowInfoDialog(false);
+            handleContinue();
+          }}
+        />
+      )}
     </div>
   );
 }

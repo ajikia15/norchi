@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import ArticleDialog from "./ArticleDialog";
+import ResponsiveArticleDialog from "./ResponsiveArticleDialog";
 
 interface HotQuestionCardProps {
   topic: HotTopic;
@@ -228,7 +228,7 @@ export default function HotQuestionCard({ topic }: HotQuestionCardProps) {
       </motion.div>
 
       {/* Article Dialog */}
-      <ArticleDialog
+      <ResponsiveArticleDialog
         topic={topic}
         isOpen={isArticleDialogOpen}
         onClose={() => setIsArticleDialogOpen(false)}

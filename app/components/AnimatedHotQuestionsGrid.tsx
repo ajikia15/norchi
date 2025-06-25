@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 
 import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import ArticleDialog from "./ArticleDialog";
+import ResponsiveArticleDialog from "./ResponsiveArticleDialog";
 import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
 
 interface AnimatedHotQuestionsGridProps {
@@ -580,7 +580,7 @@ export default function AnimatedHotQuestionsGrid({
 
         {/* Article Dialog for mobile */}
         {articleDialogTopic && (
-          <ArticleDialog
+          <ResponsiveArticleDialog
             topic={articleDialogTopic}
             isOpen={!!articleDialogTopic}
             onClose={() => setArticleDialogTopic(null)}
@@ -607,7 +607,7 @@ export default function AnimatedHotQuestionsGrid({
 
       {/* Article Dialog */}
       {articleDialogTopic && (
-        <ArticleDialog
+        <ResponsiveArticleDialog
           topic={articleDialogTopic}
           isOpen={!!articleDialogTopic}
           onClose={() => setArticleDialogTopic(null)}
