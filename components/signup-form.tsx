@@ -137,7 +137,11 @@ export function SignupForm({
                         <FormItem>
                           <FormLabel>პაროლი</FormLabel>
                           <FormControl>
-                            <Input type="password" {...field} />
+                            <Input
+                              placeholder="********"
+                              type="password"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
