@@ -66,7 +66,7 @@ export function SignupForm({
       <Card>
         <CardHeader className="text-center">
           <CardTitle className="text-xl">
-            კეთილი იყოს თქვენი დაბრუნება
+            კეთილი იყოს თქვენი მობრძანება
           </CardTitle>
           <CardDescription>გაიარეთ ავტორიზაცია</CardDescription>
         </CardHeader>
@@ -152,14 +152,14 @@ export function SignupForm({
                         ველოდებით...
                       </>
                     ) : (
-                      "შესვლა"
+                      "რეგისტრაცია"
                     )}
                   </Button>
                 </div>
                 <div className="text-center text-sm">
-                  არ გაქვთ ანგარიში?{" "}
+                  გაქვთ ანგარიში?{" "}
                   <a href="#" className="underline underline-offset-4">
-                    რეგისტრაცია
+                    შედით ანგარიშზე
                   </a>
                 </div>
               </div>
