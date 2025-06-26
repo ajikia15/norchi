@@ -13,8 +13,8 @@ export const signIn = async () => {
 export const signUp = async () => {
   await auth.api.signUpEmail({
     body: {
-      email: "test@test.com",
-      password: "test",
+      email: "1@1.com",
+      password: "123123123",
       name: "test",
     },
   });
