@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import Navbar from "./components/Navbar";
+import NavbarWrapper from "./components/NavbarWrapper";
 import { firaGO } from "./lib/fonts";
 import { Toaster } from "@/components/ui/sonner";
 const outfit = Outfit({
@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="ka">
       <body className={` ${outfit.variable} ${firaGO.variable} antialiased`}>
-        <Navbar />
+        <NavbarWrapper />
         <main className="relative font-firago">{children}</main>
         <Toaster />
       </body>

@@ -49,16 +49,18 @@ export function SignupForm({
       name: "",
     },
   });
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { success, message } = await signUp(
-      values.email,
-      values.password,
-      values.name
-    );
-    if (success) {
-      toast.success(message);
-    } else {
-      toast.error(message);
+    try {
+      await signUp(values.email, values.password, values.name);
+      // signUp will redirect on success, so this won't run
+    } catch (error) {
+      // signUp returns error info on failure
+      if (error && typeof error === "object" && "message" in error) {
+        toast.error(error.message as string);
+      } else {
+        toast.error("შეცდომა რეგისტრაციისას");
+      }
     }
   }
   return (

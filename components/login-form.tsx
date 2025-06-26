@@ -47,12 +47,18 @@ export function LoginForm({
       password: "",
     },
   });
+
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const { success, message } = await signIn(values.email, values.password);
-    if (success) {
-      toast.success(message);
-    } else {
-      toast.error(message);
+    try {
+      await signIn(values.email, values.password);
+      // signIn will redirect on success, so this won't run
+    } catch (error) {
+      // signIn returns error info on failure
+      if (error && typeof error === "object" && "message" in error) {
+        toast.error(error.message as string);
+      } else {
+        toast.error("შეცდომა ავტორიზაციისას");
+      }
     }
   }
   return (

@@ -1,5 +1,6 @@
 "use server";
 import { auth } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 export const signIn = async (email: string, password: string) => {
   try {
@@ -9,10 +10,10 @@ export const signIn = async (email: string, password: string) => {
         password: password,
       },
     });
-    return { success: true, message: "წარმატებით გაიარეთ ავტორიზაცია" };
+    redirect("/");
   } catch (error) {
     const e = error as Error;
-    return { success: false, message: e.message || "შეცდომა" };
+    throw new Error(e.message || "შეცდომა ავტორიზაციისას");
   }
 };
 
@@ -25,9 +26,21 @@ export const signUp = async (email: string, password: string, name: string) => {
         name: name,
       },
     });
-    return { success: true, message: "წარმატებით გაიარეთ რეგისტრაცია" };
+    redirect("/login");
   } catch (error) {
     const e = error as Error;
-    return { success: false, message: e.message || "შეცდომა" };
+    return { success: false, message: e.message || "შეცდომา" };
+  }
+};
+
+export const signOutAction = async () => {
+  try {
+    await auth.api.signOut({
+      headers: new Headers(),
+    });
+    redirect("/");
+  } catch (error) {
+    const e = error as Error;
+    throw new Error(e.message || "შეცდომა გასვლისას");
   }
 };

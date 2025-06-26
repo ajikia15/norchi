@@ -18,10 +18,20 @@ import {
   HelpCircle,
   BookOpen,
   Menu,
+  User,
 } from "lucide-react";
 import Logo from "./Logo";
+import { Logout } from "./Logout";
 
-export default function Navbar() {
+interface NavbarProps {
+  user?: {
+    id: string;
+    name: string;
+    email: string;
+  } | null;
+}
+
+export default function Navbar({ user }: NavbarProps = {}) {
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
@@ -51,12 +61,16 @@ export default function Navbar() {
       icon: BookOpen,
       isActive: pathname === "/stories",
     },
-    {
-      href: "/admin",
-      label: "ადმინი",
-      icon: Settings,
-      isActive: isAdmin,
-    },
+    ...(user
+      ? [
+          {
+            href: "/admin",
+            label: "ადმინი",
+            icon: Settings,
+            isActive: isAdmin,
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -85,6 +99,24 @@ export default function Navbar() {
               <Users className="h-4 w-4" />
               საზოგადოება
             </Button>
+
+            {user ? (
+              <div className="flex items-center gap-2">
+                <Link href="/profile">
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    <User className="h-4 w-4" />
+                    {user.name}
+                  </Button>
+                </Link>
+                <Logout />
+              </div>
+            ) : (
+              <Link href="/login">
+                <Button variant="outline" size="sm">
+                  შესვლა
+                </Button>
+              </Link>
+            )}
           </div>
 
           {/* Mobile Menu Sheet */}
@@ -127,6 +159,32 @@ export default function Navbar() {
                     <Users className="h-5 w-5" />
                     საზოგადოება
                   </Button>
+
+                  {user ? (
+                    <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
+                      <Link href="/profile" onClick={closeSheet}>
+                        <Button
+                          variant="ghost"
+                          size="lg"
+                          className="w-full justify-start gap-3 h-12"
+                        >
+                          <User className="h-5 w-5" />
+                          {user.name}
+                        </Button>
+                      </Link>
+                      <Logout />
+                    </div>
+                  ) : (
+                    <Link href="/login" onClick={closeSheet}>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="w-full mt-4"
+                      >
+                        შესვლა
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>
