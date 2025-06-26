@@ -24,6 +24,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { authClient } from "@/app/lib/auth-client";
+import Link from "next/link";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -146,9 +147,9 @@ export function LoginForm({
                 </div>
                 <div className="text-center text-sm">
                   არ გაქვთ ანგარიში?{" "}
-                  <a href="#" className="underline underline-offset-4">
+                  <Link href="/signup" className="underline underline-offset-4">
                     რეგისტრაცია
-                  </a>
+                  </Link>
                 </div>
               </div>
             </form>
