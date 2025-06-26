@@ -15,11 +15,15 @@ import BaseHotQuestionCard from "../components/BaseHotQuestionCard";
 
 interface HotQuestionsGridProps {
   topics: HotTopic[];
+  user?: { id: string } | null;
 }
 
 const ITEMS_PER_PAGE = 12;
 
-export default function HotQuestionsGrid({ topics }: HotQuestionsGridProps) {
+export default function HotQuestionsGrid({
+  topics,
+  user,
+}: HotQuestionsGridProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.ceil(topics.length / ITEMS_PER_PAGE);
@@ -37,7 +41,7 @@ export default function HotQuestionsGrid({ topics }: HotQuestionsGridProps) {
       {/* Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
         {currentTopics.map((topic) => (
-          <BaseHotQuestionCard key={topic.id} topic={topic} />
+          <BaseHotQuestionCard key={topic.id} topic={topic} user={user} />
         ))}
       </div>
 

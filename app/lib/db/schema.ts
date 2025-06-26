@@ -121,4 +121,17 @@ export const verification = sqliteTable("verification", {
   ),
 });
 
-export const schema = { user, session, account, verification };
+export const savedHotCards = sqliteTable("saved_hot_cards", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  hotTopicId: text("hot_topic_id")
+    .notNull()
+    .references(() => hotTopics.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+export const schema = { user, session, account, verification, savedHotCards };

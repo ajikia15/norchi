@@ -12,6 +12,7 @@ import BaseHotQuestionCard from "./BaseHotQuestionCard";
 
 interface AnimatedHotQuestionsGridProps {
   topics: HotTopic[];
+  user?: { id: string } | null;
 }
 
 /**
@@ -21,6 +22,7 @@ interface AnimatedHotQuestionsGridProps {
  */
 export default function AnimatedHotQuestionsGrid({
   topics,
+  user,
 }: AnimatedHotQuestionsGridProps) {
   const [mobile, setMobile] = useState<boolean | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -107,7 +109,7 @@ export default function AnimatedHotQuestionsGrid({
               : // Show actual cards when loaded and device detected
                 topics.map((topic) => (
                   <div key={topic.id} className="min-w-0 flex-[0_0_85%] pl-4">
-                    <BaseHotQuestionCard topic={topic} />
+                    <BaseHotQuestionCard topic={topic} user={user} />
                   </div>
                 ))}
           </div>
@@ -142,7 +144,7 @@ export default function AnimatedHotQuestionsGrid({
     <div className="flex flex-wrap justify-center gap-4 lg:gap-6">
       {topics.map((topic, index) => (
         <div key={topic.id} className="w-full sm:w-80 lg:w-72">
-          <AnimatedHotQuestionCard topic={topic} index={index} />
+          <AnimatedHotQuestionCard topic={topic} index={index} user={user} />
         </div>
       ))}
     </div>

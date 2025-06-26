@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { loadHotTopicsData } from "../lib/storage";
+import { getCurrentUser } from "../lib/auth-utils";
 import HotQuestionsClient from "./HotQuestionsClient";
 import HotQuestionsGridSkeleton from "./HotQuestionsGridSkeleton";
 
@@ -9,7 +10,10 @@ async function getHotTopicsData() {
 }
 
 export default async function HotQuestionsPage() {
-  const topics = await getHotTopicsData();
+  const [topics, user] = await Promise.all([
+    getHotTopicsData(),
+    getCurrentUser(),
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
@@ -25,7 +29,7 @@ export default async function HotQuestionsPage() {
         </div>
 
         <Suspense fallback={<HotQuestionsGridSkeleton />}>
-          <HotQuestionsClient topics={topics} />
+          <HotQuestionsClient topics={topics} user={user} />
         </Suspense>
       </div>
     </div>

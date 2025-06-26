@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import {
   Home,
   Settings,
@@ -19,6 +19,7 @@ import {
   BookOpen,
   Menu,
   User,
+  Heart,
 } from "lucide-react";
 import Logo from "./Logo";
 import UserDropdown from "./UserDropdown";
@@ -35,12 +36,12 @@ interface NavbarProps {
 
 export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
   const pathname = usePathname();
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const isHome = pathname === "/";
 
-  const closeSheet = () => {
-    setIsSheetOpen(false);
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
   };
 
   const navigationItems = [
@@ -102,10 +103,10 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
             )}
           </div>
 
-          {/* Mobile Menu Sheet */}
+          {/* Mobile Menu Drawer */}
           <div className="md:hidden">
-            <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-              <SheetTrigger asChild>
+            <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+              <DrawerTrigger asChild>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -114,14 +115,18 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                 >
                   <Menu className="h-5 w-5" />
                 </Button>
-              </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-                <SheetHeader>
-                  <SheetTitle className="text-left">ნავიგაცია</SheetTitle>
-                </SheetHeader>
-                <div className="flex flex-col gap-4 mt-6">
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader>
+                  <DrawerTitle className="text-center">ნავიგაცია</DrawerTitle>
+                </DrawerHeader>
+                <div className="flex flex-col gap-2 p-4 pb-8">
                   {navigationItems.map((item) => (
-                    <Link key={item.href} href={item.href} onClick={closeSheet}>
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={closeDrawer}
+                    >
                       <Button
                         variant={item.isActive ? "default" : "ghost"}
                         size="lg"
@@ -145,7 +150,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
 
                   {user ? (
                     <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
-                      <Link href="/profile" onClick={closeSheet}>
+                      <Link href="/profile" onClick={closeDrawer}>
                         <Button
                           variant="ghost"
                           size="lg"
@@ -156,8 +161,19 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                         </Button>
                       </Link>
 
+                      <Link href="/saved-hotcards" onClick={closeDrawer}>
+                        <Button
+                          variant="ghost"
+                          size="lg"
+                          className="w-full justify-start gap-3 h-12"
+                        >
+                          <Heart className="h-5 w-5" />
+                          შენახული კითხვები
+                        </Button>
+                      </Link>
+
                       {isAdmin && (
-                        <Link href="/admin" onClick={closeSheet}>
+                        <Link href="/admin" onClick={closeDrawer}>
                           <Button
                             variant="ghost"
                             size="lg"
@@ -169,12 +185,12 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                         </Link>
                       )}
 
-                      <div className="w-full">
+                      <div className="w-full p-3">
                         <Logout />
                       </div>
                     </div>
                   ) : (
-                    <Link href="/login" onClick={closeSheet}>
+                    <Link href="/login" onClick={closeDrawer}>
                       <Button
                         variant="outline"
                         size="lg"
@@ -185,8 +201,8 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                     </Link>
                   )}
                 </div>
-              </SheetContent>
-            </Sheet>
+              </DrawerContent>
+            </Drawer>
           </div>
         </div>
       </div>

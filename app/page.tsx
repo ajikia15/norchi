@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { Story } from "./types";
 import { loadAllData } from "./lib/storage";
+import { getCurrentUser } from "./lib/auth-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
@@ -10,7 +11,8 @@ import StoriesGridSkeleton from "./components/StoriesGridSkeleton";
 
 // Optimized parallel data loading
 async function getPageData() {
-  return await loadAllData();
+  const [data, user] = await Promise.all([loadAllData(), getCurrentUser()]);
+  return { ...data, user };
 }
 
 async function StoriesGrid({ stories }: { stories: Story[] }) {
@@ -104,14 +106,14 @@ async function StoriesGrid({ stories }: { stories: Story[] }) {
 // Main page component with optimized data loading
 export default async function HomePage() {
   // Load all data in parallel at the top level
-  const { storiesData, hotTopicsData } = await getPageData();
+  const { storiesData, hotTopicsData, user } = await getPageData();
   const stories = Object.values(storiesData.stories);
   const topics = Object.values(hotTopicsData.topics);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       {/* Hot Questions Section - now with pre-loaded data */}
-      <HotQuestionsClientSection topics={topics} />
+      <HotQuestionsClientSection topics={topics} user={user} />
 
       {/* Stories section */}
       <div className="border-b border-gray-200/30 bg-white/60 backdrop-blur-sm">

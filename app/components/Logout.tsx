@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { authClient } from "@/app/lib/auth-client";
 import { useRouter } from "next/navigation";
@@ -24,8 +23,14 @@ export const Logout = () => {
   };
 
   return (
-    <Button onClick={handleLogout} disabled={isPending}>
-      {isPending ? "გასვლა..." : "გასვლა"} <LogOut />
-    </Button>
+    <div
+      onClick={handleLogout}
+      className={`flex items-center gap-2 w-full cursor-pointer ${
+        isPending ? "opacity-50 cursor-not-allowed" : ""
+      }`}
+    >
+      <LogOut className="h-4 w-4" />
+      <span>{isPending ? "გასვლა..." : "გასვლა"}</span>
+    </div>
   );
 };

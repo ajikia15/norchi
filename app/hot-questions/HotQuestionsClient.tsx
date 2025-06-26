@@ -10,10 +10,12 @@ import { getTagsFromSearchParams, updateTagsInURL } from "../lib/url-utils";
 
 interface HotQuestionsClientProps {
   topics: HotTopic[];
+  user?: { id: string } | null;
 }
 
 export default function HotQuestionsClient({
   topics,
+  user,
 }: HotQuestionsClientProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -106,7 +108,7 @@ export default function HotQuestionsClient({
         {isPending ? (
           <HotQuestionsGridSkeleton />
         ) : (
-          <HotQuestionsGrid topics={filteredTopics} />
+          <HotQuestionsGrid topics={filteredTopics} user={user} />
         )}
       </div>
     </div>

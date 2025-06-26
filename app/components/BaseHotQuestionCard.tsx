@@ -5,17 +5,20 @@ import { motion } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Lightbulb, Save } from "lucide-react";
+import { ArrowRight, Lightbulb } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ResponsiveArticleDialog from "./ResponsiveArticleDialog";
 import DoorHandleIcon from "./DoorHandleIcon";
+import SaveHotCardButton from "./SaveHotCardButton";
 
 interface BaseHotQuestionCardProps {
   topic: HotTopic;
+  user?: { id: string } | null;
 }
 
 export default function BaseHotQuestionCard({
   topic,
+  user,
 }: BaseHotQuestionCardProps) {
   const [openedCards, setOpenedCards] = useState<Set<string>>(new Set());
   const [everOpenedCards, setEverOpenedCards] = useState<Set<string>>(
@@ -116,9 +119,7 @@ export default function BaseHotQuestionCard({
                   duration: 0.2,
                 }}
               >
-                <Button variant="ghost" size="icon" aria-label="Save answer">
-                  <Save className="h-5 w-5 text-gray-500" />
-                </Button>
+                <SaveHotCardButton hotTopicId={topic.id} user={user} />
               </motion.div>
 
               {/* Read to end button */}

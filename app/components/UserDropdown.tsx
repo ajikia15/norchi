@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, Settings, ChevronDown } from "lucide-react";
+import { User, Settings, ChevronDown, Heart } from "lucide-react";
 import Link from "next/link";
 import { Logout } from "./Logout";
 
@@ -50,6 +50,13 @@ export default function UserDropdown({ user, isAdmin }: UserDropdownProps) {
           <Link href="/profile" className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>პროფილი</span>
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem asChild>
+          <Link href="/saved-hotcards" className="cursor-pointer">
+            <Heart className="mr-2 h-4 w-4" />
+            <span>შენახული კითხვები</span>
           </Link>
         </DropdownMenuItem>
 

@@ -75,6 +75,7 @@ function HotQuestionsLoadingSkeleton({ topicsCount }: { topicsCount: number }) {
 
 interface HotQuestionsClientSectionProps {
   topics: HotTopic[];
+  user?: { id: string } | null;
 }
 
 /**
@@ -83,6 +84,7 @@ interface HotQuestionsClientSectionProps {
  */
 export default function HotQuestionsClientSection({
   topics,
+  user,
 }: HotQuestionsClientSectionProps) {
   const [contentLoaded, setContentLoaded] = useState(false);
 
@@ -120,7 +122,7 @@ export default function HotQuestionsClientSection({
             }`}
           >
             <Suspense fallback={null}>
-              <AnimatedHotQuestionsGrid topics={topics} />
+              <AnimatedHotQuestionsGrid topics={topics} user={user} />
             </Suspense>
           </div>
         </div>

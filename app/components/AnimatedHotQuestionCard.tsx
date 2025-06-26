@@ -8,11 +8,13 @@ import BaseHotQuestionCard from "./BaseHotQuestionCard";
 interface AnimatedHotQuestionCardProps {
   topic: HotTopic;
   index: number;
+  user?: { id: string } | null;
 }
 
 export default function AnimatedHotQuestionCard({
   topic,
   index,
+  user,
 }: AnimatedHotQuestionCardProps) {
   const [isVisible, setIsVisible] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -61,7 +63,7 @@ export default function AnimatedHotQuestionCard({
         damping: 20,
       }}
     >
-      <BaseHotQuestionCard topic={topic} />
+      <BaseHotQuestionCard topic={topic} user={user} />
     </motion.div>
   );
 }
