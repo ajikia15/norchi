@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useTransition } from "react";
 import { Button } from "@/components/ui/button";
-import { Heart, HeartOff } from "lucide-react";
+import { Star } from "lucide-react";
 import {
   saveHotCard,
   unsaveHotCard,
@@ -44,7 +44,10 @@ export default function SaveHotCardButton({
     checkSaved();
   }, [hotTopicId, user]);
 
-  const handleToggleSave = () => {
+  const handleToggleSave = (e: React.MouseEvent) => {
+    // Prevent event propagation to avoid closing the card
+    e.stopPropagation();
+
     if (!user) {
       toast.error("პირველ გაიარეთ ავტორიზაცია");
       return;
@@ -88,17 +91,14 @@ export default function SaveHotCardButton({
       size="sm"
       onClick={handleToggleSave}
       disabled={isPending}
-      className={`transition-colors ${
+      className={`transition-colors touch-manipulation ${
         isSaved
-          ? "text-red-500 hover:text-red-600"
-          : "text-gray-500 hover:text-red-500"
+          ? "text-yellow-600 hover:text-yellow-700"
+          : "text-gray-500 hover:text-yellow-500"
       }`}
+      style={{ touchAction: "manipulation" }}
     >
-      {isSaved ? (
-        <Heart className="h-4 w-4 fill-current" />
-      ) : (
-        <HeartOff className="h-4 w-4" />
-      )}
+      <Star className={`h-4 w-4 ${isSaved ? "fill-current" : ""}`} />
     </Button>
   );
 }

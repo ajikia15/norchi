@@ -1,9 +1,9 @@
 "use server";
 import { db } from "@/app/lib/db/client";
-import { savedHotCards, hotTopics } from "@/app/lib/db/schema";
+import { savedHotCards, hotTopics, tags } from "@/app/lib/db/schema";
 import { requireAuth, getCurrentUser } from "@/app/lib/auth-utils";
 import { eq, and } from "drizzle-orm";
-import { HotTopic } from "../types";
+import { HotTopic, Tag } from "../types";
 
 /**
  * Save a hot topic for the current user
@@ -90,25 +90,50 @@ export async function getSavedHotCards(): Promise<HotTopic[]> {
       return [];
     }
 
-    const savedTopics = await db
-      .select({
-        id: hotTopics.id,
-        title: hotTopics.title,
-        answer: hotTopics.answer,
-        tags: hotTopics.tags,
-        createdAt: hotTopics.createdAt,
-        updatedAt: hotTopics.updatedAt,
-      })
-      .from(savedHotCards)
-      .innerJoin(hotTopics, eq(savedHotCards.hotTopicId, hotTopics.id))
-      .where(eq(savedHotCards.userId, user.id))
-      .orderBy(savedHotCards.createdAt);
+    // Load both saved topics and all tags in parallel for better performance
+    const [savedTopicsResult, tagsResult] = await Promise.all([
+      db
+        .select({
+          id: hotTopics.id,
+          title: hotTopics.title,
+          answer: hotTopics.answer,
+          tags: hotTopics.tags,
+          createdAt: hotTopics.createdAt,
+          updatedAt: hotTopics.updatedAt,
+        })
+        .from(savedHotCards)
+        .innerJoin(hotTopics, eq(savedHotCards.hotTopicId, hotTopics.id))
+        .where(eq(savedHotCards.userId, user.id))
+        .orderBy(savedHotCards.createdAt),
+      db.select().from(tags),
+    ]);
 
-    // Parse tags JSON string to array
-    return savedTopics.map((topic) => ({
-      ...topic,
-      tags: JSON.parse(topic.tags || "[]"),
-    }));
+    // Create a map of tags for easy lookup
+    const tagsMap: Record<string, Tag> = {};
+    tagsResult.forEach((dbTag) => {
+      tagsMap[dbTag.id] = {
+        id: dbTag.id,
+        label: dbTag.label,
+        emoji: dbTag.emoji,
+        color: dbTag.color,
+        createdAt: dbTag.createdAt,
+        updatedAt: dbTag.updatedAt,
+      };
+    });
+
+    // Parse tags JSON string to array and attach tag data
+    return savedTopicsResult.map((topic) => {
+      const topicTagIds = JSON.parse(topic.tags || "[]") as string[];
+      const tagData = topicTagIds
+        .map((tagId) => tagsMap[tagId])
+        .filter(Boolean); // Remove undefined tags
+
+      return {
+        ...topic,
+        tags: topicTagIds,
+        tagData,
+      };
+    });
   } catch {
     console.error("Error fetching saved hot cards");
     return [];
