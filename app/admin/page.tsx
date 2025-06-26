@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { loadAllData } from "../lib/storage";
 import AdminClient from "./AdminClient";
 import AdminSkeleton from "../components/AdminSkeleton";
-import ServerAuthGuard from "../components/ServerAuthGuard";
+import AdminGuard from "../components/AdminGuard";
 
 async function AdminContent() {
   try {
@@ -30,10 +30,10 @@ async function AdminContent() {
 
 export default function AdminPage() {
   return (
-    <ServerAuthGuard>
+    <AdminGuard>
       <Suspense fallback={<AdminSkeleton />}>
         <AdminContent />
       </Suspense>
-    </ServerAuthGuard>
+    </AdminGuard>
   );
 }

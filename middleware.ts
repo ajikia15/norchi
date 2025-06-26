@@ -65,6 +65,8 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
+    // For admin routes, role check is handled by AdminGuard component
+    // This middleware only ensures authentication
     return NextResponse.next();
   } catch {
     return NextResponse.redirect(new URL("/login", request.url));

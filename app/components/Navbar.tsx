@@ -21,6 +21,7 @@ import {
   User,
 } from "lucide-react";
 import Logo from "./Logo";
+import UserDropdown from "./UserDropdown";
 import { Logout } from "./Logout";
 
 interface NavbarProps {
@@ -29,13 +30,13 @@ interface NavbarProps {
     name: string;
     email: string;
   } | null;
+  isAdmin?: boolean;
 }
 
-export default function Navbar({ user }: NavbarProps = {}) {
+export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
   const pathname = usePathname();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
 
-  const isAdmin = pathname.startsWith("/admin");
   const isHome = pathname === "/";
 
   const closeSheet = () => {
@@ -61,16 +62,6 @@ export default function Navbar({ user }: NavbarProps = {}) {
       icon: BookOpen,
       isActive: pathname === "/stories",
     },
-    ...(user
-      ? [
-          {
-            href: "/admin",
-            label: "ადმინი",
-            icon: Settings,
-            isActive: isAdmin,
-          },
-        ]
-      : []),
   ];
 
   return (
@@ -101,15 +92,7 @@ export default function Navbar({ user }: NavbarProps = {}) {
             </Button>
 
             {user ? (
-              <div className="flex items-center gap-2">
-                <Link href="/profile">
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    <User className="h-4 w-4" />
-                    {user.name}
-                  </Button>
-                </Link>
-                <Logout />
-              </div>
+              <UserDropdown user={user} isAdmin={isAdmin} />
             ) : (
               <Link href="/login">
                 <Button variant="outline" size="sm">
@@ -169,10 +152,26 @@ export default function Navbar({ user }: NavbarProps = {}) {
                           className="w-full justify-start gap-3 h-12"
                         >
                           <User className="h-5 w-5" />
-                          {user.name}
+                          პროფილი
                         </Button>
                       </Link>
-                      <Logout />
+
+                      {isAdmin && (
+                        <Link href="/admin" onClick={closeSheet}>
+                          <Button
+                            variant="ghost"
+                            size="lg"
+                            className="w-full justify-start gap-3 h-12"
+                          >
+                            <Settings className="h-5 w-5" />
+                            ადმინ პანელი
+                          </Button>
+                        </Link>
+                      )}
+
+                      <div className="w-full">
+                        <Logout />
+                      </div>
                     </div>
                   ) : (
                     <Link href="/login" onClick={closeSheet}>

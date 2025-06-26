@@ -1,5 +1,14 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 
+// User roles enum
+export const USER_ROLES = {
+  USER: "user",
+  MODERATOR: "moderator",
+  ADMIN: "admin",
+} as const;
+
+export type UserRole = (typeof USER_ROLES)[keyof typeof USER_ROLES];
+
 export const stories = sqliteTable("stories", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
@@ -55,6 +64,7 @@ export const user = sqliteTable("user", {
     .$defaultFn(() => false)
     .notNull(),
   image: text("image"),
+  role: text("role").$type<UserRole>().notNull().default(USER_ROLES.USER),
   createdAt: integer("created_at", { mode: "timestamp" })
     .$defaultFn(() => /* @__PURE__ */ new Date())
     .notNull(),
