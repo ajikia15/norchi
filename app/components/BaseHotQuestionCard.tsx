@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { HotTopic } from "../types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Lightbulb } from "lucide-react";
+import { ArrowRight, Lightbulb, Save } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import ResponsiveArticleDialog from "./ResponsiveArticleDialog";
 import DoorHandleIcon from "./DoorHandleIcon";
@@ -24,7 +24,6 @@ export default function BaseHotQuestionCard({
   const [articleDialogTopic, setArticleDialogTopic] = useState<HotTopic | null>(
     null
   );
-  const [isCardHovered, setIsCardHovered] = useState(false);
 
   const isOpen = openedCards.has(topic.id);
   const isLightOn = everOpenedCards.has(topic.id);
@@ -44,11 +43,7 @@ export default function BaseHotQuestionCard({
 
   return (
     <>
-      <motion.div
-        className="relative h-[22rem] w-full"
-        onMouseEnter={() => setIsCardHovered(true)}
-        onMouseLeave={() => setIsCardHovered(false)}
-      >
+      <motion.div className="relative h-[22rem] w-full">
         {/* Answer Content Behind Door */}
         <motion.div
           className={`absolute inset-0 bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg border-2 border-gray-300 p-4 lg:p-5 flex flex-col overflow-hidden shadow-inner ${
@@ -92,7 +87,7 @@ export default function BaseHotQuestionCard({
               </div>
             </div>
 
-            {/* Bottom section with tags and read button */}
+            {/* Bottom section with save icon and full-width read button */}
             <motion.div
               className="relative mt-3 flex flex-shrink-0 items-center justify-between gap-2 border-t border-gray-200 pt-3"
               initial={{ opacity: 0, y: 20 }}
@@ -109,72 +104,43 @@ export default function BaseHotQuestionCard({
                 />
               )}
 
-              {/* Tags */}
-              {topic.tagData && topic.tagData.length > 0 && (
-                <div
-                  className="scrollbar-hide relative flex min-h-0 flex-1 items-center overflow-x-auto overflow-y-hidden"
-                  style={{
-                    maskImage:
-                      "linear-gradient(to right, black 85%, transparent 100%)",
-                    WebkitMaskImage:
-                      "linear-gradient(to right, black 85%, transparent 100%)",
-                  }}
-                >
-                  <div className="flex w-max gap-1">
-                    {topic.tagData.map((tag, tagIndex) => (
-                      <motion.div
-                        key={tag.id}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{
-                          opacity: isOpen ? 1 : 0,
-                          scale: isOpen ? 1 : 0.8,
-                        }}
-                        transition={{
-                          delay: isOpen ? 0.3 + tagIndex * 0.05 : 0,
-                          duration: 0.2,
-                        }}
-                      >
-                        <Badge
-                          variant="default"
-                          style={{
-                            backgroundColor: tag.color,
-                            borderColor: tag.color,
-                            color: "white",
-                          }}
-                          className="text-xs"
-                        >
-                          {tag.emoji} {tag.label}
-                        </Badge>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Read button */}
+              {/* Save Button */}
               <motion.div
                 className="flex-shrink-0"
-                initial={{ opacity: 0, x: 20, scale: 0.8 }}
+                initial={{ opacity: 0 }}
+                animate={{
+                  opacity: isOpen ? 1 : 0,
+                }}
+                transition={{
+                  delay: isOpen ? 0.3 : 0,
+                  duration: 0.2,
+                }}
+              >
+                <Button variant="ghost" size="icon" aria-label="Save answer">
+                  <Save className="h-5 w-5 text-gray-500" />
+                </Button>
+              </motion.div>
+
+              {/* Read to end button */}
+              <motion.div
+                className="flex-1"
+                initial={{ opacity: 0, x: 20 }}
                 animate={{
                   opacity: isOpen ? 1 : 0,
                   x: isOpen ? 0 : 20,
-                  scale: isOpen ? 1 : 0.8,
                 }}
                 transition={{ delay: isOpen ? 0.25 : 0, duration: 0.3 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
               >
                 <Button
                   variant="outline"
-                  size="sm"
-                  className="touch-manipulation shadow-sm transition-shadow hover:shadow-md"
+                  className="w-full touch-manipulation shadow-sm transition-shadow hover:shadow-md"
                   onClick={(e) => {
                     e.stopPropagation();
                     setArticleDialogTopic(topic);
                   }}
                   style={{ touchAction: "manipulation" }}
                 >
-                  წაიკითხე <ArrowRight className="ml-1 h-3 w-3" />
+                  წაიკითხე ბოლომდე <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </motion.div>
             </motion.div>
@@ -199,20 +165,13 @@ export default function BaseHotQuestionCard({
             perspective: "1000px",
           }}
           onClick={!isOpen ? () => toggleCard(topic.id) : undefined}
-          whileHover={
-            !isLightOn
-              ? {
-                  filter: "brightness(1.05)",
-                }
-              : {}
-          }
         >
           {/* Door Panel */}
           <div className="absolute flex h-full w-full flex-col justify-between overflow-hidden rounded-lg border-2 border-gray-300 bg-gradient-to-br from-white to-gray-50 p-4 shadow-lg lg:p-5">
             {/* Door Handle */}
             <motion.div
               className="absolute bottom-[30%] left-2 z-10 text-gray-400"
-              whileHover={{ scale: 1.1, color: "rgb(34 197 94)" }}
+              whileHover={{ color: "rgb(34 197 94)" }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <DoorHandleIcon width={20} height={20} />
@@ -224,20 +183,11 @@ export default function BaseHotQuestionCard({
                 {/* Lightbulb */}
                 <div className="absolute -top-16 left-1/2 -translate-x-1/2">
                   <Lightbulb
-                    size={32}
-                    className={isLightOn ? "text-amber-500" : "text-gray-400"}
-                    style={{
-                      filter: isLightOn
-                        ? "drop-shadow(0 0 10px #f59e0b)"
-                        : isCardHovered && !isLightOn
-                        ? "drop-shadow(0 0 3px rgba(245, 158, 11, 0.4))"
-                        : "none",
-                      color:
-                        isCardHovered && !isLightOn
-                          ? "rgba(245, 158, 11, 0.6)"
-                          : undefined,
-                      transition: "all 0.3s ease",
-                    }}
+                    className={`h-6 w-6 transition-colors duration-500 ${
+                      isLightOn
+                        ? "text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.7)]"
+                        : "text-gray-400 group-hover:text-gray-500"
+                    }`}
                   />
                 </div>
 
@@ -251,14 +201,12 @@ export default function BaseHotQuestionCard({
             {topic.tagData && topic.tagData.length > 0 && topic.tagData[0] && (
               <motion.div
                 className="absolute bottom-4 left-1/2 -translate-x-1/2"
-                whileHover={{ scale: 1.05 }}
                 transition={{ type: "spring", stiffness: 300, damping: 10 }}
               >
                 <Badge
                   variant="outline"
                   style={{
-                    borderColor: topic.tagData[0].color,
-                    color: topic.tagData[0].color,
+                    borderColor: "rgb(156 163 175)", // gray-400
                   }}
                   className="bg-white/80 text-xs shadow-sm backdrop-blur-sm"
                 >

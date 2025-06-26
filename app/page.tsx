@@ -29,20 +29,20 @@ async function StoriesGrid({ stories }: { stories: Story[] }) {
 
   if (stories.length > 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
         {stories.map((story) => (
           <Card
             key={story.id}
-            className="transition-all duration-200 hover:shadow-xl hover:scale-[1.02] border-2 border-gray-200/50 hover:border-primary/50 bg-white/80 backdrop-blur-sm"
+            className="hover:border-primary/50 border-2 border-gray-200/50 bg-white/80 backdrop-blur-sm transition-all duration-200 hover:shadow-xl"
           >
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="text-xl leading-tight line-clamp-2 mb-3">
+                <div className="min-w-0 flex-1">
+                  <CardTitle className="mb-3 line-clamp-2 text-xl leading-tight">
                     {story.name}
                   </CardTitle>
                   {story.description && (
-                    <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+                    <p className="text-muted-foreground line-clamp-3 text-sm leading-relaxed">
                       {story.description}
                     </p>
                   )}
@@ -53,7 +53,7 @@ async function StoriesGrid({ stories }: { stories: Story[] }) {
             <CardContent className="pt-0">
               <div className="space-y-4">
                 {/* Stats */}
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                <div className="text-muted-foreground flex items-center gap-4 text-xs">
                   <div className="flex items-center gap-1">
                     <BookOpen className="h-3 w-3" />
                     <span>{getNodeCount(story)} გამოწვევა</span>
@@ -80,19 +80,19 @@ async function StoriesGrid({ stories }: { stories: Story[] }) {
   } else {
     return (
       <div className="flex flex-col items-center justify-center py-24 text-center">
-        <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+        <div className="mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-gray-100">
           <BookOpen className="h-10 w-10 text-gray-400" />
         </div>
-        <h3 className="text-2xl font-semibold text-gray-900 mb-3">
+        <h3 className="mb-3 text-2xl font-semibold text-gray-900">
           გზები არ არის ხელმისაწვდომი
         </h3>
-        <p className="text-muted-foreground max-w-md mb-6 text-lg">
+        <p className="text-muted-foreground mb-6 max-w-md text-lg">
           ჯერ არ არის ლოგიკური გამოწვევის გზები. ეწვიეთ ადმინისტრატორის პანელს
           თქვენი პირველი გზის შესაქმნელად.
         </p>
         <Button asChild size="lg" className="shadow-sm">
           <Link href="/admin/story">
-            <Settings className="h-4 w-4 " />
+            <Settings className="h-4 w-4" />
             შექმენით თქვენი პირველი გზა
           </Link>
         </Button>
@@ -114,13 +114,13 @@ export default async function HomePage() {
       <HotQuestionsClientSection topics={topics} />
 
       {/* Stories section */}
-      <div className="bg-white/60 backdrop-blur-sm border-b border-gray-200/30">
-        <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="border-b border-gray-200/30 bg-white/60 backdrop-blur-sm">
+        <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="text-center">
-            <h1 className="text-5xl font-bold text-gray-900 tracking-tight mb-4">
+            <h1 className="mb-4 text-5xl font-bold tracking-tight text-gray-900">
               რაში არ ეთანხმები გირჩს?
             </h1>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="mx-auto max-w-2xl text-lg text-gray-600">
               გირჩის საზოგადოებაში აზრთა სხვადასხვაობა ბუნებრივია — ლიდერებიც კი
               ყველაფერზე არ თანხმდებიან. მაგრამ ვცხოვრობთ ერთად, რადგან მთავარში
               ვთანხმდებით. რაც არ უნდა გეზიზღებოდეთ, დარწმუნებულები ვართ, რომ
@@ -132,7 +132,7 @@ export default async function HomePage() {
       </div>
 
       {/* Story Grid - now with pre-loaded data */}
-      <div className="max-w-7xl mx-auto px-6 py-12">
+      <div className="mx-auto max-w-7xl px-6 py-12">
         <Suspense
           fallback={<StoriesGridSkeleton cardsCount={stories.length} />}
         >

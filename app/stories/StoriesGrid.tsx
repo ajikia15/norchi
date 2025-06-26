@@ -72,7 +72,7 @@ export default function StoriesGrid({ stories }: StoriesGridProps) {
         {currentStories.map((story) => (
           <Card
             key={story.id}
-            className="transition-all duration-200 hover:shadow-xl hover:scale-[1.02] border-2 border-gray-200/50 hover:border-primary/50 bg-white/80 backdrop-blur-sm"
+            className="transition-all duration-200 hover:shadow-xl border-2 border-gray-200/50 hover:border-primary/50 bg-white/80 backdrop-blur-sm"
           >
             <CardHeader className="pb-4">
               <div className="flex items-start justify-between">

@@ -97,14 +97,14 @@ export default function TagFilter({
                 `}
                 style={
                   {
-                    borderColor: isSelected ? tag.color : undefined,
+                    borderColor: isSelected ? "rgb(156 163 175)" : undefined, // gray-400
                     backgroundColor: isSelected ? tag.color : undefined,
-                    "--hover-border-color": tag.color,
+                    "--hover-border-color": "rgb(156 163 175)", // gray-400
                   } as React.CSSProperties & { "--hover-border-color": string }
                 }
                 onMouseEnter={(e) => {
                   if (!isSelected && !isLoading) {
-                    e.currentTarget.style.borderColor = tag.color;
+                    e.currentTarget.style.borderColor = "rgb(156 163 175)"; // gray-400
                   }
                 }}
                 onMouseLeave={(e) => {
@@ -113,8 +113,8 @@ export default function TagFilter({
                   }
                 }}
                 onClick={() => onTagToggle(tag.id)}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
                 transition={{
                   duration: 0.3,
                   delay: index * 0.02,
@@ -122,7 +122,6 @@ export default function TagFilter({
                   stiffness: 400,
                   damping: 25,
                 }}
-                whileTap={!isLoading ? { scale: 0.98 } : {}}
                 disabled={isLoading}
               >
                 {/* Subtle pulse animation for selected tags */}

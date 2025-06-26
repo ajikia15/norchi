@@ -391,7 +391,7 @@ export default function HotQuestionsManagerClient({
                               key={tag.id}
                               style={{
                                 backgroundColor: tag.color,
-                                borderColor: tag.color,
+                                borderColor: "rgb(156 163 175)", // gray-400
                                 color: "white",
                               }}
                             >
@@ -462,8 +462,7 @@ export default function HotQuestionsManagerClient({
                         <Badge
                           style={{
                             backgroundColor: tag.color,
-                            borderColor: tag.color,
-                            color: "white",
+                            borderColor: "rgb(156 163 175)", // gray-400
                           }}
                         >
                           {tag.emoji} {tag.label}
@@ -537,7 +536,7 @@ export default function HotQuestionsManagerClient({
                           topicFormData.selectedTags.includes(tag.id)
                             ? {
                                 backgroundColor: tag.color,
-                                borderColor: tag.color,
+                                borderColor: "rgb(156 163 175)", // gray-400
                                 color: "white",
                               }
                             : {}

@@ -8,7 +8,7 @@ export default function HotQuestionCardSkeleton() {
       {/* Card skeleton with door-like structure */}
       <div className="absolute inset-0 rounded-lg border-2 border-gray-300 bg-white p-4 shadow-lg">
         {/* Door handle skeleton */}
-        <Skeleton className="absolute left-2 top-1/2 h-8 w-2 -translate-y-1/2 rounded-r-md" />
+        <Skeleton className="absolute left-2 bottom-[30%] h-8 w-2 rounded-r-md" />
 
         {/* Lightbulb area skeleton */}
         <div className="absolute top-16 left-1/2 -translate-x-1/2">

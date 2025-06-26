@@ -187,7 +187,7 @@ function CustomNode({ data, selected }: NodeProps<CustomNodeData>) {
             e.stopPropagation();
             onAddConnection(node.id);
           }}
-          className="absolute -right-10 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-all hover:scale-110 shadow-lg"
+          className="absolute -right-10 top-1/2 transform -translate-y-1/2 w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center hover:bg-blue-600 transition-all shadow-lg"
           title="ახალი ვარიანტის დამატება"
         >
           <Plus className="w-4 h-4" />
