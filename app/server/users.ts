@@ -9,17 +9,25 @@ export const signIn = async (email: string, password: string) => {
         password: password,
       },
     });
+    return { success: true, message: "წარმატებით გაიარეთ ავტორიზაცია" };
   } catch (error) {
-    console.error(error);
+    const e = error as Error;
+    return { success: false, message: e.message || "შეცდომა" };
   }
 };
 
 export const signUp = async (email: string, password: string, name: string) => {
-  await auth.api.signUpEmail({
-    body: {
-      email: email,
-      password: password,
-      name: name,
-    },
-  });
+  try {
+    await auth.api.signUpEmail({
+      body: {
+        email: email,
+        password: password,
+        name: name,
+      },
+    });
+    return { success: true, message: "წარმატებით გაიარეთ რეგისტრაცია" };
+  } catch (error) {
+    const e = error as Error;
+    return { success: false, message: e.message || "შეცდომა" };
+  }
 };

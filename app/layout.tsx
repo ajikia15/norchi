@@ -3,7 +3,7 @@ import { Outfit } from "next/font/google";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 import { firaGO } from "./lib/fonts";
-
+import { Toaster } from "@/components/ui/sonner";
 const outfit = Outfit({
   variable: "--font-outfit",
   subsets: ["latin"],
@@ -34,6 +34,7 @@ export default function RootLayout({
       <body className={` ${outfit.variable} ${firaGO.variable} antialiased`}>
         <Navbar />
         <main className="relative font-firago">{children}</main>
+        <Toaster />
       </body>
     </html>
   );

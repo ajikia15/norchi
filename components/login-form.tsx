@@ -21,6 +21,8 @@ import {
   FormMessage,
 } from "./ui/form";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -37,8 +39,13 @@ export function LoginForm({
       password: "",
     },
   });
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    signIn(values.email, values.password);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    const { success, message } = await signIn(values.email, values.password);
+    if (success) {
+      toast.success(message);
+    } else {
+      toast.error(message);
+    }
   }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -105,8 +112,19 @@ export function LoginForm({
                       />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full">
-                    შესვლა
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? (
+                      <>
+                        <Loader2 className="animate-spin" />
+                        ველოდებით...
+                      </>
+                    ) : (
+                      "შესვლა"
+                    )}
                   </Button>
                 </div>
                 <div className="text-center text-sm">
