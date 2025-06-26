@@ -60,7 +60,6 @@ export default function AnimatedHotQuestionCard({
         stiffness: 150,
         damping: 20,
       }}
-      whileHover={{ y: -5 }}
     >
       <BaseHotQuestionCard topic={topic} />
     </motion.div>
