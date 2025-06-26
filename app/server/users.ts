@@ -1,21 +1,25 @@
 "use server";
 import { auth } from "@/lib/auth";
 
-export const signIn = async () => {
-  await auth.api.signInEmail({
-    body: {
-      email: "test@test.com",
-      password: "test",
-    },
-  });
+export const signIn = async (email: string, password: string) => {
+  try {
+    await auth.api.signInEmail({
+      body: {
+        email: email,
+        password: password,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+  }
 };
 
-export const signUp = async () => {
+export const signUp = async (email: string, password: string, name: string) => {
   await auth.api.signUpEmail({
     body: {
-      email: "1@1.com",
-      password: "123123123",
-      name: "test",
+      email: email,
+      password: password,
+      name: name,
     },
   });
 };
