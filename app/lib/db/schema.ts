@@ -134,4 +134,32 @@ export const savedHotCards = sqliteTable("saved_hot_cards", {
     .notNull(),
 });
 
+export const videoPromises = sqliteTable("video_promises", {
+  id: text("id").primaryKey(),
+  ytVideoId: text("yt_video_id").notNull(),
+  title: text("title").notNull(),
+  upvoteCount: integer("upvote_count").notNull().default(0),
+  algorithmPoints: integer("algorithm_points").notNull().default(0),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const videoPromiseUpvotes = sqliteTable("video_promise_upvotes", {
+  id: text("id").primaryKey(),
+  videoPromiseId: text("video_promise_id")
+    .notNull()
+    .references(() => videoPromises.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
 export const schema = { user, session, account, verification, savedHotCards };
+
+export type SelectVideoPromise = typeof videoPromises.$inferSelect;
+export type InsertVideoPromise = typeof videoPromises.$inferInsert;
+export type SelectVideoPromiseUpvote = typeof videoPromiseUpvotes.$inferSelect;
+export type InsertVideoPromiseUpvote = typeof videoPromiseUpvotes.$inferInsert;

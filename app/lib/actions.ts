@@ -2,7 +2,14 @@
 
 import { revalidatePath } from "next/cache";
 import { db } from "./db/client";
-import { stories, hotTopics, tags, hotcardCategories } from "./db/schema";
+import {
+  stories,
+  hotTopics,
+  tags,
+  hotcardCategories,
+  videoPromises,
+  videoPromiseUpvotes,
+} from "./db/schema";
 import { eq, sql } from "drizzle-orm";
 
 // Story actions
@@ -362,4 +369,143 @@ export async function deleteHotcardCategory(id: string) {
   revalidatePath("/admin");
   revalidatePath("/");
   return { success: true };
+}
+
+// Video Promises actions
+export async function createVideoPromise(formData: FormData) {
+  const ytVideoId = formData.get("ytVideoId") as string;
+  const title = formData.get("title") as string;
+
+  if (!ytVideoId || !title) {
+    throw new Error("YouTube Video ID and title are required");
+  }
+
+  const id = `vp-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  await db.insert(videoPromises).values({
+    id,
+    ytVideoId,
+    title,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/promises");
+  return { success: true, id };
+}
+
+export async function updateVideoPromise(id: string, formData: FormData) {
+  const ytVideoId = formData.get("ytVideoId") as string;
+  const title = formData.get("title") as string;
+
+  if (!ytVideoId || !title) {
+    throw new Error("YouTube Video ID and title are required");
+  }
+
+  await db
+    .update(videoPromises)
+    .set({
+      ytVideoId,
+      title,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(videoPromises.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/promises");
+  return { success: true };
+}
+
+export async function deleteVideoPromise(id: string) {
+  await db.delete(videoPromises).where(eq(videoPromises.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/promises");
+  return { success: true };
+}
+
+// Video Promise Upvote actions
+export async function toggleVideoPromiseUpvote(
+  videoPromiseId: string,
+  userId: string
+) {
+  try {
+    // Check if user has already upvoted this video promise
+    const existingUpvote = await db
+      .select()
+      .from(videoPromiseUpvotes)
+      .where(
+        sql`${videoPromiseUpvotes.videoPromiseId} = ${videoPromiseId} AND ${videoPromiseUpvotes.userId} = ${userId}`
+      )
+      .limit(1);
+
+    if (existingUpvote.length > 0) {
+      // Remove upvote
+      await db
+        .delete(videoPromiseUpvotes)
+        .where(
+          sql`${videoPromiseUpvotes.videoPromiseId} = ${videoPromiseId} AND ${videoPromiseUpvotes.userId} = ${userId}`
+        );
+
+      // Decrement upvote count
+      await db
+        .update(videoPromises)
+        .set({
+          upvoteCount: sql`${videoPromises.upvoteCount} - 1`,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(videoPromises.id, videoPromiseId));
+
+      revalidatePath("/promises");
+      return { success: true, action: "removed" };
+    } else {
+      // Add upvote
+      const upvoteId = `vpu-${Date.now()}`;
+      await db.insert(videoPromiseUpvotes).values({
+        id: upvoteId,
+        videoPromiseId,
+        userId,
+      });
+
+      // Increment upvote count
+      await db
+        .update(videoPromises)
+        .set({
+          upvoteCount: sql`${videoPromises.upvoteCount} + 1`,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(videoPromises.id, videoPromiseId));
+
+      revalidatePath("/promises");
+      return { success: true, action: "added" };
+    }
+  } catch (error) {
+    console.error("Error toggling video promise upvote:", error);
+    return { success: false, error: "Failed to toggle upvote" };
+  }
+}
+
+// Admin action to update algorithm points
+export async function updateVideoPromiseAlgorithmPoints(
+  id: string,
+  algorithmPoints: number
+) {
+  try {
+    await db
+      .update(videoPromises)
+      .set({
+        algorithmPoints,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(videoPromises.id, id));
+
+    revalidatePath("/admin");
+    revalidatePath("/promises");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating algorithm points:", error);
+    return { success: false, error: "Failed to update algorithm points" };
+  }
 }

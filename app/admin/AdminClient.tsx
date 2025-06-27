@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { StoriesData, HotTopicsData } from "../types";
+import { StoriesData, HotTopicsData, VideoPromise } from "../types";
 import {
   createStory,
   deleteStory as deleteStoryAction,
@@ -14,14 +14,30 @@ import {
   deleteTag,
   exportHotTopics,
   importHotTopic,
+  createVideoPromise,
+  updateVideoPromise,
+  deleteVideoPromise,
+  updateVideoPromiseAlgorithmPoints,
 } from "../lib/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StoryManagerClient from "../components/StoryManagerClient";
 import HotQuestionsManagerClient from "../components/HotQuestionsManagerClient";
+import VideoPromisesManagerClient from "../components/VideoPromisesManagerClient";
 
 interface AdminClientProps {
   initialStoriesData: StoriesData;
   initialHotTopicsData: HotTopicsData;
+  initialVideoPromisesData: {
+    videoPromises: VideoPromise[];
+    pagination: {
+      currentPage: number;
+      totalPages: number;
+      totalItems: number;
+      itemsPerPage: number;
+      hasNextPage: boolean;
+      hasPreviousPage: boolean;
+    };
+  };
 }
 
 // Utility function for file downloads
@@ -45,6 +61,7 @@ function downloadJsonFile(data: unknown, filename: string) {
 export default function AdminClient({
   initialStoriesData,
   initialHotTopicsData,
+  initialVideoPromisesData,
 }: AdminClientProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -55,6 +72,10 @@ export default function AdminClient({
 
   const handleTabChange = (value: string) => {
     router.push(`/admin?tab=${value}`);
+  };
+
+  const handleVideoPromisesPageChange = (page: number) => {
+    router.push(`/admin?tab=videoPromises&page=${page}`);
   };
 
   const handleStorySelect = (storyId: string) => {
@@ -256,6 +277,79 @@ export default function AdminClient({
     });
   };
 
+  // Video Promises handlers
+  const handleVideoPromiseCreate = async (ytVideoId: string, title: string) => {
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("ytVideoId", ytVideoId);
+        formData.append("title", title);
+
+        const result = await createVideoPromise(formData);
+        if (result.success) {
+          router.refresh();
+        }
+      } catch (error) {
+        console.error("Error creating video promise:", error);
+        alert("ვიდეო დაპირების შექმნა ვერ მოხერხდა");
+      }
+    });
+  };
+
+  const handleVideoPromiseUpdate = async (
+    id: string,
+    ytVideoId: string,
+    title: string
+  ) => {
+    startTransition(async () => {
+      try {
+        const formData = new FormData();
+        formData.append("ytVideoId", ytVideoId);
+        formData.append("title", title);
+
+        await updateVideoPromise(id, formData);
+        router.refresh();
+      } catch (error) {
+        console.error("Error updating video promise:", error);
+        alert("ვიდეო დაპირების განახლება ვერ მოხერხდა");
+      }
+    });
+  };
+
+  const handleVideoPromiseDelete = async (id: string) => {
+    startTransition(async () => {
+      try {
+        await deleteVideoPromise(id);
+        router.refresh();
+      } catch (error) {
+        console.error("Error deleting video promise:", error);
+        alert("ვიდეო დაპირების წაშლა ვერ მოხერხდა");
+      }
+    });
+  };
+
+  const handleVideoPromiseAlgorithmPointsUpdate = async (
+    id: string,
+    algorithmPoints: number
+  ) => {
+    startTransition(async () => {
+      try {
+        const result = await updateVideoPromiseAlgorithmPoints(
+          id,
+          algorithmPoints
+        );
+        if (result.success) {
+          router.refresh();
+        } else {
+          alert("ალგორითმული ქულების განახლება ვერ მოხერხდა");
+        }
+      } catch (error) {
+        console.error("Error updating algorithm points:", error);
+        alert("ალგორითმული ქულების განახლება ვერ მოხერხდა");
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
       <div className="container mx-auto px-4 py-8">
@@ -273,9 +367,10 @@ export default function AdminClient({
           onValueChange={handleTabChange}
           className="w-full"
         >
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="stories">გზები</TabsTrigger>
             <TabsTrigger value="hotquestions">ცხელი კითხვები</TabsTrigger>
+            <TabsTrigger value="videoPromises">ვიდეო დაპირებები</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stories" className="mt-6">
@@ -299,6 +394,19 @@ export default function AdminClient({
               onTagDelete={handleTagDelete}
               onExportTopics={handleExportTopics}
               onImportTopic={handleImportTopic}
+              isLoading={isPending}
+            />
+          </TabsContent>
+
+          <TabsContent value="videoPromises" className="mt-6">
+            <VideoPromisesManagerClient
+              videoPromises={initialVideoPromisesData.videoPromises}
+              pagination={initialVideoPromisesData.pagination}
+              onVideoPromiseCreate={handleVideoPromiseCreate}
+              onVideoPromiseUpdate={handleVideoPromiseUpdate}
+              onVideoPromiseDelete={handleVideoPromiseDelete}
+              onPageChange={handleVideoPromisesPageChange}
+              onAlgorithmPointsUpdate={handleVideoPromiseAlgorithmPointsUpdate}
               isLoading={isPending}
             />
           </TabsContent>

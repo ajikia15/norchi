@@ -133,3 +133,38 @@ export const TOPICAL_TAGS = {
     badgeVariant: "outline" as const,
   },
 } as const;
+
+export interface VideoPromise {
+  id: string;
+  ytVideoId: string;
+  title: string;
+  upvoteCount: number;
+  algorithmPoints: number;
+  createdAt: string;
+  updatedAt: string;
+  // Computed fields
+  totalUpvotes?: number; // upvoteCount + algorithmPoints
+  hasUpvoted?: boolean; // Current user's upvote status
+}
+
+export interface VideoPromisesData {
+  videoPromises: Record<string, VideoPromise>;
+}
+
+// Centralized pagination types for video promises
+export interface VideoPromisesPaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedVideoPromisesResult {
+  videoPromises: VideoPromise[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
