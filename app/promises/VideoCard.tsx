@@ -19,7 +19,6 @@ export default function VideoCard({
   onUpvote,
 }: VideoCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
   const videoId = videoPromise.ytVideoId;
   const totalUpvotes = videoPromise.upvoteCount + videoPromise.algorithmPoints;
 
@@ -57,11 +56,7 @@ export default function VideoCard({
   };
 
   return (
-    <div
-      className="bg-card relative mx-auto w-full overflow-hidden rounded-xl border shadow-sm"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <div className="relative mx-auto w-full overflow-hidden rounded-xl border shadow-sm">
       <div className="relative aspect-[9/16] w-full">
         {/* Title Overlay */}
         {!isPlaying && (
@@ -78,20 +73,7 @@ export default function VideoCard({
         <div className="absolute bottom-12 left-0 z-20 flex flex-col gap-0">
           <button
             onClick={handleUpvote}
-            className={`group flex items-center h-10 rounded-r-lg bg-white transition-all  duration-300 overflow-hidden pointer-events-auto
-              ${
-                isUpvoted || isHovered
-                  ? "pl-3 pr-6 w-36"
-                  : "pl-3 pr-3 w-10 rounded-br-none"
-              }
-            `}
-            style={{
-              minWidth: "2.5rem",
-              paddingTop: "0.25rem",
-              paddingBottom: "0.25rem",
-            }}
-            onMouseEnter={() => setIsHovered(true)}
-            onMouseLeave={() => setIsHovered(false)}
+            className={`group pointer-events-auto flex h-10 items-center overflow-hidden rounded-r-lg bg-white pl-3 pr-3 transition-all duration-300`}
           >
             <ArrowUp
               className={`h-5 w-5 shrink-0 transition-colors duration-200 ${
@@ -100,16 +82,21 @@ export default function VideoCard({
                   : "text-gray-700 group-hover:text-gray-900"
               }`}
             />
+            <span className="ml-2 text-xs font-normal text-gray-700">
+              {totalUpvotes}
+            </span>
             <span
-              className={`inline-block whitespace-nowrap text-sm text-gray-900 transition-all duration-300 ml-0 pr-4 ${
-                isUpvoted || isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
-              }`}
-              style={{ transitionProperty: "opacity, width" }}
+              className={`ml-2 text-sm text-gray-900 whitespace-nowrap overflow-hidden
+                transition-all duration-300
+                ${
+                  isUpvoted
+                    ? "max-w-[120px] opacity-100"
+                    : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100"
+                }
+              `}
+              style={{ transitionProperty: "max-width, opacity" }}
             >
               {isUpvoted ? "მეტმა ნახოს!" : "მეტმა ნახოს?"}
-            </span>
-            <span className="ml-auto pl-2 pr-2 text-xs font-normal text-gray-700">
-              {totalUpvotes}
             </span>
           </button>
           <Button
