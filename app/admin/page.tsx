@@ -9,13 +9,14 @@ import AdminSkeleton from "../components/AdminSkeleton";
 import AdminGuard from "../components/AdminGuard";
 
 interface AdminContentProps {
-  searchParams: { page?: string; tab?: string };
+  searchParams: Promise<{ page?: string; tab?: string }>;
 }
 
 async function AdminContent({ searchParams }: AdminContentProps) {
+  const params = await searchParams;
   try {
-    const page = parseInt(searchParams.page || "1");
-    const tab = searchParams.tab || "stories";
+    const page = parseInt(params.page || "1");
+    const tab = params.tab || "stories";
 
     // Use optimized separate data loading with error handling
     const [storiesData, hotTopicsResult, videoPromisesResult] =
@@ -70,7 +71,7 @@ async function AdminContent({ searchParams }: AdminContentProps) {
 export default function AdminPage({
   searchParams,
 }: {
-  searchParams: { page?: string; tab?: string };
+  searchParams: Promise<{ page?: string; tab?: string }>;
 }) {
   return (
     <AdminGuard>

@@ -2,18 +2,18 @@ import { loadVideoPromisesWithUpvoteStatus } from "../lib/storage";
 import { getCurrentUser } from "../lib/auth-utils";
 import PromisesClient from "./PromisesClient";
 
-interface PromisesPageProps {
-  searchParams: {
-    page?: string;
-  };
-}
-
 export default async function PromisesPage({
   searchParams,
-}: PromisesPageProps) {
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
+  const params = await searchParams;
   try {
     const user = await getCurrentUser();
-    let currentPage = parseInt(searchParams.page || "1", 10);
+    let currentPage = parseInt(
+      Array.isArray(params.page) ? params.page[0] : params.page || "1",
+      10
+    );
     if (isNaN(currentPage) || currentPage < 1) {
       currentPage = 1;
     }
