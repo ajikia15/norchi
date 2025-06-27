@@ -24,6 +24,7 @@ import {
 import Logo from "./Logo";
 import UserDropdown from "./UserDropdown";
 import { Logout } from "./Logout";
+import { Video } from "lucide-react";
 
 interface NavbarProps {
   user?: {
@@ -66,7 +67,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
     {
       href: "/promises",
       label: "დაპირებები",
-      icon: BookOpen,
+      icon: Video,
       isActive: pathname === "/promises",
     },
   ];
@@ -79,7 +80,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
           <Logo href="/" size="sm" showSubtitle={false} />
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden items-center gap-4 md:flex">
             {navigationItems.map((item) => (
               <Link key={item.href} href={item.href}>
                 <Button
@@ -136,7 +137,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                       <Button
                         variant={item.isActive ? "default" : "ghost"}
                         size="lg"
-                        className="w-full justify-start gap-3 h-12"
+                        className="h-12 w-full justify-start gap-3"
                       >
                         <item.icon className="h-5 w-5" />
                         {item.label}
@@ -147,7 +148,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                   <Button
                     variant="ghost"
                     size="lg"
-                    className="w-full justify-start gap-3 h-12"
+                    className="h-12 w-full justify-start gap-3"
                     disabled
                   >
                     <Users className="h-5 w-5" />
@@ -155,12 +156,12 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                   </Button>
 
                   {user ? (
-                    <div className="flex flex-col gap-2 mt-4 pt-4 border-t">
+                    <div className="mt-4 flex flex-col gap-2 border-t pt-4">
                       <Link href="/profile" onClick={closeDrawer}>
                         <Button
                           variant="ghost"
                           size="lg"
-                          className="w-full justify-start gap-3 h-12"
+                          className="h-12 w-full justify-start gap-3"
                         >
                           <User className="h-5 w-5" />
                           პროფილი
@@ -171,7 +172,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                         <Button
                           variant="ghost"
                           size="lg"
-                          className="w-full justify-start gap-3 h-12"
+                          className="h-12 w-full justify-start gap-3"
                         >
                           <Heart className="h-5 w-5" />
                           შენახული კითხვები
@@ -183,7 +184,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                           <Button
                             variant="ghost"
                             size="lg"
-                            className="w-full justify-start gap-3 h-12"
+                            className="h-12 w-full justify-start gap-3"
                           >
                             <Settings className="h-5 w-5" />
                             ადმინ პანელი
@@ -200,7 +201,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
                       <Button
                         variant="outline"
                         size="lg"
-                        className="w-full mt-4"
+                        className="mt-4 w-full"
                       >
                         შესვლა
                       </Button>
