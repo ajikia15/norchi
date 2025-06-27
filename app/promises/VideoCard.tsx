@@ -1,6 +1,7 @@
 "use client";
 
-import { YouTubeEmbed } from "react-social-media-embed";
+import LiteYouTubeEmbed from "react-lite-youtube-embed";
+import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { ArrowUp } from "lucide-react";
 import { useState } from "react";
 import Marquee from "react-fast-marquee";
@@ -12,13 +13,23 @@ interface VideoCardProps {
   onUpvote?: (videoPromiseId: string) => void;
 }
 
+function extractYouTubeId(urlOrId: string): string {
+  // If it's already a plain ID (11 chars, no slashes), return as is
+  if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
+  // Try to extract from various YouTube URL formats
+  const match = urlOrId.match(
+    /(?:youtube\.com\/(?:.*v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  return match ? match[1] : urlOrId;
+}
+
 export default function VideoCard({
   videoPromise,
   isUpvoted = false,
   onUpvote,
 }: VideoCardProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const videoUrl = `https://youtube.com/shorts/${videoPromise.ytVideoId}`;
+  const videoId = extractYouTubeId(videoPromise.ytVideoId);
   const totalUpvotes = videoPromise.upvoteCount + videoPromise.algorithmPoints;
 
   const handleUpvote = () => {
@@ -34,11 +45,12 @@ export default function VideoCard({
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className="aspect-[9/16] w-full">
-        <YouTubeEmbed
-          url={videoUrl}
-          width="100%"
-          height="100%"
-          className="h-full w-full"
+        <LiteYouTubeEmbed
+          id={videoId}
+          title={videoPromise.title}
+          aspectWidth={9}
+          aspectHeight={16}
+          poster="maxresdefault"
         />
       </div>
 
