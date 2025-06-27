@@ -72,15 +72,15 @@ export default function VideoCard({
         {/* Vertical Action Buttons */}
         <div className="absolute right-0 top-24 z-20 flex flex-col items-end gap-0">
           <button
-            className={`group pointer-events-auto flex h-10 flex-row-reverse items-center justify-end overflow-hidden rounded-l-lg bg-white pl-4 pr-2 transition-all duration-300`}
+            className={`group pointer-events-auto flex h-10 flex-row-reverse items-center justify-end gap-x-2 overflow-hidden rounded-l-lg bg-white pl-2 transition-all duration-300 hover:pr-2`}
             onClick={handleUpvote}
           >
             <span
-              className={`mr-3 text-sm text-gray-900 whitespace-nowrap overflow-hidden
-                transition-all duration-300
+              className={`mr-0 text-sm text-gray-900 whitespace-nowrap overflow-hidden
+                transition-all duration-300 
                 ${
                   isUpvoted
-                    ? "max-w-[120px] opacity-100"
+                    ? "max-w-[120px] opacity-100 pr-2"
                     : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100"
                 }
               `}
@@ -95,7 +95,7 @@ export default function VideoCard({
                   : "text-gray-700 group-hover:text-gray-900"
               }`}
             />
-            <span className="ml-3 text-xs font-normal text-gray-700">
+            <span className="ml-0 text-xs font-normal text-gray-700">
               {totalUpvotes}
             </span>
           </button>
