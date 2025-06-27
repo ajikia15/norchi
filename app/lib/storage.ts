@@ -280,8 +280,8 @@ export const loadVideoPromises = cache(
           id: dbVideoPromise.id,
           ytVideoId: dbVideoPromise.ytVideoId,
           title: dbVideoPromise.title,
-          upvoteCount: dbVideoPromise.upvoteCount,
-          algorithmPoints: dbVideoPromise.algorithmPoints,
+          upvoteCount: dbVideoPromise.upvoteCount ?? 0,
+          algorithmPoints: dbVideoPromise.algorithmPoints ?? 0,
           createdAt: dbVideoPromise.createdAt,
           updatedAt: dbVideoPromise.updatedAt,
         })
@@ -334,8 +334,8 @@ export const loadVideoPromisesData = cache(
           id: dbVideoPromise.id,
           ytVideoId: dbVideoPromise.ytVideoId,
           title: dbVideoPromise.title,
-          upvoteCount: dbVideoPromise.upvoteCount,
-          algorithmPoints: dbVideoPromise.algorithmPoints,
+          upvoteCount: dbVideoPromise.upvoteCount ?? 0,
+          algorithmPoints: dbVideoPromise.algorithmPoints ?? 0,
           createdAt: dbVideoPromise.createdAt,
           updatedAt: dbVideoPromise.updatedAt,
         };
@@ -392,8 +392,8 @@ export const loadVideoPromisesWithUpvoteStatus = cache(
           id: dbVideoPromise.id,
           ytVideoId: dbVideoPromise.ytVideoId,
           title: dbVideoPromise.title,
-          upvoteCount: dbVideoPromise.upvoteCount,
-          algorithmPoints: dbVideoPromise.algorithmPoints,
+          upvoteCount: dbVideoPromise.upvoteCount ?? 0,
+          algorithmPoints: dbVideoPromise.algorithmPoints ?? 0,
           createdAt: dbVideoPromise.createdAt,
           updatedAt: dbVideoPromise.updatedAt,
         })

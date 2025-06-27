@@ -91,7 +91,7 @@ export default function VideoCard({
             className={gradientOverlay}
             style={{ transition: "opacity 0.3s" }}
           >
-            <span className="w-full whitespace-pre-line break-words text-base text-white">
+            <span className="line-clamp-2 w-full whitespace-pre-line break-words text-base text-white">
               {videoPromise.title}
             </span>
           </div>

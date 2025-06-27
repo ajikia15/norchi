@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { VideoPromise } from "../types";
 import VideoCard from "./VideoCard";
 import { toggleVideoPromiseUpvote } from "../lib/actions";
@@ -36,16 +35,12 @@ export default function PromisesClient({
   userId,
   pagination,
 }: PromisesClientProps) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
   // State for tracking which videos are playing
   const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState<
     string | null
   >(null);
 
-  // Initialize local state for upvotes and counts
+  // Initialize local state for upvotes and counts - these should reset on each page
   const [localUpvotes, setLocalUpvotes] =
     useState<Record<string, boolean>>(upvotedPromises);
   const [localCounts, setLocalCounts] = useState<Record<string, number>>(() => {
@@ -55,12 +50,6 @@ export default function PromisesClient({
     });
     return counts;
   });
-
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", page.toString());
-    router.push(`/promises?${params.toString()}`);
-  };
 
   // Handler for when a video starts playing
   const handleVideoPlay = (videoPromiseId: string) => {
@@ -94,30 +83,10 @@ export default function PromisesClient({
       [videoPromiseId]: prev[videoPromiseId] + (newUpvoteState ? 1 : -1),
     }));
 
-    startTransition(async () => {
-      try {
-        const result = await toggleVideoPromiseUpvote(videoPromiseId, userId);
+    try {
+      const result = await toggleVideoPromiseUpvote(videoPromiseId, userId);
 
-        if (!result.success) {
-          // Revert optimistic update on error
-          setLocalUpvotes((prev) => ({
-            ...prev,
-            [videoPromiseId]: wasUpvoted,
-          }));
-          setLocalCounts((prev) => ({
-            ...prev,
-            [videoPromiseId]: prev[videoPromiseId] + (wasUpvoted ? 1 : -1),
-          }));
-
-          toast.error("ვოუთის მიცემა ვერ მოხერხდა");
-        } else {
-          if (result.action === "added") {
-            toast.success("ვოუთი მიცემულია!");
-          } else {
-            toast.success("ვოუთი გაუქმებულია");
-          }
-        }
-      } catch (error) {
+      if (!result.success) {
         // Revert optimistic update on error
         setLocalUpvotes((prev) => ({
           ...prev,
@@ -128,10 +97,28 @@ export default function PromisesClient({
           [videoPromiseId]: prev[videoPromiseId] + (wasUpvoted ? 1 : -1),
         }));
 
-        console.error("Error toggling upvote:", error);
         toast.error("ვოუთის მიცემა ვერ მოხერხდა");
+      } else {
+        if (result.action === "added") {
+          toast.success("ვოუთი მიცემულია!");
+        } else {
+          toast.success("ვოუთი გაუქმებულია");
+        }
       }
-    });
+    } catch (error) {
+      // Revert optimistic update on error
+      setLocalUpvotes((prev) => ({
+        ...prev,
+        [videoPromiseId]: wasUpvoted,
+      }));
+      setLocalCounts((prev) => ({
+        ...prev,
+        [videoPromiseId]: prev[videoPromiseId] + (wasUpvoted ? 1 : -1),
+      }));
+
+      console.error("Error toggling upvote:", error);
+      toast.error("ვოუთის მიცემა ვერ მოხერხდა");
+    }
   };
 
   const generatePaginationItems = () => {
@@ -143,7 +130,7 @@ export default function PromisesClient({
         items.push(
           <PaginationItem key={i}>
             <PaginationLink
-              onClick={() => handlePageChange(i)}
+              href={`/promises?page=${i}`}
               isActive={pagination.currentPage === i}
               className="cursor-pointer"
             >
@@ -160,7 +147,7 @@ export default function PromisesClient({
       items.push(
         <PaginationItem key={1}>
           <PaginationLink
-            onClick={() => handlePageChange(1)}
+            href={`/promises?page=1`}
             isActive={pagination.currentPage === 1}
             className="cursor-pointer"
           >
@@ -187,7 +174,7 @@ export default function PromisesClient({
         items.push(
           <PaginationItem key={i}>
             <PaginationLink
-              onClick={() => handlePageChange(i)}
+              href={`/promises?page=${i}`}
               isActive={pagination.currentPage === i}
               className="cursor-pointer"
             >
@@ -209,7 +196,7 @@ export default function PromisesClient({
         items.push(
           <PaginationItem key={pagination.totalPages}>
             <PaginationLink
-              onClick={() => handlePageChange(pagination.totalPages)}
+              href={`/promises?page=${pagination.totalPages}`}
               isActive={pagination.currentPage === pagination.totalPages}
               className="cursor-pointer"
             >
@@ -257,9 +244,7 @@ export default function PromisesClient({
                 <PaginationContent>
                   <PaginationItem>
                     <PaginationPrevious
-                      onClick={() =>
-                        handlePageChange(pagination.currentPage - 1)
-                      }
+                      href={`/promises?page=${pagination.currentPage - 1}`}
                       className={
                         !pagination.hasPreviousPage
                           ? "pointer-events-none opacity-50"
@@ -272,9 +257,7 @@ export default function PromisesClient({
 
                   <PaginationItem>
                     <PaginationNext
-                      onClick={() =>
-                        handlePageChange(pagination.currentPage + 1)
-                      }
+                      href={`/promises?page=${pagination.currentPage + 1}`}
                       className={
                         !pagination.hasNextPage
                           ? "pointer-events-none opacity-50"
