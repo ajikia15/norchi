@@ -2,10 +2,10 @@
 
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, Share2 } from "lucide-react";
 import { useState } from "react";
-import Marquee from "react-fast-marquee";
 import { VideoPromise } from "@/app/types";
+import { Button } from "@/components/ui/button";
 
 interface VideoCardProps {
   videoPromise: VideoPromise;
@@ -13,28 +13,46 @@ interface VideoCardProps {
   onUpvote?: (videoPromiseId: string) => void;
 }
 
-function extractYouTubeId(urlOrId: string): string {
-  // If it's already a plain ID (11 chars, no slashes), return as is
-  if (/^[a-zA-Z0-9_-]{11}$/.test(urlOrId)) return urlOrId;
-  // Try to extract from various YouTube URL formats
-  const match = urlOrId.match(
-    /(?:youtube\.com\/(?:.*v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
-  );
-  return match ? match[1] : urlOrId;
-}
-
 export default function VideoCard({
   videoPromise,
   isUpvoted = false,
   onUpvote,
 }: VideoCardProps) {
+  const [isPlaying, setIsPlaying] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const videoId = extractYouTubeId(videoPromise.ytVideoId);
+  const videoId = videoPromise.ytVideoId;
   const totalUpvotes = videoPromise.upvoteCount + videoPromise.algorithmPoints;
+
+  // Extract playlist if present
+  function extractPlaylistId(urlOrId: string): string | null {
+    const match = urlOrId.match(/[?&]list=([a-zA-Z0-9_-]+)/);
+    return match ? match[1] : null;
+  }
+  const playlistId = extractPlaylistId(videoPromise.ytVideoId);
+
+  // Generate shareable link
+  const videoUrl = `https://www.youtube.com/watch?v=${videoId}${
+    playlistId ? `&list=${playlistId}` : ""
+  }`;
 
   const handleUpvote = () => {
     if (onUpvote) {
       onUpvote(videoPromise.id);
+    }
+  };
+
+  // Custom gradient overlay style (black)
+  const gradientOverlay =
+    "absolute top-0 left-0 w-full z-10 px-4 py-6 flex items-start " +
+    "bg-gradient-to-b from-black/80 via-black/40 to-black/0";
+
+  // Copy to clipboard handler
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(videoUrl);
+    } catch {
+      // fallback: alert
+      alert("ბმული დაკოპირდა: " + videoUrl);
     }
   };
 
@@ -44,52 +62,74 @@ export default function VideoCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div className="aspect-[9/16] w-full">
+      <div className="relative aspect-[9/16] w-full">
+        {/* Title Overlay */}
+        {!isPlaying && (
+          <div
+            className={gradientOverlay}
+            style={{ transition: "opacity 0.3s" }}
+          >
+            <span className="w-full whitespace-pre-line break-words text-base text-white">
+              {videoPromise.title}
+            </span>
+          </div>
+        )}
+        {/* Vertical Action Buttons */}
+        <div className="absolute bottom-12 left-0 z-20 flex flex-col gap-0">
+          <button
+            onClick={handleUpvote}
+            className={`group flex items-center h-10 rounded-r-lg bg-white transition-all  duration-300 overflow-hidden pointer-events-auto
+              ${
+                isUpvoted || isHovered
+                  ? "pl-3 pr-6 w-36"
+                  : "pl-3 pr-3 w-10 rounded-br-none"
+              }
+            `}
+            style={{
+              minWidth: "2.5rem",
+              paddingTop: "0.25rem",
+              paddingBottom: "0.25rem",
+            }}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => setIsHovered(false)}
+          >
+            <ArrowUp
+              className={`h-5 w-5 shrink-0 transition-colors duration-200 ${
+                isUpvoted
+                  ? "text-green-500"
+                  : "text-gray-700 group-hover:text-gray-900"
+              }`}
+            />
+            <span
+              className={`inline-block whitespace-nowrap text-sm text-gray-900 transition-all duration-300 ml-0 pr-4 ${
+                isUpvoted || isHovered ? "opacity-100 w-auto" : "opacity-0 w-0"
+              }`}
+              style={{ transitionProperty: "opacity, width" }}
+            >
+              {isUpvoted ? "მეტმა ნახოს!" : "მეტმა ნახოს?"}
+            </span>
+            <span className="ml-auto pl-2 pr-2 text-xs font-normal text-gray-700">
+              {totalUpvotes}
+            </span>
+          </button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleShare}
+            title="ბმულის გაზიარება"
+            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-l-none rounded-tr-none bg-white hover:bg-white"
+          >
+            <Share2 className="h-5 w-5 text-gray-700" />
+          </Button>
+        </div>
         <LiteYouTubeEmbed
           id={videoId}
           title={videoPromise.title}
           aspectWidth={9}
           aspectHeight={16}
           poster="maxresdefault"
+          onIframeAdded={() => setIsPlaying(true)}
         />
-      </div>
-
-      {/* Footer */}
-      <div className="absolute bottom-0 left-0 right-0 flex items-center justify-between border-t bg-white px-4 py-3">
-        {/* Left side - Marquee title */}
-        <div className="mr-4 flex-1 overflow-hidden">
-          {isHovered ? (
-            <Marquee speed={50} gradient={false}>
-              <span className="pr-8 text-sm font-medium text-gray-900">
-                {videoPromise.title}
-              </span>
-            </Marquee>
-          ) : (
-            <div className="truncate text-sm font-medium text-gray-900">
-              {videoPromise.title}
-            </div>
-          )}
-        </div>
-
-        {/* Right side - Upvote button */}
-        <button
-          onClick={handleUpvote}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-            isUpvoted
-              ? "bg-green-100 text-green-700 hover:bg-green-200"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-          }`}
-        >
-          <ArrowUp
-            className={`h-4 w-4 ${
-              isUpvoted ? "text-green-600" : "text-gray-600"
-            }`}
-          />
-          <span className="hidden sm:inline">
-            {isUpvoted ? "მეტმა ნახოს!" : "მეტმა ნახოს?"}
-          </span>
-          <span className="text-xs text-gray-500">{totalUpvotes}</span>
-        </button>
       </div>
     </div>
   );
