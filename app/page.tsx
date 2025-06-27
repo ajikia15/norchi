@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { Story } from "./types";
-import { loadAllData } from "./lib/storage";
+import { loadStoriesData, loadHotTopics } from "./lib/storage";
 import { getCurrentUser } from "./lib/auth-utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,10 +9,28 @@ import Link from "next/link";
 import HotQuestionsClientSection from "./components/HotQuestionsClientSection";
 import StoriesGridSkeleton from "./components/StoriesGridSkeleton";
 
-// Optimized parallel data loading
+// Add static generation to reduce server CPU
+export const revalidate = 1800; // Revalidate every 30 minutes
+
+// Optimized parallel data loading for homepage
 async function getPageData() {
-  const [data, user] = await Promise.all([loadAllData(), getCurrentUser()]);
-  return { ...data, user };
+  const [storiesData, user] = await Promise.all([
+    loadStoriesData(),
+    getCurrentUser(),
+  ]);
+
+  // Load hot topics with user context to prevent N+1 queries
+  const hotTopicsResult = await loadHotTopics({
+    page: 1,
+    limit: 8,
+    userId: user?.id, // Pass userId to batch-load saved status
+  });
+
+  return {
+    storiesData,
+    topics: hotTopicsResult.topics,
+    user,
+  };
 }
 
 async function StoriesGrid({ stories }: { stories: Story[] }) {
@@ -105,14 +123,13 @@ async function StoriesGrid({ stories }: { stories: Story[] }) {
 
 // Main page component with optimized data loading
 export default async function HomePage() {
-  // Load all data in parallel at the top level
-  const { storiesData, hotTopicsData, user } = await getPageData();
+  // Load optimized data for homepage
+  const { storiesData, topics, user } = await getPageData();
   const stories = Object.values(storiesData.stories);
-  const topics = Object.values(hotTopicsData.topics);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Hot Questions Section - now with pre-loaded data */}
+      {/* Hot Questions Section - now with only 8 topics */}
       <HotQuestionsClientSection topics={topics} user={user} />
 
       {/* Stories section */}

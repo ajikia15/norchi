@@ -1,13 +1,24 @@
 import { Suspense } from "react";
-import { loadAllData } from "../lib/storage";
+import { loadStoriesData, loadHotTopics } from "../lib/storage";
 import AdminClient from "./AdminClient";
 import AdminSkeleton from "../components/AdminSkeleton";
 import AdminGuard from "../components/AdminGuard";
 
 async function AdminContent() {
   try {
-    // Use optimized parallel data loading with error handling
-    const { storiesData, hotTopicsData } = await loadAllData();
+    // Use optimized separate data loading with error handling
+    const [storiesData, hotTopicsResult] = await Promise.all([
+      loadStoriesData(),
+      loadHotTopics(), // Load all for admin management
+    ]);
+
+    // Convert to legacy format for AdminClient compatibility
+    const hotTopicsData = {
+      topics: Object.fromEntries(
+        hotTopicsResult.topics.map((topic) => [topic.id, topic])
+      ),
+      tags: hotTopicsResult.tags,
+    };
 
     return (
       <AdminClient

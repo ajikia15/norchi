@@ -76,11 +76,32 @@ export interface HotTopic {
   updatedAt: string;
   // Computed/joined fields when tags are loaded
   tagData?: Tag[];
+  // Saved status for the current user (prevents N+1 queries)
+  isSaved?: boolean;
 }
 
 export interface HotTopicsData {
   topics: Record<string, HotTopic>;
   tags: Record<string, Tag>;
+}
+
+// Centralized pagination types for hot topics
+export interface HotTopicsPaginationParams {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedHotTopicsResult {
+  topics: HotTopic[];
+  tags: Record<string, Tag>;
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
 }
 
 // Legacy interfaces - will be removed after migration

@@ -3,12 +3,21 @@
   StoriesData,
   HotTopic,
   HotTopicsData,
+  HotTopicsPaginationParams,
+  PaginatedHotTopicsResult,
   Tag,
   HotcardCategory,
 } from "../types";
 import { db } from "./db/client";
-import { stories, hotTopics, tags, hotcardCategories } from "./db/schema";
+import {
+  stories,
+  hotTopics,
+  tags,
+  hotcardCategories,
+  savedHotCards,
+} from "./db/schema";
 import { cache } from "react";
+import { eq, count } from "drizzle-orm";
 
 // Cached server-side functions for database operations with React cache
 export const loadStoriesData = cache(async (): Promise<StoriesData> => {
@@ -47,59 +56,155 @@ export const loadStoriesData = cache(async (): Promise<StoriesData> => {
   }
 });
 
-// Optimized server-side hot topics function with parallel loading and caching
-export const loadHotTopicsData = cache(async (): Promise<HotTopicsData> => {
-  try {
-    // Load both tags and topics in parallel for better performance
-    const [tagsResult, topicsResult] = await Promise.all([
-      db.select().from(tags),
-      db.select().from(hotTopics),
-    ]);
+// 🎯 CENTRALIZED HOT TOPICS FETCHING WITH PAGINATION
+// This is the single source of truth for hot topics across the entire website
+export const loadHotTopics = cache(
+  async (
+    params: HotTopicsPaginationParams & { userId?: string } = {}
+  ): Promise<PaginatedHotTopicsResult> => {
+    const { page = 1, limit = 12, userId } = params;
+    const offset = (page - 1) * limit;
 
-    const tagsMap: Record<string, Tag> = {};
+    try {
+      // Load tags, total count, and paginated topics in parallel
+      const [tagsResult, totalCountResult, topicsResult] = await Promise.all([
+        db.select().from(tags),
+        db.select({ count: count() }).from(hotTopics),
+        db.select().from(hotTopics).limit(limit).offset(offset),
+      ]);
 
-    tagsResult.forEach((dbTag) => {
-      tagsMap[dbTag.id] = {
-        id: dbTag.id,
-        label: dbTag.label,
-        emoji: dbTag.emoji,
-        color: dbTag.color,
-        createdAt: dbTag.createdAt,
-        updatedAt: dbTag.updatedAt,
+      // If userId provided, load saved status for all topics to prevent N+1 queries
+      const savedTopicsMap: Record<string, boolean> = {};
+      if (userId) {
+        const savedTopicsResult = await db
+          .select({ hotTopicId: savedHotCards.hotTopicId })
+          .from(savedHotCards)
+          .where(eq(savedHotCards.userId, userId));
+
+        savedTopicsResult.forEach((saved) => {
+          savedTopicsMap[saved.hotTopicId] = true;
+        });
+      }
+
+      // Build tags map
+      const tagsMap: Record<string, Tag> = {};
+      tagsResult.forEach((dbTag) => {
+        tagsMap[dbTag.id] = {
+          id: dbTag.id,
+          label: dbTag.label,
+          emoji: dbTag.emoji,
+          color: dbTag.color,
+          createdAt: dbTag.createdAt,
+          updatedAt: dbTag.updatedAt,
+        };
+      });
+
+      // Transform topics and attach tag data + saved status
+      const topics: HotTopic[] = topicsResult.map((dbTopic) => {
+        const topicTagIds = JSON.parse(dbTopic.tags || "[]") as string[];
+        const tagData = topicTagIds
+          .map((tagId) => tagsMap[tagId])
+          .filter(Boolean);
+
+        return {
+          id: dbTopic.id,
+          tags: topicTagIds,
+          title: dbTopic.title,
+          answer: dbTopic.answer,
+          createdAt: dbTopic.createdAt,
+          updatedAt: dbTopic.updatedAt,
+          tagData,
+          isSaved: savedTopicsMap[dbTopic.id] || false, // Add saved status
+        };
+      });
+
+      // Calculate pagination metadata
+      const totalItems = totalCountResult[0].count;
+      const totalPages = Math.ceil(totalItems / limit);
+
+      return {
+        topics,
+        tags: tagsMap,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems,
+          itemsPerPage: limit,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
       };
-    });
-
-    const topicsMap: Record<string, HotTopic> = {};
-
-    topicsResult.forEach((dbTopic) => {
-      const topicTagIds = JSON.parse(dbTopic.tags || "[]") as string[];
-      const tagData = topicTagIds
-        .map((tagId) => tagsMap[tagId])
-        .filter(Boolean); // Remove undefined tags
-
-      topicsMap[dbTopic.id] = {
-        id: dbTopic.id,
-        tags: topicTagIds,
-        title: dbTopic.title,
-        answer: dbTopic.answer,
-        createdAt: dbTopic.createdAt,
-        updatedAt: dbTopic.updatedAt,
-        tagData,
+    } catch (error) {
+      console.error("Failed to load hot topics from database:", error);
+      // Return empty result instead of throwing
+      return {
+        topics: [],
+        tags: {},
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalItems: 0,
+          itemsPerPage: limit,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
       };
-    });
-
-    return {
-      topics: topicsMap,
-      tags: tagsMap,
-    };
-  } catch (error) {
-    console.error("Failed to load hot topics from database:", error);
-    throw error;
+    }
   }
+);
+
+// Optimized function to load a single story by ID (reduces server CPU)
+export const loadSingleStory = cache(
+  async (storyId: string): Promise<Story | null> => {
+    try {
+      const result = await db
+        .select()
+        .from(stories)
+        .where(eq(stories.id, storyId))
+        .limit(1);
+
+      if (result.length === 0) {
+        return null;
+      }
+
+      const dbStory = result[0];
+      return {
+        id: dbStory.id,
+        name: dbStory.name,
+        description: dbStory.description || undefined,
+        flowData: JSON.parse(dbStory.flowData),
+        createdAt: dbStory.createdAt,
+        updatedAt: dbStory.updatedAt,
+      };
+    } catch (error) {
+      console.error("Failed to load story from database:", error);
+      return null;
+    }
+  }
+);
+
+// LEGACY FUNCTIONS - TO BE REMOVED
+// Keep for backward compatibility during migration
+export const loadHotTopicsData = cache(async (): Promise<HotTopicsData> => {
+  console.warn("loadHotTopicsData is deprecated. Use loadHotTopics() instead.");
+  const result = await loadHotTopics();
+
+  // Convert to legacy format
+  const topicsMap: Record<string, HotTopic> = {};
+  result.topics.forEach((topic) => {
+    topicsMap[topic.id] = topic;
+  });
+
+  return {
+    topics: topicsMap,
+    tags: result.tags,
+  };
 });
 
-// Combined data loader for parallel loading on pages that need both
 export const loadAllData = cache(async () => {
+  console.warn(
+    "loadAllData is deprecated. Use loadStoriesData() and loadHotTopics() separately."
+  );
   const [storiesData, hotTopicsData] = await Promise.all([
     loadStoriesData(),
     loadHotTopicsData(),

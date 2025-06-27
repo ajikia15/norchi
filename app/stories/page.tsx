@@ -3,6 +3,9 @@ import { loadStoriesData } from "../lib/storage";
 import StoriesGrid from "./StoriesGrid";
 import StoriesGridSkeleton from "./StoriesGridSkeleton";
 
+// Add static generation to reduce server CPU
+export const revalidate = 1800; // Revalidate every 30 minutes
+
 async function getStoriesData() {
   const storiesData = await loadStoriesData();
   return Object.values(storiesData.stories);

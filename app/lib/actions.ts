@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { db } from "./db/client";
 import { stories, hotTopics, tags, hotcardCategories } from "./db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 // Story actions
 export async function createStory(formData: FormData) {
@@ -119,22 +119,24 @@ export async function updateTag(id: string, formData: FormData) {
 }
 
 export async function deleteTag(id: string) {
-  // Remove this tag from all hot topics that use it
-  const hotTopicsWithTag = await db.select().from(hotTopics);
+  // Optimized: Only fetch topics that actually contain this tag (reduces server CPU)
+  const hotTopicsWithTag = await db
+    .select()
+    .from(hotTopics)
+    .where(sql`json_extract(tags, '$') LIKE '%"${id}"%'`);
 
+  // Batch update all affected topics
   for (const topic of hotTopicsWithTag) {
     const topicTags = JSON.parse(topic.tags || "[]") as string[];
     const updatedTags = topicTags.filter((tagId) => tagId !== id);
 
-    if (topicTags.length !== updatedTags.length) {
-      await db
-        .update(hotTopics)
-        .set({
-          tags: JSON.stringify(updatedTags),
-          updatedAt: new Date().toISOString(),
-        })
-        .where(eq(hotTopics.id, topic.id));
-    }
+    await db
+      .update(hotTopics)
+      .set({
+        tags: JSON.stringify(updatedTags),
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(hotTopics.id, topic.id));
   }
 
   // Delete the tag

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { loadStoriesData } from "@/app/lib/storage";
+import { loadSingleStory } from "@/app/lib/storage";
 import StoryEditClient from "./StoryEditClient";
 import StoryLoadingSkeleton from "@/app/components/StoryLoadingSkeleton";
 
@@ -11,11 +11,10 @@ interface PageProps {
 async function StoryEditContent({ params }: PageProps) {
   const { id: storyId } = await params;
 
-  // Load data server-side
-  const storiesData = await loadStoriesData();
+  // Load individual story instead of all stories (reduces server CPU)
+  const story = await loadSingleStory(storyId);
 
   // Check if story exists
-  const story = storiesData.stories[storyId];
   if (!story) {
     notFound();
   }

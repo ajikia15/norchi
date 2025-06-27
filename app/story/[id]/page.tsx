@@ -1,24 +1,26 @@
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { loadStoriesData } from "../../lib/storage";
+import { loadSingleStory } from "../../lib/storage";
 import StoryClient from "./StoryClient";
 import { cache } from "react";
 import StoryLoadingSkeleton from "../../components/StoryLoadingSkeleton";
+
+// Add static generation to reduce server CPU
+export const revalidate = 1800; // Revalidate every 30 minutes
 
 interface PageProps {
   params: Promise<{ id: string }>;
 }
 
-// Cached function for individual story loading
+// Optimized function for individual story loading (reduces server CPU)
 const getStory = cache(async (storyId: string) => {
-  const storiesData = await loadStoriesData();
-  return storiesData.stories[storyId];
+  return await loadSingleStory(storyId);
 });
 
 async function StoryContent({ params }: PageProps) {
   const { id: storyId } = await params;
 
-  // Load data server-side with caching
+  // Load individual story instead of all stories
   const story = await getStory(storyId);
 
   // Check if story exists
@@ -43,16 +45,5 @@ export default function StoryPage({ params }: PageProps) {
 }
 
 // Generate static params for better performance
-export async function generateStaticParams() {
-  try {
-    const storiesData = await loadStoriesData();
-    const stories = Object.values(storiesData.stories);
-
-    return stories.map((story) => ({
-      id: story.id,
-    }));
-  } catch (error) {
-    console.error("Error generating static params for stories:", error);
-    return [];
-  }
-}
+// Note: generateStaticParams removed to avoid loading all stories
+// Dynamic pages will be generated on-demand with revalidation

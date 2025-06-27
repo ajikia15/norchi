@@ -119,7 +119,11 @@ export default function BaseHotQuestionCard({
                   duration: 0.2,
                 }}
               >
-                <SaveHotCardButton hotTopicId={topic.id} user={user} />
+                <SaveHotCardButton
+                  hotTopicId={topic.id}
+                  user={user}
+                  initialSavedStatus={topic.isSaved}
+                />
               </motion.div>
 
               {/* Read to end button */}

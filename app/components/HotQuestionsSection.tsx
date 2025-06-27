@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { loadHotTopicsData } from "../lib/storage";
+import { loadHotTopics } from "../lib/storage";
 import dynamic from "next/dynamic";
 import HotQuestionCardSkeleton from "./HotQuestionCardSkeleton";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -65,19 +65,27 @@ function HotQuestionsLoadingSkeleton() {
 }
 
 // Server component that loads data and passes to client component
-async function HotQuestionsGrid() {
-  const hotTopicsData = await loadHotTopicsData();
-  const topics = Object.values(hotTopicsData.topics);
-
-  return <AnimatedHotQuestionsGrid topics={topics} />;
+async function HotQuestionsGrid({ user }: { user?: { id: string } | null }) {
+  const hotTopicsResult = await loadHotTopics({
+    page: 1,
+    limit: 8,
+    userId: user?.id, // Pass userId to batch-load saved status
+  });
+  return (
+    <AnimatedHotQuestionsGrid topics={hotTopicsResult.topics} user={user} />
+  );
 }
 
 // This component is kept for backward compatibility but is now optimized
-export default function HotQuestionsSection() {
+export default async function HotQuestionsSection({
+  user,
+}: {
+  user?: { id: string } | null;
+}) {
   return (
-    <section className="py-12 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
+    <section className="py-8 bg-gradient-to-br from-gray-50/50 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
-        <h2 className="text-xl text-gray-400 text-center mb-12">
+        <h2 className="text-xl text-gray-400 text-center mb-8">
           შეუღე კარი სიმართლეს
         </h2>
         {/* <div className="text-center mb-12">
@@ -95,7 +103,7 @@ export default function HotQuestionsSection() {
         </div> */}
 
         <Suspense fallback={<HotQuestionsLoadingSkeleton />}>
-          <HotQuestionsGrid />
+          <HotQuestionsGrid user={user} />
         </Suspense>
       </div>
     </section>

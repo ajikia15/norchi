@@ -1,19 +1,19 @@
 import { Suspense } from "react";
-import { loadHotTopicsData } from "../lib/storage";
+import { loadHotTopics } from "../lib/storage";
 import { getCurrentUser } from "../lib/auth-utils";
 import HotQuestionsClient from "./HotQuestionsClient";
 import HotQuestionsGridSkeleton from "./HotQuestionsGridSkeleton";
 
-async function getHotTopicsData() {
-  const hotTopicsData = await loadHotTopicsData();
-  return Object.values(hotTopicsData.topics);
-}
+// Add static generation to reduce server CPU
+export const revalidate = 1800; // Revalidate every 30 minutes
 
 export default async function HotQuestionsPage() {
-  const [topics, user] = await Promise.all([
-    getHotTopicsData(),
-    getCurrentUser(),
-  ]);
+  const user = await getCurrentUser();
+  const hotTopicsResult = await loadHotTopics({
+    page: 1,
+    limit: 12,
+    userId: user?.id, // Pass userId to batch-load saved status
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
@@ -29,7 +29,7 @@ export default async function HotQuestionsPage() {
         </div>
 
         <Suspense fallback={<HotQuestionsGridSkeleton />}>
-          <HotQuestionsClient topics={topics} user={user} />
+          <HotQuestionsClient topics={hotTopicsResult.topics} user={user} />
         </Suspense>
       </div>
     </div>

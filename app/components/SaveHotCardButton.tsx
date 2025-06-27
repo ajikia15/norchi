@@ -1,48 +1,24 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Star } from "lucide-react";
-import {
-  saveHotCard,
-  unsaveHotCard,
-  isHotCardSaved,
-} from "@/app/server/saved-hotcards";
+import { saveHotCard, unsaveHotCard } from "@/app/server/saved-hotcards";
 import { toast } from "sonner";
 
 interface SaveHotCardButtonProps {
   hotTopicId: string;
   user?: { id: string } | null;
+  initialSavedStatus?: boolean; // Pre-loaded from server to prevent N+1 queries
 }
 
 export default function SaveHotCardButton({
   hotTopicId,
   user,
+  initialSavedStatus = false,
 }: SaveHotCardButtonProps) {
-  const [isSaved, setIsSaved] = useState(false);
+  const [isSaved, setIsSaved] = useState(initialSavedStatus);
   const [isPending, startTransition] = useTransition();
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Check if card is already saved on mount
-  useEffect(() => {
-    if (!user) {
-      setIsLoading(false);
-      return;
-    }
-
-    const checkSaved = async () => {
-      try {
-        const saved = await isHotCardSaved(hotTopicId);
-        setIsSaved(saved);
-      } catch (error) {
-        console.error("Error checking saved status:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkSaved();
-  }, [hotTopicId, user]);
 
   const handleToggleSave = (e: React.MouseEvent) => {
     // Prevent event propagation to avoid closing the card
@@ -74,15 +50,6 @@ export default function SaveHotCardButton({
   // Don't show button if user is not logged in
   if (!user) {
     return null;
-  }
-
-  // Show skeleton while loading
-  if (isLoading) {
-    return (
-      <Button variant="ghost" size="sm" disabled>
-        <div className="h-4 w-4 bg-gray-300 animate-pulse rounded" />
-      </Button>
-    );
   }
 
   return (
