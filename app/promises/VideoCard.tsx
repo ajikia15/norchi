@@ -70,23 +70,13 @@ export default function VideoCard({
           </div>
         )}
         {/* Vertical Action Buttons */}
-        <div className="absolute bottom-12 left-0 z-20 flex flex-col gap-0">
+        <div className="absolute right-0 top-24 z-20 flex flex-col items-end gap-0">
           <button
+            className={`group pointer-events-auto flex h-10 flex-row-reverse items-center justify-end overflow-hidden rounded-l-lg bg-white pl-4 pr-2 transition-all duration-300`}
             onClick={handleUpvote}
-            className={`group pointer-events-auto flex h-10 items-center overflow-hidden rounded-r-lg bg-white pl-3 pr-3 transition-all duration-300`}
           >
-            <ArrowUp
-              className={`h-5 w-5 shrink-0 transition-colors duration-200 ${
-                isUpvoted
-                  ? "text-green-500"
-                  : "text-gray-700 group-hover:text-gray-900"
-              }`}
-            />
-            <span className="ml-2 text-xs font-normal text-gray-700">
-              {totalUpvotes}
-            </span>
             <span
-              className={`ml-2 text-sm text-gray-900 whitespace-nowrap overflow-hidden
+              className={`mr-3 text-sm text-gray-900 whitespace-nowrap overflow-hidden
                 transition-all duration-300
                 ${
                   isUpvoted
@@ -98,13 +88,23 @@ export default function VideoCard({
             >
               {isUpvoted ? "მეტმა ნახოს!" : "მეტმა ნახოს?"}
             </span>
+            <ArrowUp
+              className={`h-5 w-5 shrink-0 transition-colors duration-200 ${
+                isUpvoted
+                  ? "text-green-500"
+                  : "text-gray-700 group-hover:text-gray-900"
+              }`}
+            />
+            <span className="ml-3 text-xs font-normal text-gray-700">
+              {totalUpvotes}
+            </span>
           </button>
           <Button
             variant="ghost"
             size="icon"
             onClick={handleShare}
             title="ბმულის გაზიარება"
-            className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-l-none rounded-tr-none bg-white hover:bg-white"
+            className="pointer-events-auto flex h-10 w-10 items-center justify-center self-end rounded-r-none rounded-tl-none bg-white"
           >
             <Share2 className="h-5 w-5 text-gray-700" />
           </Button>
