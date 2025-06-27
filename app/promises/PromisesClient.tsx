@@ -36,23 +36,42 @@ export default function PromisesClient({
   userId,
   pagination,
 }: PromisesClientProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [isPending, startTransition] = useTransition();
+
+  // State for tracking which videos are playing
+  const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState<
+    string | null
+  >(null);
+
+  // Initialize local state for upvotes and counts
   const [localUpvotes, setLocalUpvotes] =
     useState<Record<string, boolean>>(upvotedPromises);
   const [localCounts, setLocalCounts] = useState<Record<string, number>>(() => {
     const counts: Record<string, number> = {};
-    videoPromises.forEach((vp) => {
-      counts[vp.id] = vp.upvoteCount + vp.algorithmPoints;
+    videoPromises.forEach((promise) => {
+      counts[promise.id] = promise.upvoteCount + promise.algorithmPoints;
     });
     return counts;
   });
-  const [, startTransition] = useTransition();
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handlePageChange = (page: number) => {
-    const currentParams = new URLSearchParams(searchParams.toString());
-    currentParams.set("page", page.toString());
-    router.push(`/promises?${currentParams.toString()}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    router.push(`/promises?${params.toString()}`);
+  };
+
+  // Handler for when a video starts playing
+  const handleVideoPlay = (videoPromiseId: string) => {
+    setCurrentlyPlayingVideo(videoPromiseId);
+  };
+
+  // Handler for when a video stops playing
+  const handleVideoStop = (videoPromiseId: string) => {
+    if (currentlyPlayingVideo === videoPromiseId) {
+      setCurrentlyPlayingVideo(null);
+    }
   };
 
   const handleUpvote = async (videoPromiseId: string) => {
@@ -223,6 +242,9 @@ export default function PromisesClient({
                   videoPromise={enhancedVideoPromise}
                   isUpvoted={localUpvotes[videoPromise.id] || false}
                   onUpvote={userId ? handleUpvote : undefined}
+                  onVideoPlay={handleVideoPlay}
+                  onVideoStop={handleVideoStop}
+                  currentlyPlayingVideo={currentlyPlayingVideo}
                 />
               );
             })}

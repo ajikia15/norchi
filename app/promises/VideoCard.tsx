@@ -3,7 +3,7 @@
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { ArrowUp, Share2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { VideoPromise } from "@/app/types";
 import { Button } from "@/components/ui/button";
 
@@ -11,16 +11,37 @@ interface VideoCardProps {
   videoPromise: VideoPromise;
   isUpvoted?: boolean;
   onUpvote?: (videoPromiseId: string) => void;
+  onVideoPlay?: (videoPromiseId: string) => void;
+  onVideoStop?: (videoPromiseId: string) => void;
+  currentlyPlayingVideo?: string | null;
 }
 
 export default function VideoCard({
   videoPromise,
   isUpvoted = false,
   onUpvote,
+  onVideoPlay,
+  onVideoStop,
+  currentlyPlayingVideo,
 }: VideoCardProps) {
   const [isPlaying, setIsPlaying] = useState(false);
+  const [shouldReset, setShouldReset] = useState(0); // Force component reset
   const videoId = videoPromise.ytVideoId;
   const totalUpvotes = videoPromise.upvoteCount + videoPromise.algorithmPoints;
+
+  // Effect to stop this video if another video starts playing
+  useEffect(() => {
+    if (
+      currentlyPlayingVideo &&
+      currentlyPlayingVideo !== videoPromise.id &&
+      isPlaying
+    ) {
+      // Reset this video component to stop playback
+      setIsPlaying(false);
+      setShouldReset((prev) => prev + 1); // Force component reset
+      onVideoStop?.(videoPromise.id);
+    }
+  }, [currentlyPlayingVideo, videoPromise.id, isPlaying, onVideoStop]);
 
   // Extract playlist if present
   function extractPlaylistId(urlOrId: string): string | null {
@@ -38,6 +59,12 @@ export default function VideoCard({
     if (onUpvote) {
       onUpvote(videoPromise.id);
     }
+  };
+
+  // Handle when iframe is added (video player is loaded)
+  const handleIframeAdded = () => {
+    setIsPlaying(true);
+    onVideoPlay?.(videoPromise.id);
   };
 
   // Custom gradient overlay style (black)
@@ -110,12 +137,13 @@ export default function VideoCard({
           </Button>
         </div>
         <LiteYouTubeEmbed
+          key={`${videoId}-${shouldReset}`} // Force re-render when shouldReset changes
           id={videoId}
           title={videoPromise.title}
           aspectWidth={9}
           aspectHeight={16}
           poster="maxresdefault"
-          onIframeAdded={() => setIsPlaying(true)}
+          onIframeAdded={handleIframeAdded}
         />
       </div>
     </div>
