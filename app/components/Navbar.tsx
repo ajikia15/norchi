@@ -63,6 +63,12 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
       icon: BookOpen,
       isActive: pathname === "/stories",
     },
+    {
+      href: "/promises",
+      label: "დაპირებები",
+      icon: BookOpen,
+      isActive: pathname === "/promises",
+    },
   ];
 
   return (
