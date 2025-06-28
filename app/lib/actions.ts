@@ -9,6 +9,8 @@ import {
   hotcardCategories,
   videoPromises,
   videoPromiseUpvotes,
+  videos,
+  videoUpvotes,
 } from "./db/schema";
 import { eq, sql } from "drizzle-orm";
 
@@ -507,5 +509,172 @@ export async function updateVideoPromiseAlgorithmPoints(
   } catch (error) {
     console.error("Error updating algorithm points:", error);
     return { success: false, error: "Failed to update algorithm points" };
+  }
+}
+
+// NEW VIDEO ACTIONS (for updated videos table)
+export async function createVideo(formData: FormData) {
+  const ytVideoId = formData.get("ytVideoId") as string;
+  const title = formData.get("title") as string;
+  const type = formData.get("type") as string;
+  const status = formData.get("status") as string;
+  const startTimeStr = formData.get("startTime") as string;
+  const endTimeStr = formData.get("endTime") as string;
+
+  if (!ytVideoId || !title || !type) {
+    throw new Error("YouTube Video ID, title, and type are required");
+  }
+
+  const id = `v-${Date.now()}`;
+  const now = new Date().toISOString();
+
+  // Parse time values
+  const startTime =
+    startTimeStr && !isNaN(parseInt(startTimeStr))
+      ? parseInt(startTimeStr)
+      : null;
+  const endTime =
+    endTimeStr && !isNaN(parseInt(endTimeStr)) ? parseInt(endTimeStr) : null;
+
+  await db.insert(videos).values({
+    id,
+    ytVideoId,
+    title,
+    type,
+    status: status || "pending",
+    startTime,
+    endTime,
+    createdAt: now,
+    updatedAt: now,
+  });
+
+  revalidatePath("/admin");
+  revalidatePath("/treasury");
+  return { success: true, id };
+}
+
+export async function updateVideo(id: string, formData: FormData) {
+  const ytVideoId = formData.get("ytVideoId") as string;
+  const title = formData.get("title") as string;
+  const type = formData.get("type") as string;
+  const status = formData.get("status") as string;
+  const startTimeStr = formData.get("startTime") as string;
+  const endTimeStr = formData.get("endTime") as string;
+
+  if (!ytVideoId || !title || !type) {
+    throw new Error("YouTube Video ID, title, and type are required");
+  }
+
+  // Parse time values
+  const startTime =
+    startTimeStr && !isNaN(parseInt(startTimeStr))
+      ? parseInt(startTimeStr)
+      : null;
+  const endTime =
+    endTimeStr && !isNaN(parseInt(endTimeStr)) ? parseInt(endTimeStr) : null;
+
+  await db
+    .update(videos)
+    .set({
+      ytVideoId,
+      title,
+      type,
+      status: status || "pending",
+      startTime,
+      endTime,
+      updatedAt: new Date().toISOString(),
+    })
+    .where(eq(videos.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/treasury");
+  return { success: true };
+}
+
+export async function deleteVideo(id: string) {
+  await db.delete(videos).where(eq(videos.id, id));
+
+  revalidatePath("/admin");
+  revalidatePath("/treasury");
+  return { success: true };
+}
+
+export async function updateVideoAlgorithmPoints(
+  id: string,
+  algorithmPoints: number
+) {
+  try {
+    await db
+      .update(videos)
+      .set({
+        algorithmPoints,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(videos.id, id));
+
+    revalidatePath("/admin");
+    revalidatePath("/treasury");
+    return { success: true };
+  } catch (error) {
+    console.error("Error updating video algorithm points:", error);
+    return { success: false, error: "Failed to update algorithm points" };
+  }
+}
+
+// Video Upvote actions (for new videos table)
+export async function toggleVideoUpvote(videoId: string, userId: string) {
+  try {
+    // Check if user has already upvoted this video
+    const existingUpvote = await db
+      .select()
+      .from(videoUpvotes)
+      .where(
+        sql`${videoUpvotes.videoId} = ${videoId} AND ${videoUpvotes.userId} = ${userId}`
+      )
+      .limit(1);
+
+    if (existingUpvote.length > 0) {
+      // Remove upvote
+      await db
+        .delete(videoUpvotes)
+        .where(
+          sql`${videoUpvotes.videoId} = ${videoId} AND ${videoUpvotes.userId} = ${userId}`
+        );
+
+      // Decrement upvote count
+      await db
+        .update(videos)
+        .set({
+          upvoteCount: sql`${videos.upvoteCount} - 1`,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(videos.id, videoId));
+
+      revalidatePath("/treasury");
+      return { success: true, action: "removed" };
+    } else {
+      // Add upvote
+      const upvoteId = `vu-${Date.now()}`;
+      await db.insert(videoUpvotes).values({
+        id: upvoteId,
+        videoId,
+        userId,
+      });
+
+      // Increment upvote count
+      await db
+        .update(videos)
+        .set({
+          upvoteCount: sql`${videos.upvoteCount} + 1`,
+          updatedAt: new Date().toISOString(),
+        })
+        .where(eq(videos.id, videoId));
+
+      revalidatePath("/treasury");
+      return { success: true, action: "added" };
+    }
+  } catch (error) {
+    console.error("Error toggling video upvote:", error);
+    return { success: false, error: "Failed to toggle upvote" };
   }
 }

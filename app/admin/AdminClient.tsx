@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { StoriesData, HotTopicsData, VideoPromise } from "../types";
+import { StoriesData, HotTopicsData, Video } from "../types";
 import {
   createStory,
   deleteStory as deleteStoryAction,
@@ -14,21 +14,21 @@ import {
   deleteTag,
   exportHotTopics,
   importHotTopic,
-  createVideoPromise,
-  updateVideoPromise,
-  deleteVideoPromise,
-  updateVideoPromiseAlgorithmPoints,
+  createVideo,
+  updateVideo,
+  deleteVideo,
+  updateVideoAlgorithmPoints,
 } from "../lib/actions";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import StoryManagerClient from "../components/StoryManagerClient";
 import HotQuestionsManagerClient from "../components/HotQuestionsManagerClient";
-import VideoPromisesManagerClient from "../components/VideoPromisesManagerClient";
+import VideoManagerClient from "../components/VideoManagerClient";
 
 interface AdminClientProps {
   initialStoriesData: StoriesData;
   initialHotTopicsData: HotTopicsData;
-  initialVideoPromisesData: {
-    videoPromises: VideoPromise[];
+  initialVideosData: {
+    videos: Video[];
     pagination: {
       currentPage: number;
       totalPages: number;
@@ -61,7 +61,7 @@ function downloadJsonFile(data: unknown, filename: string) {
 export default function AdminClient({
   initialStoriesData,
   initialHotTopicsData,
-  initialVideoPromisesData,
+  initialVideosData,
 }: AdminClientProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -74,8 +74,8 @@ export default function AdminClient({
     router.push(`/admin?tab=${value}`);
   };
 
-  const handleVideoPromisesPageChange = (page: number) => {
-    router.push(`/admin?tab=videoPromises&page=${page}`);
+  const handleVideosPageChange = (page: number) => {
+    router.push(`/admin?tab=videos&page=${page}`);
   };
 
   const handleStorySelect = (storyId: string) => {
@@ -278,66 +278,90 @@ export default function AdminClient({
   };
 
   // Video Promises handlers
-  const handleVideoPromiseCreate = async (ytVideoId: string, title: string) => {
-    startTransition(async () => {
-      try {
-        const formData = new FormData();
-        formData.append("ytVideoId", ytVideoId);
-        formData.append("title", title);
-
-        const result = await createVideoPromise(formData);
-        if (result.success) {
-          router.refresh();
-        }
-      } catch (error) {
-        console.error("Error creating video promise:", error);
-        alert("ვიდეო დაპირების შექმნა ვერ მოხერხდა");
-      }
-    });
-  };
-
-  const handleVideoPromiseUpdate = async (
-    id: string,
+  const handleVideoCreate = async (
     ytVideoId: string,
-    title: string
+    title: string,
+    type: string,
+    status: string,
+    startTime?: number,
+    endTime?: number
   ) => {
     startTransition(async () => {
       try {
         const formData = new FormData();
         formData.append("ytVideoId", ytVideoId);
         formData.append("title", title);
+        formData.append("type", type);
+        formData.append("status", status);
+        if (startTime !== undefined) {
+          formData.append("startTime", startTime.toString());
+        }
+        if (endTime !== undefined) {
+          formData.append("endTime", endTime.toString());
+        }
 
-        await updateVideoPromise(id, formData);
-        router.refresh();
+        const result = await createVideo(formData);
+        if (result.success) {
+          router.refresh();
+        }
       } catch (error) {
-        console.error("Error updating video promise:", error);
-        alert("ვიდეო დაპირების განახლება ვერ მოხერხდა");
+        console.error("Error creating video:", error);
+        alert("ვიდეოს შექმნა ვერ მოხერხდა");
       }
     });
   };
 
-  const handleVideoPromiseDelete = async (id: string) => {
+  const handleVideoUpdate = async (
+    id: string,
+    ytVideoId: string,
+    title: string,
+    type: string,
+    status: string,
+    startTime?: number,
+    endTime?: number
+  ) => {
     startTransition(async () => {
       try {
-        await deleteVideoPromise(id);
+        const formData = new FormData();
+        formData.append("ytVideoId", ytVideoId);
+        formData.append("title", title);
+        formData.append("type", type);
+        formData.append("status", status);
+        if (startTime !== undefined) {
+          formData.append("startTime", startTime.toString());
+        }
+        if (endTime !== undefined) {
+          formData.append("endTime", endTime.toString());
+        }
+
+        await updateVideo(id, formData);
         router.refresh();
       } catch (error) {
-        console.error("Error deleting video promise:", error);
-        alert("ვიდეო დაპირების წაშლა ვერ მოხერხდა");
+        console.error("Error updating video:", error);
+        alert("ვიდეოს განახლება ვერ მოხერხდა");
       }
     });
   };
 
-  const handleVideoPromiseAlgorithmPointsUpdate = async (
+  const handleVideoDelete = async (id: string) => {
+    startTransition(async () => {
+      try {
+        await deleteVideo(id);
+        router.refresh();
+      } catch (error) {
+        console.error("Error deleting video:", error);
+        alert("ვიდეოს წაშლა ვერ მოხერხდა");
+      }
+    });
+  };
+
+  const handleVideoAlgorithmPointsUpdate = async (
     id: string,
     algorithmPoints: number
   ) => {
     startTransition(async () => {
       try {
-        const result = await updateVideoPromiseAlgorithmPoints(
-          id,
-          algorithmPoints
-        );
+        const result = await updateVideoAlgorithmPoints(id, algorithmPoints);
         if (result.success) {
           router.refresh();
         } else {
@@ -370,7 +394,7 @@ export default function AdminClient({
           <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="stories">გზები</TabsTrigger>
             <TabsTrigger value="hotquestions">ცხელი კითხვები</TabsTrigger>
-            <TabsTrigger value="videoPromises">ვიდეო დაპირებები</TabsTrigger>
+            <TabsTrigger value="videos">ვიდეოები</TabsTrigger>
           </TabsList>
 
           <TabsContent value="stories" className="mt-6">
@@ -398,15 +422,15 @@ export default function AdminClient({
             />
           </TabsContent>
 
-          <TabsContent value="videoPromises" className="mt-6">
-            <VideoPromisesManagerClient
-              videoPromises={initialVideoPromisesData.videoPromises}
-              pagination={initialVideoPromisesData.pagination}
-              onVideoPromiseCreate={handleVideoPromiseCreate}
-              onVideoPromiseUpdate={handleVideoPromiseUpdate}
-              onVideoPromiseDelete={handleVideoPromiseDelete}
-              onPageChange={handleVideoPromisesPageChange}
-              onAlgorithmPointsUpdate={handleVideoPromiseAlgorithmPointsUpdate}
+          <TabsContent value="videos" className="mt-6">
+            <VideoManagerClient
+              videos={initialVideosData.videos}
+              pagination={initialVideosData.pagination}
+              onVideoCreate={handleVideoCreate}
+              onVideoUpdate={handleVideoUpdate}
+              onVideoDelete={handleVideoDelete}
+              onPageChange={handleVideosPageChange}
+              onAlgorithmPointsUpdate={handleVideoAlgorithmPointsUpdate}
               isLoading={isPending}
             />
           </TabsContent>

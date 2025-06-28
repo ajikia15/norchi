@@ -96,8 +96,8 @@ export default function VideoSlider({
     <div className="space-y-6">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <h3 className="text-2xl font-bold text-green-600">{title}</h3>
+        <h3 className="text-2xl font-bold text-green-600">{title}</h3>
+        <div className="flex items-center gap-2">
           <div className="flex gap-2">
             <Button
               variant="ghost"
@@ -118,18 +118,18 @@ export default function VideoSlider({
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
+          <Button
+            variant="link"
+            className="text-sm text-green-600 underline-offset-4 hover:underline"
+            onClick={() => (window.location.href = viewAllHref)}
+          >
+            View All
+          </Button>
         </div>
-        <Button
-          variant="link"
-          className="text-sm text-green-600 underline-offset-4 hover:underline"
-          onClick={() => (window.location.href = viewAllHref)}
-        >
-          View All
-        </Button>
       </div>
 
       {/* Slider */}
-      <div className="overflow-hidden" ref={emblaRef}>
+      <div className="embla__fade overflow-hidden" ref={emblaRef}>
         <div className="flex gap-4">
           {videos.map((video) => (
             <div

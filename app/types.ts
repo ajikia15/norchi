@@ -140,6 +140,8 @@ export interface Video {
   title: string;
   type: string; // 'promise', 'roast', 'livestream', etc.
   status: string; // 'verified', 'pending'
+  startTime?: number; // Start time in seconds (optional)
+  endTime?: number; // End time in seconds (optional)
   upvoteCount: number;
   algorithmPoints: number;
   createdAt: string;

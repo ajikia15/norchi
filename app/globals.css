@@ -276,6 +276,34 @@ body.game-active {
   white-space: pre-wrap;
 }
 
+/* Embla Carousel Fade Effect */
+.embla__fade {
+  position: relative;
+}
+
+.embla__fade::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 5%;
+  pointer-events: none;
+  background: linear-gradient(
+    to left,
+    oklch(0.9911 0 0 / 1),
+    oklch(0.9911 0 0 / 0)
+  );
+}
+
+.dark .embla__fade::after {
+  background: linear-gradient(
+    to left,
+    oklch(0.1822 0 0 / 1),
+    oklch(0.1822 0 0 / 0)
+  );
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

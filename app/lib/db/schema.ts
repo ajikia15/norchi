@@ -140,6 +140,8 @@ export const videos = sqliteTable("videos", {
   title: text("title").notNull(),
   type: text("type").notNull().default("promise"), // 'promise', 'roast', 'livestream', etc.
   status: text("status").notNull().default("pending"), // 'verified', 'pending'
+  startTime: integer("start_time"), // Start time in seconds (optional)
+  endTime: integer("end_time"), // End time in seconds (optional)
   upvoteCount: integer("upvote_count").notNull().default(0),
   algorithmPoints: integer("algorithm_points").notNull().default(0),
   createdAt: text("created_at").notNull(),

@@ -1,9 +1,5 @@
 import { Suspense } from "react";
-import {
-  loadStoriesData,
-  loadHotTopics,
-  loadVideoPromises,
-} from "../lib/storage";
+import { loadStoriesData, loadHotTopics, loadVideos } from "../lib/storage";
 import AdminClient from "./AdminClient";
 import AdminSkeleton from "../components/AdminSkeleton";
 import AdminGuard from "../components/AdminGuard";
@@ -19,15 +15,14 @@ async function AdminContent({ searchParams }: AdminContentProps) {
     const tab = params.tab || "stories";
 
     // Use optimized separate data loading with error handling
-    const [storiesData, hotTopicsResult, videoPromisesResult] =
-      await Promise.all([
-        loadStoriesData(),
-        loadHotTopics({ page: tab === "hotquestions" ? page : 1, limit: 10 }),
-        loadVideoPromises({
-          page: tab === "videoPromises" ? page : 1,
-          limit: 10,
-        }),
-      ]);
+    const [storiesData, hotTopicsResult, videosResult] = await Promise.all([
+      loadStoriesData(),
+      loadHotTopics({ page: tab === "hotquestions" ? page : 1, limit: 10 }),
+      loadVideos({
+        page: tab === "videos" ? page : 1,
+        limit: 10,
+      }),
+    ]);
 
     // Convert to legacy format for AdminClient compatibility
     const hotTopicsData = {
@@ -41,7 +36,7 @@ async function AdminContent({ searchParams }: AdminContentProps) {
       <AdminClient
         initialStoriesData={storiesData}
         initialHotTopicsData={hotTopicsData}
-        initialVideoPromisesData={videoPromisesResult}
+        initialVideosData={videosResult}
       />
     );
   } catch (error) {
@@ -52,8 +47,8 @@ async function AdminContent({ searchParams }: AdminContentProps) {
       <AdminClient
         initialStoriesData={{ stories: {}, currentStoryId: "" }}
         initialHotTopicsData={{ topics: {}, tags: {} }}
-        initialVideoPromisesData={{
-          videoPromises: [],
+        initialVideosData={{
+          videos: [],
           pagination: {
             currentPage: 1,
             totalPages: 0,
