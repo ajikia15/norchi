@@ -5,7 +5,7 @@ import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Video } from "../types";
-import TreasuryVideoCard from "./TreasuryVideoCard";
+import VideoCard from "./VideoCard";
 
 interface VideoSliderProps {
   title: string;
@@ -136,7 +136,13 @@ export default function VideoSlider({
               key={video.id}
               className={`${getCardWidth()} min-w-0 flex-none`}
             >
-              <TreasuryVideoCard video={video} type={type} userId={userId} />
+              <VideoCard 
+                video={video} 
+                variant="horizontal-card"
+                type={type} 
+                userId={userId}
+                enableInternalUpvoteHandling={true}
+              />
             </div>
           ))}
         </div>

@@ -226,7 +226,8 @@ export default function PromisesClient({
               return (
                 <VideoCard
                   key={videoPromise.id}
-                  videoPromise={enhancedVideoPromise}
+                  video={enhancedVideoPromise}
+                  variant="vertical-overlay"
                   isUpvoted={localUpvotes[videoPromise.id] || false}
                   onUpvote={userId ? handleUpvote : undefined}
                   onVideoPlay={handleVideoPlay}
