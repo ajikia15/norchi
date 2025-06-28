@@ -121,8 +121,10 @@ export default function VideoManagerClient({
     title: "",
     type: "promise",
     status: "pending",
+    startTimeHours: "0",
     startTimeMinutes: "0",
     startTimeSeconds: "0",
+    endTimeHours: "0",
     endTimeMinutes: "0",
     endTimeSeconds: "0",
   });
@@ -166,8 +168,10 @@ export default function VideoManagerClient({
       title: "",
       type: "promise",
       status: "pending",
+      startTimeHours: "0",
       startTimeMinutes: "0",
       startTimeSeconds: "0",
+      endTimeHours: "0",
       endTimeMinutes: "0",
       endTimeSeconds: "0",
     });
@@ -181,9 +185,11 @@ export default function VideoManagerClient({
     setIsSubmitting(true);
     try {
       const startTime =
+        (parseInt(formData.startTimeHours) || 0) * 3600 +
         (parseInt(formData.startTimeMinutes) || 0) * 60 +
         (parseInt(formData.startTimeSeconds) || 0);
       const endTime =
+        (parseInt(formData.endTimeHours) || 0) * 3600 +
         (parseInt(formData.endTimeMinutes) || 0) * 60 +
         (parseInt(formData.endTimeSeconds) || 0);
 
@@ -211,14 +217,20 @@ export default function VideoManagerClient({
       title: video.title,
       type: video.type,
       status: video.status,
+      startTimeHours: video.startTime
+        ? Math.floor(video.startTime / 3600).toString()
+        : "0",
       startTimeMinutes: video.startTime
-        ? Math.floor(video.startTime / 60).toString()
+        ? Math.floor((video.startTime % 3600) / 60).toString()
         : "0",
       startTimeSeconds: video.startTime
         ? (video.startTime % 60).toString()
         : "0",
+      endTimeHours: video.endTime
+        ? Math.floor(video.endTime / 3600).toString()
+        : "0",
       endTimeMinutes: video.endTime
-        ? Math.floor(video.endTime / 60).toString()
+        ? Math.floor((video.endTime % 3600) / 60).toString()
         : "0",
       endTimeSeconds: video.endTime ? (video.endTime % 60).toString() : "0",
     });
@@ -238,9 +250,11 @@ export default function VideoManagerClient({
     setIsSubmitting(true);
     try {
       const startTime =
+        (parseInt(formData.startTimeHours) || 0) * 3600 +
         (parseInt(formData.startTimeMinutes) || 0) * 60 +
         (parseInt(formData.startTimeSeconds) || 0);
       const endTime =
+        (parseInt(formData.endTimeHours) || 0) * 3600 +
         (parseInt(formData.endTimeMinutes) || 0) * 60 +
         (parseInt(formData.endTimeSeconds) || 0);
 
@@ -291,6 +305,14 @@ export default function VideoManagerClient({
 
   const secondOptions: WheelPickerOption[] = Array.from(
     { length: 60 },
+    (_, i) => ({
+      label: i.toString().padStart(2, "0"),
+      value: i.toString(),
+    })
+  );
+
+  const hourOptions: WheelPickerOption[] = Array.from(
+    { length: 24 },
     (_, i) => ({
       label: i.toString().padStart(2, "0"),
       value: i.toString(),
@@ -616,9 +638,35 @@ export default function VideoManagerClient({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                 {/* Start Time */}
                 <div className="space-y-2">
-                  <Label>დაწყების დრო</Label>
+                  <Label>დაწყების დრო (საათი:წუთი:წამი)</Label>
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={formData.startTimeHours}
+                        onChange={(e) => {
+                          if (
+                            e.target.value === "" ||
+                            (+e.target.value >= 0 && +e.target.value < 24)
+                          ) {
+                            setFormData((p) => ({
+                              ...p,
+                              startTimeHours: e.target.value,
+                            }));
+                          }
+                        }}
+                        onBlur={(e) => {
+                          if (e.target.value === "")
+                            setFormData((p) => ({
+                              ...p,
+                              startTimeHours: "0",
+                            }));
+                        }}
+                        className="w-14 text-center"
+                      />
+                      <span className="font-bold">:</span>
                       <Input
                         type="number"
                         min="0"
@@ -673,6 +721,13 @@ export default function VideoManagerClient({
                     </div>
                     <WheelPickerWrapper>
                       <WheelPicker
+                        options={hourOptions}
+                        value={formData.startTimeHours}
+                        onValueChange={(val) =>
+                          setFormData((p) => ({ ...p, startTimeHours: val }))
+                        }
+                      />
+                      <WheelPicker
                         options={minuteOptions}
                         value={formData.startTimeMinutes}
                         onValueChange={(val) =>
@@ -692,9 +747,32 @@ export default function VideoManagerClient({
 
                 {/* End Time */}
                 <div className="space-y-2">
-                  <Label>დასრულების დრო</Label>
+                  <Label>დასრულების დრო (საათი:წუთი:წამი)</Label>
                   <div className="flex flex-col items-center gap-3">
                     <div className="flex items-center gap-1">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="23"
+                        value={formData.endTimeHours}
+                        onChange={(e) => {
+                          if (
+                            e.target.value === "" ||
+                            (+e.target.value >= 0 && +e.target.value < 24)
+                          ) {
+                            setFormData((p) => ({
+                              ...p,
+                              endTimeHours: e.target.value,
+                            }));
+                          }
+                        }}
+                        onBlur={(e) => {
+                          if (e.target.value === "")
+                            setFormData((p) => ({ ...p, endTimeHours: "0" }));
+                        }}
+                        className="w-14 text-center"
+                      />
+                      <span className="font-bold">:</span>
                       <Input
                         type="number"
                         min="0"
@@ -742,6 +820,13 @@ export default function VideoManagerClient({
                       />
                     </div>
                     <WheelPickerWrapper>
+                      <WheelPicker
+                        options={hourOptions}
+                        value={formData.endTimeHours}
+                        onValueChange={(val) =>
+                          setFormData((p) => ({ ...p, endTimeHours: val }))
+                        }
+                      />
                       <WheelPicker
                         options={minuteOptions}
                         value={formData.endTimeMinutes}

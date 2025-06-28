@@ -11,7 +11,7 @@ import { toast } from "sonner";
 type VideoCardVariant = "vertical-overlay" | "horizontal-card";
 type VideoType = "roasts" | "promises" | "best-moments";
 
-interface VideoCardProps {
+interface UnifiedVideoCardProps {
   video: Video;
   variant?: VideoCardVariant;
   type?: VideoType;
@@ -27,7 +27,7 @@ interface VideoCardProps {
   enableInternalUpvoteHandling?: boolean;
 }
 
-export default function VideoCard({
+export default function UnifiedVideoCard({
   video,
   variant = "vertical-overlay",
   type = "promises",
@@ -38,7 +38,7 @@ export default function VideoCard({
   onVideoStop,
   currentlyPlayingVideo,
   enableInternalUpvoteHandling = false,
-}: VideoCardProps) {
+}: UnifiedVideoCardProps) {
   // State for video playback (vertical-overlay variant)
   const [isPlaying, setIsPlaying] = useState(false);
   const [shouldReset, setShouldReset] = useState(0);
