@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Video } from "../types";
 import VideoCard from "./VideoCard";
-import EnhancedVideoCard from "./EnhancedVideoCard";
 
 interface VideoSliderProps {
   title: string;
@@ -85,13 +84,6 @@ export default function VideoSlider({
     }
   };
 
-  // Determine which card component to use based on video type and time data
-  const shouldUseEnhancedCard = (video: Video) => {
-    // Use enhanced card for non-promises videos (fun, best-moments) that have start/end time
-    if (type === "promises") return false; // 9:16 videos use regular VideoCard
-    return video.startTime !== undefined || video.endTime !== undefined;
-  };
-
   if (videos.length === 0) {
     return (
       <div className="py-8 text-center">
@@ -136,7 +128,7 @@ export default function VideoSlider({
         </div>
       </div>
 
-      {/* Slider */}
+      {/* Slider - Now using ONLY VideoCard for unified play button experience */}
       <div className="embla__fade overflow-hidden" ref={emblaRef}>
         <div className="flex gap-4">
           {videos.map((video) => (
@@ -144,22 +136,13 @@ export default function VideoSlider({
               key={video.id}
               className={`${getCardWidth()} min-w-0 flex-none`}
             >
-              {shouldUseEnhancedCard(video) ? (
-                <EnhancedVideoCard
-                  video={video}
-                  type={type}
-                  userId={userId}
-                  enableInternalUpvoteHandling={true}
-                />
-              ) : (
-                <VideoCard
-                  video={video}
-                  variant="horizontal-card"
-                  type={type}
-                  userId={userId}
-                  enableInternalUpvoteHandling={true}
-                />
-              )}
+              <VideoCard
+                video={video}
+                variant="horizontal-card"
+                type={type}
+                userId={userId}
+                enableInternalUpvoteHandling={true}
+              />
             </div>
           ))}
         </div>

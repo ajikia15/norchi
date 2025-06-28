@@ -403,11 +403,7 @@ export default function VideoManagerClient({
                     </span>
                   </TableCell>
                   <TableCell>
-                    <span
-                      className={`text-sm px-2 py-1 rounded ${getStatusBadgeColor(
-                        video.status
-                      )}`}
-                    >
+                    <span className={`rounded px-2 py-1 text-sm`}>
                       {getStatusLabel(video.status)}
                     </span>
                   </TableCell>
