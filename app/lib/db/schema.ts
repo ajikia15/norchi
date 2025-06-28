@@ -134,6 +134,32 @@ export const savedHotCards = sqliteTable("saved_hot_cards", {
     .notNull(),
 });
 
+export const videos = sqliteTable("videos", {
+  id: text("id").primaryKey(),
+  ytVideoId: text("yt_video_id").notNull(),
+  title: text("title").notNull(),
+  type: text("type").notNull().default("promise"), // 'promise', 'roast', 'livestream', etc.
+  status: text("status").notNull().default("pending"), // 'verified', 'pending'
+  upvoteCount: integer("upvote_count").notNull().default(0),
+  algorithmPoints: integer("algorithm_points").notNull().default(0),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const videoUpvotes = sqliteTable("video_upvotes", {
+  id: text("id").primaryKey(),
+  videoId: text("video_id")
+    .notNull()
+    .references(() => videos.id, { onDelete: "cascade" }),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  createdAt: integer("created_at", { mode: "timestamp" })
+    .$defaultFn(() => /* @__PURE__ */ new Date())
+    .notNull(),
+});
+
+// Keep old tables for backward compatibility during migration
 export const videoPromises = sqliteTable("video_promises", {
   id: text("id").primaryKey(),
   ytVideoId: text("yt_video_id").notNull(),
@@ -159,6 +185,13 @@ export const videoPromiseUpvotes = sqliteTable("video_promise_upvotes", {
 
 export const schema = { user, session, account, verification, savedHotCards };
 
+// New video types
+export type SelectVideo = typeof videos.$inferSelect;
+export type InsertVideo = typeof videos.$inferInsert;
+export type SelectVideoUpvote = typeof videoUpvotes.$inferSelect;
+export type InsertVideoUpvote = typeof videoUpvotes.$inferInsert;
+
+// Legacy video promise types (for backward compatibility)
 export type SelectVideoPromise = typeof videoPromises.$inferSelect;
 export type InsertVideoPromise = typeof videoPromises.$inferInsert;
 export type SelectVideoPromiseUpvote = typeof videoPromiseUpvotes.$inferSelect;

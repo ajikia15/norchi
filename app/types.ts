@@ -134,6 +134,22 @@ export const TOPICAL_TAGS = {
   },
 } as const;
 
+export interface Video {
+  id: string;
+  ytVideoId: string;
+  title: string;
+  type: string; // 'promise', 'roast', 'livestream', etc.
+  status: string; // 'verified', 'pending'
+  upvoteCount: number;
+  algorithmPoints: number;
+  createdAt: string;
+  updatedAt: string;
+  // Computed fields
+  totalUpvotes?: number; // upvoteCount + algorithmPoints
+  hasUpvoted?: boolean; // Current user's upvote status
+}
+
+// Legacy interface for backward compatibility
 export interface VideoPromise {
   id: string;
   ytVideoId: string;
@@ -147,6 +163,31 @@ export interface VideoPromise {
   hasUpvoted?: boolean; // Current user's upvote status
 }
 
+export interface VideosData {
+  videos: Record<string, Video>;
+}
+
+// Centralized pagination types for videos
+export interface VideosPaginationParams {
+  page?: number;
+  limit?: number;
+  type?: string; // Filter by video type
+  status?: string; // Filter by video status
+}
+
+export interface PaginatedVideosResult {
+  videos: Video[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  };
+}
+
+// Legacy interfaces for backward compatibility
 export interface VideoPromisesData {
   videoPromises: Record<string, VideoPromise>;
 }

@@ -65,10 +65,10 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
       isActive: pathname === "/stories",
     },
     {
-      href: "/promises",
-      label: "დაპირებები",
+      href: "/treasury",
+      label: "საუნჯე",
       icon: Video,
-      isActive: pathname === "/promises",
+      isActive: pathname === "/treasury",
     },
   ];
 

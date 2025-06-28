@@ -4,11 +4,11 @@ import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { ArrowUp, Share2 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { VideoPromise } from "@/app/types";
+import { Video } from "@/app/types";
 import { Button } from "@/components/ui/button";
 
 interface VideoCardProps {
-  videoPromise: VideoPromise;
+  videoPromise: Video;
   isUpvoted?: boolean;
   onUpvote?: (videoPromiseId: string) => void;
   onVideoPlay?: (videoPromiseId: string) => void;

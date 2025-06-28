@@ -7,6 +7,9 @@
   PaginatedHotTopicsResult,
   Tag,
   HotcardCategory,
+  Video,
+  VideosPaginationParams,
+  PaginatedVideosResult,
   VideoPromise,
   VideoPromisesData,
   VideoPromisesPaginationParams,
@@ -19,11 +22,13 @@ import {
   tags,
   hotcardCategories,
   savedHotCards,
+  videos,
+  videoUpvotes,
   videoPromises,
   videoPromiseUpvotes,
 } from "./db/schema";
 import { cache } from "react";
-import { eq, count } from "drizzle-orm";
+import { eq, count, and } from "drizzle-orm";
 
 // Cached server-side functions for database operations with React cache
 export const loadStoriesData = cache(async (): Promise<StoriesData> => {
@@ -434,6 +439,215 @@ export const loadVideoPromisesWithUpvoteStatus = cache(
         },
       };
     }
+  }
+);
+
+// NEW VIDEO FUNCTIONS (with type filtering)
+export const loadVideos = cache(
+  async (
+    params: VideosPaginationParams = {}
+  ): Promise<PaginatedVideosResult> => {
+    const { page = 1, limit = 10, type, status } = params;
+    const offset = (page - 1) * limit;
+
+    try {
+      // Build WHERE conditions
+      const whereConditions = [];
+      if (type) {
+        whereConditions.push(eq(videos.type, type));
+      }
+      if (status) {
+        whereConditions.push(eq(videos.status, status));
+      }
+
+      const whereClause =
+        whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+      // Load total count and paginated videos in parallel
+      const [totalCountResult, videosResult] = await Promise.all([
+        whereClause
+          ? db.select({ count: count() }).from(videos).where(whereClause)
+          : db.select({ count: count() }).from(videos),
+        whereClause
+          ? db
+              .select()
+              .from(videos)
+              .where(whereClause)
+              .orderBy(videos.createdAt)
+              .limit(limit)
+              .offset(offset)
+          : db
+              .select()
+              .from(videos)
+              .orderBy(videos.createdAt)
+              .limit(limit)
+              .offset(offset),
+      ]);
+
+      // Transform database results to Video format
+      const videosList: Video[] = videosResult.map((dbVideo) => ({
+        id: dbVideo.id,
+        ytVideoId: dbVideo.ytVideoId,
+        title: dbVideo.title,
+        type: dbVideo.type,
+        status: dbVideo.status,
+        upvoteCount: dbVideo.upvoteCount ?? 0,
+        algorithmPoints: dbVideo.algorithmPoints ?? 0,
+        createdAt: dbVideo.createdAt,
+        updatedAt: dbVideo.updatedAt,
+      }));
+
+      // Calculate pagination metadata
+      const totalItems = totalCountResult[0].count;
+      const totalPages = Math.ceil(totalItems / limit);
+
+      return {
+        videos: videosList,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems,
+          itemsPerPage: limit,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error("Failed to load videos from database:", error);
+      // Return empty result instead of throwing
+      return {
+        videos: [],
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalItems: 0,
+          itemsPerPage: limit,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+    }
+  }
+);
+
+export const loadVideosWithUpvoteStatus = cache(
+  async (
+    params: VideosPaginationParams & { userId?: string } = {}
+  ): Promise<
+    PaginatedVideosResult & { upvotedVideos: Record<string, boolean> }
+  > => {
+    const { page = 1, limit = 10, type, status, userId } = params;
+    const offset = (page - 1) * limit;
+
+    try {
+      // Build WHERE conditions
+      const whereConditions = [];
+      if (type) {
+        whereConditions.push(eq(videos.type, type));
+      }
+      if (status) {
+        whereConditions.push(eq(videos.status, status));
+      }
+
+      const whereClause =
+        whereConditions.length > 0 ? and(...whereConditions) : undefined;
+
+      // Load total count and paginated videos in parallel
+      const [totalCountResult, videosResult] = await Promise.all([
+        whereClause
+          ? db.select({ count: count() }).from(videos).where(whereClause)
+          : db.select({ count: count() }).from(videos),
+        whereClause
+          ? db
+              .select()
+              .from(videos)
+              .where(whereClause)
+              .orderBy(videos.createdAt)
+              .limit(limit)
+              .offset(offset)
+          : db
+              .select()
+              .from(videos)
+              .orderBy(videos.createdAt)
+              .limit(limit)
+              .offset(offset),
+      ]);
+
+      // If userId provided, load upvoted status for all videos to prevent N+1 queries
+      const upvotedVideosMap: Record<string, boolean> = {};
+      if (userId) {
+        const upvotedVideosResult = await db
+          .select({ videoId: videoUpvotes.videoId })
+          .from(videoUpvotes)
+          .where(eq(videoUpvotes.userId, userId));
+
+        upvotedVideosResult.forEach((upvoted) => {
+          upvotedVideosMap[upvoted.videoId] = true;
+        });
+      }
+
+      // Transform database results to Video format
+      const videosList: Video[] = videosResult.map((dbVideo) => ({
+        id: dbVideo.id,
+        ytVideoId: dbVideo.ytVideoId,
+        title: dbVideo.title,
+        type: dbVideo.type,
+        status: dbVideo.status,
+        upvoteCount: dbVideo.upvoteCount ?? 0,
+        algorithmPoints: dbVideo.algorithmPoints ?? 0,
+        createdAt: dbVideo.createdAt,
+        updatedAt: dbVideo.updatedAt,
+      }));
+
+      // Calculate pagination metadata
+      const totalItems = totalCountResult[0].count;
+      const totalPages = Math.ceil(totalItems / limit);
+
+      return {
+        videos: videosList,
+        upvotedVideos: upvotedVideosMap,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalItems,
+          itemsPerPage: limit,
+          hasNextPage: page < totalPages,
+          hasPreviousPage: page > 1,
+        },
+      };
+    } catch (error) {
+      console.error(
+        "Failed to load videos with upvote status from database:",
+        error
+      );
+      // Return empty result instead of throwing
+      return {
+        videos: [],
+        upvotedVideos: {},
+        pagination: {
+          currentPage: 1,
+          totalPages: 0,
+          totalItems: 0,
+          itemsPerPage: limit,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+    }
+  }
+);
+
+// Optimized function specifically for promises page (only type = 'promise')
+export const loadPromiseVideosWithUpvoteStatus = cache(
+  async (
+    params: VideosPaginationParams & { userId?: string } = {}
+  ): Promise<
+    PaginatedVideosResult & { upvotedVideos: Record<string, boolean> }
+  > => {
+    return loadVideosWithUpvoteStatus({
+      ...params,
+      type: "promise", // Force filter to only promise type videos
+    });
   }
 );
 

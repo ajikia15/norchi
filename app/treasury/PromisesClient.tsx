@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { VideoPromise } from "../types";
+import { Video } from "../types";
 import VideoCard from "./VideoCard";
 import { toggleVideoPromiseUpvote } from "../lib/actions";
 import { toast } from "sonner";
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/pagination";
 
 interface PromisesClientProps {
-  videoPromises: VideoPromise[];
+  videoPromises: Video[];
   upvotedPromises: Record<string, boolean>;
   userId?: string;
   pagination: {
