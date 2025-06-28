@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { PlayCircle, AlertCircle } from "lucide-react";
+import { PlayCircle, AlertCircle, Radio } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface LiveStreamStatus {
@@ -324,42 +324,28 @@ export default function LiveSection() {
       </div>
 
       {/* Right: Info Panel */}
-      <div className="h-full">
-        {streamStatus.isLive && !iframeError ? (
-          // LIVE STATE DESIGN
-          <div className="relative flex h-full flex-col rounded-2xl border border-green-700 bg-green-600 p-8 text-center text-white shadow-xl">
-            <div className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full bg-red-500 px-3 py-1 text-sm font-semibold text-white">
-              <div className="h-2 w-2 animate-pulse rounded-full bg-white" />
+      <div className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-xl">
+        <h2 className="text-3xl font-bold text-gray-800">
+          Your party isn&apos;t talking to you?
+        </h2>
+        <p className="mt-2 text-xl font-semibold text-green-600">
+          Girchi will talk to you.
+        </p>
+
+        {/* This is the section that will change */}
+        <div className="my-8 flex flex-grow flex-col items-center justify-center rounded-lg bg-gray-50 p-6">
+          {streamStatus.isLive && !iframeError ? (
+            // LIVE STATE: Big rounded button
+            <Button
+              size="lg"
+              className="flex h-28 w-28 flex-col items-center rounded-full bg-red-500 text-2xl font-bold text-white shadow-lg hover:bg-red-600"
+            >
+              <Radio className="mb-1 h-10 w-10 animate-pulse" />
               <span>LIVE</span>
-            </div>
-            <h2 className="text-3xl font-bold">We&apos;re Live Now!</h2>
-            <p className="mt-2 text-xl font-semibold text-green-100">
-              Your party isn&apos;t talking to you? Girchi will.
-            </p>
-            <div className="my-8 flex flex-grow flex-col items-center justify-center">
-              <p className="text-2xl font-semibold tracking-wide">CALL US!</p>
-              <div className="mt-4 rounded-lg bg-white px-8 py-4 font-mono text-4xl text-green-700 shadow-inner">
-                📞 598 36 36 36
-              </div>
-            </div>
-            <div className="mt-auto">
-              <p className="text-lg text-green-200">
-                {streamStatus.viewerCount
-                  ? `${streamStatus.viewerCount.toLocaleString()} people are watching`
-                  : "Join the conversation"}
-              </p>
-            </div>
-          </div>
-        ) : (
-          // OFFLINE STATE DESIGN
-          <div className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-xl">
-            <h2 className="text-3xl font-bold text-gray-800">
-              Your party isn&apos;t talking to you?
-            </h2>
-            <p className="mt-2 text-xl font-semibold text-green-600">
-              Girchi will talk to you.
-            </p>
-            <div className="my-8 flex flex-grow flex-col items-center justify-center rounded-lg bg-gray-50 p-6">
+            </Button>
+          ) : (
+            // OFFLINE STATE: Countdown timer
+            <>
               <p className="font-semibold uppercase tracking-wide text-gray-600">
                 Don&apos;t Miss Our Next Live
               </p>
@@ -379,17 +365,20 @@ export default function LiveSection() {
               <p className="mt-2 text-sm text-gray-500">
                 Every day at 10 AM & 8 PM
               </p>
-            </div>
-            <div className="mt-auto">
-              <p className="text-gray-600">
-                Get your questions ready. Call us live:
-              </p>
-              <div className="mt-2 inline-block rounded-lg border-2 border-dashed border-green-200 bg-green-100 px-6 py-3 font-mono text-2xl text-green-800">
-                📞 598 36 36 36
-              </div>
-            </div>
+            </>
+          )}
+        </div>
+
+        <div className="mt-auto">
+          <p className="text-gray-600">
+            {streamStatus.isLive && !iframeError
+              ? "Get your questions answered now. Call us live:"
+              : "Get your questions ready. Call us live:"}
+          </p>
+          <div className="mt-2 inline-block rounded-lg border-2 border-dashed border-green-200 bg-green-100 px-6 py-3 font-mono text-2xl text-green-800">
+            📞 598 36 36 36
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
