@@ -96,7 +96,7 @@ export default function VideoSlider({
     <div className="space-y-6">
       {/* Section Header */}
       <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold text-green-600">{title}</h3>
+        <h3 className="text-2xl font-bold">{title}</h3>
         <div className="flex items-center gap-2">
           <div className="flex gap-2">
             <Button

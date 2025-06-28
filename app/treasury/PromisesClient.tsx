@@ -35,11 +35,6 @@ export default function PromisesClient({
   userId,
   pagination,
 }: PromisesClientProps) {
-  // State for tracking which videos are playing
-  const [currentlyPlayingVideo, setCurrentlyPlayingVideo] = useState<
-    string | null
-  >(null);
-
   // Initialize local state for upvotes and counts - these should reset on each page
   const [localUpvotes, setLocalUpvotes] =
     useState<Record<string, boolean>>(upvotedPromises);
@@ -50,18 +45,6 @@ export default function PromisesClient({
     });
     return counts;
   });
-
-  // Handler for when a video starts playing
-  const handleVideoPlay = (videoPromiseId: string) => {
-    setCurrentlyPlayingVideo(videoPromiseId);
-  };
-
-  // Handler for when a video stops playing
-  const handleVideoStop = (videoPromiseId: string) => {
-    if (currentlyPlayingVideo === videoPromiseId) {
-      setCurrentlyPlayingVideo(null);
-    }
-  };
 
   const handleUpvote = async (videoPromiseId: string) => {
     if (!userId) {
@@ -214,7 +197,7 @@ export default function PromisesClient({
     <>
       {videoPromises.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {videoPromises.map((videoPromise) => {
               // Create enhanced video promise with local state
               const enhancedVideoPromise = {
@@ -227,12 +210,11 @@ export default function PromisesClient({
                 <VideoCard
                   key={videoPromise.id}
                   video={enhancedVideoPromise}
-                  variant="vertical-overlay"
+                  variant="vertical-card"
+                  type="promises"
                   isUpvoted={localUpvotes[videoPromise.id] || false}
+                  userId={userId}
                   onUpvote={userId ? handleUpvote : undefined}
-                  onVideoPlay={handleVideoPlay}
-                  onVideoStop={handleVideoStop}
-                  currentlyPlayingVideo={currentlyPlayingVideo}
                 />
               );
             })}
@@ -272,8 +254,8 @@ export default function PromisesClient({
           )}
         </>
       ) : (
-        <div className="text-center py-12">
-          <p className="text-gray-500 text-lg">
+        <div className="py-12 text-center">
+          <p className="text-lg text-gray-500">
             ვიდეო დაპირებები ჯერ არ არის ატვირთული.
           </p>
         </div>
