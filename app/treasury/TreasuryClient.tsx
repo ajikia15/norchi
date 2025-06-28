@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Video } from "../types";
-import LiveSection from "./LiveSection";
+// import LiveSection from "./LiveSection"; // Temporarily disabled
 import VideoSlider from "./VideoSlider";
 
 interface TreasuryClientProps {
@@ -40,14 +40,14 @@ export default function TreasuryClient({
         </p>
       </motion.div>
 
-      {/* Live Section */}
-      <motion.section
+      {/* Live Section - Temporarily disabled */}
+      {/* <motion.section
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <LiveSection />
-      </motion.section>
+      </motion.section> */}
 
       {/* Roasts Section */}
       <motion.section
@@ -86,7 +86,7 @@ export default function TreasuryClient({
         transition={{ delay: 0.5, duration: 0.5 }}
       >
         <VideoSlider
-          title="Best Moments"
+          title="🔥გულის ჯიბით სატარებელი"
           videos={bestMoments}
           type="best-moments"
           userId={userId}
