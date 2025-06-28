@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import { ArrowUp, Share2 } from "lucide-react";
+import { ArrowUp, Share2, Play } from "lucide-react";
 import { Video } from "@/app/types";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -187,16 +187,8 @@ export default function VideoCard({
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/30">
-              <div className="rounded-full bg-red-600 p-4 transition-colors hover:bg-red-700">
-                <svg
-                  className="ml-1 h-8 w-8 text-white"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Play className="h-10 w-10 text-gray-100 opacity-80" />
             </div>
           </div>
         ) : (
