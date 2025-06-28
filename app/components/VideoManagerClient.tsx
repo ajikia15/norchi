@@ -89,9 +89,10 @@ interface VideoManagerClientProps {
 
 const VIDEO_TYPES = [
   { value: "promise", label: "დაპირება" },
-  { value: "roast", label: "როასტი" },
+  { value: "roast", label: "კ" },
   { value: "livestream", label: "ლაივსტრიმი" },
   { value: "best-moment", label: "საუკეთესო მომენტი" },
+  { value: "other", label: "სხვა" },
 ];
 
 const VIDEO_STATUSES = [
@@ -331,22 +332,11 @@ export default function VideoManagerClient({
     return VIDEO_STATUSES.find((s) => s.value === status)?.label || status;
   };
 
-  const getStatusBadgeColor = (status: string) => {
-    switch (status) {
-      case "verified":
-        return "text-green-600 bg-green-50";
-      case "pending":
-        return "text-yellow-600 bg-yellow-50";
-      default:
-        return "text-gray-600 bg-gray-50";
-    }
-  };
-
   if (videos.length === 0 && !isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex justify-between items-center">
+          <CardTitle className="flex items-center justify-between">
             ვიდეოების მართვა
             <Button onClick={() => setIsCreateDialogOpen(true)}>
               <Plus className="h-4 w-4" />
@@ -355,7 +345,7 @@ export default function VideoManagerClient({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
+          <div className="py-8 text-center">
             <p className="text-gray-500">ვიდეოები არ მოიძებნა.</p>
           </div>
         </CardContent>
@@ -369,7 +359,7 @@ export default function VideoManagerClient({
         <CardTitle>ვიდეოების მართვა</CardTitle>
       </CardHeader>
       <CardContent className="px-6">
-        <div className="flex justify-between mb-4">
+        <div className="mb-4 flex justify-between">
           <div className="text-sm text-gray-600">
             სულ: {pagination.totalItems} ვიდეო
           </div>
@@ -397,7 +387,7 @@ export default function VideoManagerClient({
             {isLoading ? (
               <TableRow>
                 <TableCell colSpan={9} className="text-center">
-                  <Loader2 className="h-6 w-6 animate-spin inline-block" />
+                  <Loader2 className="inline-block h-6 w-6 animate-spin" />
                 </TableCell>
               </TableRow>
             ) : videos.length > 0 ? (
@@ -408,7 +398,7 @@ export default function VideoManagerClient({
                     {video.ytVideoId}
                   </TableCell>
                   <TableCell>
-                    <span className="text-sm px-2 py-1 rounded bg-blue-50 text-blue-600">
+                    <span className="rounded bg-blue-50 px-2 py-1 text-sm text-blue-600">
                       {getTypeLabel(video.type)}
                     </span>
                   </TableCell>
@@ -437,7 +427,7 @@ export default function VideoManagerClient({
                               value: e.target.value,
                             })
                           }
-                          className="w-20 h-8 text-sm"
+                          className="h-8 w-20 text-sm"
                         />
                         <Button
                           size="icon"
@@ -458,7 +448,7 @@ export default function VideoManagerClient({
                       </div>
                     ) : (
                       <button
-                        className="text-blue-600 hover:underline cursor-pointer"
+                        className="cursor-pointer text-blue-600 hover:underline"
                         onClick={() => handleAlgorithmPointsEdit(video)}
                         disabled={isLoading}
                       >
@@ -513,7 +503,7 @@ export default function VideoManagerClient({
 
         {/* Pagination */}
         {pagination.totalPages > 1 && (
-          <div className="flex justify-center mt-6">
+          <div className="mt-6 flex justify-center">
             <Pagination>
               <PaginationContent>
                 {pagination.hasPreviousPage && (
@@ -635,7 +625,7 @@ export default function VideoManagerClient({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+              <div className="mt-4 grid grid-cols-1 gap-6 md:grid-cols-2">
                 {/* Start Time */}
                 <div className="space-y-2">
                   <Label>დაწყების დრო (საათი:წუთი:წამი)</Label>
@@ -849,7 +839,7 @@ export default function VideoManagerClient({
               {formData.ytVideoId && (
                 <div className="space-y-2">
                   <Label>ვიდეოს ბმული:</Label>
-                  <p className="text-sm font-mono break-all bg-gray-100 p-2 rounded">
+                  <p className="break-all rounded bg-gray-100 p-2 font-mono text-sm">
                     {getYouTubeUrl(formData.ytVideoId)}
                   </p>
                 </div>
@@ -873,7 +863,7 @@ export default function VideoManagerClient({
                 }
               >
                 {isSubmitting && (
-                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 )}
                 {editingVideo ? "განახლება" : "შექმნა"}
               </Button>

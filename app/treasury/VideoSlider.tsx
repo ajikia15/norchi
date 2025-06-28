@@ -11,7 +11,7 @@ import EnhancedVideoCard from "./EnhancedVideoCard";
 interface VideoSliderProps {
   title: string;
   videos: Video[];
-  type: "roasts" | "promises" | "best-moments";
+  type: "fun" | "promises" | "best-moments";
   userId?: string;
   viewAllHref: string;
 }
@@ -77,7 +77,7 @@ export default function VideoSlider({
     switch (type) {
       case "promises":
         return "basis-[200px] md:basis-[220px] lg:basis-[240px]";
-      case "roasts":
+      case "fun":
       case "best-moments":
         return "basis-[280px] md:basis-[300px] lg:basis-[320px]";
       default:
@@ -87,7 +87,7 @@ export default function VideoSlider({
 
   // Determine which card component to use based on video type and time data
   const shouldUseEnhancedCard = (video: Video) => {
-    // Use enhanced card for non-promises videos (roasts, best-moments) that have start/end time
+    // Use enhanced card for non-promises videos (fun, best-moments) that have start/end time
     if (type === "promises") return false; // 9:16 videos use regular VideoCard
     return video.startTime !== undefined || video.endTime !== undefined;
   };

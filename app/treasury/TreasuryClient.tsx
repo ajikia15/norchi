@@ -6,14 +6,14 @@ import { Video } from "../types";
 import VideoSlider from "./VideoSlider";
 
 interface TreasuryClientProps {
-  roasts: Video[];
+  fun: Video[];
   promises: Video[];
   bestMoments: Video[];
   userId?: string;
 }
 
 export default function TreasuryClient({
-  roasts,
+  // fun,
   promises,
   bestMoments,
   userId,
@@ -32,12 +32,8 @@ export default function TreasuryClient({
         transition={{ delay: 0.1, duration: 0.5 }}
         className="text-center"
       >
-        <h1 className="mb-2 text-4xl font-bold text-gray-900">
-          Treasury - თეზავრე
-        </h1>
-        <p className="text-lg text-gray-600">
-          Live streams, roasts, promises, and best moments collection
-        </p>
+        <h1 className="mb-2 text-4xl font-bold text-gray-900">საუნჯე</h1>
+        <p className="text-lg text-gray-600">ხალხის რჩეული ვიდეო რგოლები</p>
       </motion.div>
 
       {/* Live Section - Temporarily disabled */}
@@ -49,20 +45,20 @@ export default function TreasuryClient({
         <LiveSection />
       </motion.section> */}
 
-      {/* Roasts Section */}
-      <motion.section
+      {/* fun Section */}
+      {/* <motion.section
         initial={{ y: 40, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
       >
         <VideoSlider
-          title="Roasts"
-          videos={roasts}
-          type="roasts"
+          title="fun"
+          videos={fun}
+          type="fun"
           userId={userId}
-          viewAllHref="/treasury/roasts"
+          viewAllHref="/treasury/fun"
         />
-      </motion.section>
+      </motion.section> */}
 
       {/* Promises Section */}
       <motion.section

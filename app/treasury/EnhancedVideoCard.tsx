@@ -9,7 +9,7 @@ import { Video } from "@/app/types";
 
 interface EnhancedVideoCardProps {
   video: Video;
-  type: "roasts" | "promises" | "best-moments";
+  type: "fun" | "promises" | "best-moments";
   userId?: string;
   enableInternalUpvoteHandling?: boolean;
 }
@@ -35,7 +35,7 @@ export default function EnhancedVideoCard({
   // Type-specific configurations
   const getTypeConfig = () => {
     const configs = {
-      roasts: {
+      fun: {
         aspectRatio: "aspect-[4/3]",
         aspectWidth: 4,
         aspectHeight: 3,
@@ -228,11 +228,23 @@ export default function EnhancedVideoCard({
         {config.needsTimeControl && (video.startTime || video.endTime) && (
           <div className="text-xs text-gray-500 mb-2">
             {video.startTime && (
-              <span>Start: {Math.floor(video.startTime / 3600)}:{Math.floor((video.startTime % 3600) / 60).toString().padStart(2, '0')}:{(video.startTime % 60).toString().padStart(2, '0')}</span>
+              <span>
+                Start: {Math.floor(video.startTime / 3600)}:
+                {Math.floor((video.startTime % 3600) / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :{(video.startTime % 60).toString().padStart(2, "0")}
+              </span>
             )}
             {video.startTime && video.endTime && <span> • </span>}
             {video.endTime && (
-              <span>End: {Math.floor(video.endTime / 3600)}:{Math.floor((video.endTime % 3600) / 60).toString().padStart(2, '0')}:{(video.endTime % 60).toString().padStart(2, '0')}</span>
+              <span>
+                End: {Math.floor(video.endTime / 3600)}:
+                {Math.floor((video.endTime % 3600) / 60)
+                  .toString()
+                  .padStart(2, "0")}
+                :{(video.endTime % 60).toString().padStart(2, "0")}
+              </span>
             )}
           </div>
         )}

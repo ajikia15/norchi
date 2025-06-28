@@ -19,34 +19,32 @@ export default async function TreasuryPage({
     }
 
     // Load different types of videos for Treasury sections
-    const [roastsResult, promisesResult, bestMomentsResult] = await Promise.all(
-      [
-        loadVideosWithUpvoteStatus({
-          page: 1,
-          limit: 6,
-          userId: user?.id,
-          type: "roast",
-        }),
-        loadVideosWithUpvoteStatus({
-          page: 1,
-          limit: 6,
-          userId: user?.id,
-          type: "promise",
-        }),
-        loadVideosWithUpvoteStatus({
-          page: 1,
-          limit: 6,
-          userId: user?.id,
-          type: "best-moment",
-        }),
-      ]
-    );
+    const [funResult, promisesResult, bestMomentsResult] = await Promise.all([
+      loadVideosWithUpvoteStatus({
+        page: 1,
+        limit: 6,
+        userId: user?.id,
+        type: "roast",
+      }),
+      loadVideosWithUpvoteStatus({
+        page: 1,
+        limit: 6,
+        userId: user?.id,
+        type: "promise",
+      }),
+      loadVideosWithUpvoteStatus({
+        page: 1,
+        limit: 6,
+        userId: user?.id,
+        type: "best-moment",
+      }),
+    ]);
 
     return (
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto px-4 py-8">
           <TreasuryClient
-            roasts={roastsResult.videos}
+            fun={funResult.videos}
             promises={promisesResult.videos}
             bestMoments={bestMomentsResult.videos}
             userId={user?.id}

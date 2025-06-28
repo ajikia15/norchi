@@ -28,7 +28,7 @@ import {
   videoPromiseUpvotes,
 } from "./db/schema";
 import { cache } from "react";
-import { eq, count, and } from "drizzle-orm";
+import { eq, count, and, desc, sql } from "drizzle-orm";
 
 // Cached server-side functions for database operations with React cache
 export const loadStoriesData = cache(async (): Promise<StoriesData> => {
@@ -473,13 +473,13 @@ export const loadVideos = cache(
               .select()
               .from(videos)
               .where(whereClause)
-              .orderBy(videos.createdAt)
+              .orderBy(desc(sql`${videos.upvoteCount} + ${videos.algorithmPoints}`))
               .limit(limit)
               .offset(offset)
           : db
               .select()
               .from(videos)
-              .orderBy(videos.createdAt)
+              .orderBy(desc(sql`${videos.upvoteCount} + ${videos.algorithmPoints}`))
               .limit(limit)
               .offset(offset),
       ]);
@@ -564,13 +564,13 @@ export const loadVideosWithUpvoteStatus = cache(
               .select()
               .from(videos)
               .where(whereClause)
-              .orderBy(videos.createdAt)
+              .orderBy(desc(sql`${videos.upvoteCount} + ${videos.algorithmPoints}`))
               .limit(limit)
               .offset(offset)
           : db
               .select()
               .from(videos)
-              .orderBy(videos.createdAt)
+              .orderBy(desc(sql`${videos.upvoteCount} + ${videos.algorithmPoints}`))
               .limit(limit)
               .offset(offset),
       ]);
