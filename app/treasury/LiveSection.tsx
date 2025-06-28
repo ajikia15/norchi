@@ -335,14 +335,11 @@ export default function LiveSection() {
         {/* This is the section that will change */}
         <div className="my-8 flex flex-grow flex-col items-center justify-center rounded-lg bg-gray-50 p-6">
           {streamStatus.isLive && !iframeError ? (
-            // LIVE STATE: Big rounded button
-            <Button
-              size="lg"
-              className="flex h-28 w-28 flex-col items-center rounded-full bg-red-500 text-2xl font-bold text-white shadow-lg hover:bg-red-600"
-            >
-              <Radio className="mb-1 h-10 w-10 animate-pulse" />
+            // LIVE STATE: Big badge
+            <div className="inline-flex items-center justify-center gap-4 rounded-full bg-red-500 px-12 py-6 text-2xl font-bold text-white shadow-lg">
+              <Radio className="h-10 w-10 animate-pulse" />
               <span>LIVE</span>
-            </Button>
+            </div>
           ) : (
             // OFFLINE STATE: Countdown timer
             <>
@@ -363,7 +360,7 @@ export default function LiveSection() {
                 </div>
               </div>
               <p className="mt-2 text-sm text-gray-500">
-                Every day at 10 AM & 8 PM
+                ყოველ სამუშაო დღეს - დილას 10:00-ზე და საღამოს 20:00-ზე
               </p>
             </>
           )}
