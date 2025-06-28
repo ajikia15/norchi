@@ -326,10 +326,10 @@ export default function LiveSection() {
       {/* Right: Info Panel */}
       <div className="flex h-full flex-col rounded-2xl border border-gray-100 bg-white p-8 text-center shadow-xl">
         <h2 className="text-3xl font-bold text-gray-800">
-          Your party isn&apos;t talking to you?
+          არ გელაპარაკება შენი პარტია?
         </h2>
         <p className="mt-2 text-xl font-semibold text-green-600">
-          Girchi will talk to you.
+          გირჩი დაგელაპარაკება.
         </p>
 
         {/* This is the section that will change */}
