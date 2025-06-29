@@ -39,17 +39,14 @@ export default function VideoCard({
     const configs = {
       fun: {
         aspectRatio: "aspect-[16/9]",
-        bgColor: "bg-white",
         needsTimeControl: true,
       },
       promises: {
         aspectRatio: "aspect-[9/16]",
-        bgColor: "bg-white",
         needsTimeControl: false,
       },
       "best-moments": {
         aspectRatio: "aspect-[16/9]",
-        bgColor: "bg-green-50",
         needsTimeControl: true,
       },
     };
@@ -171,7 +168,7 @@ export default function VideoCard({
 
   return (
     <div
-      className={`relative flex h-full flex-col overflow-hidden rounded-xl shadow-sm ${config.bgColor}`}
+      className={`relative flex h-full flex-col overflow-hidden rounded-xl shadow-sm`}
     >
       <div className={`relative ${getAspectRatio()}`}>
         {showPoster ? (
