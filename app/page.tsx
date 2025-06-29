@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Settings, BookOpen, Calendar } from "lucide-react";
 import Link from "next/link";
-import HotQuestionsClientSection from "./components/HotQuestionsClientSection";
+import HeroSection from "./components/HeroSection";
 import StoriesGridSkeleton from "./components/StoriesGridSkeleton";
+import HotQuestionsClientSection from "./components/HotQuestionsClientSection";
 
 // Add static generation to reduce server CPU
 export const revalidate = 1800; // Revalidate every 30 minutes
@@ -129,34 +130,39 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
-      {/* Hot Questions Section - now with only 8 topics */}
-      <HotQuestionsClientSection topics={topics} user={user} />
+      <HeroSection />
 
-      {/* Stories section */}
-      <div className="border-b border-gray-200/30 bg-white/60 backdrop-blur-sm">
-        <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="text-center">
-            <h1 className="mb-4 text-5xl font-bold tracking-tight text-gray-900">
-              რაში არ ეთანხმები გირჩს?
-            </h1>
-            <p className="mx-auto max-w-2xl text-lg text-gray-600">
-              გირჩის საზოგადოებაში აზრთა სხვადასხვაობა ბუნებრივია — ლიდერებიც კი
-              ყველაფერზე არ თანხმდებიან. მაგრამ ვცხოვრობთ ერთად, რადგან მთავარში
-              ვთანხმდებით. რაც არ უნდა გეზიზღებოდეთ, დარწმუნებულები ვართ, რომ
-              რაღაცაში დაგვეთანხმები. სცადე გზები, რომელიც ბევრმა გირჩელმა
-              გაიარა.
-            </p>
-          </div>
-        </div>
+      <div id="hot-questions">
+        <HotQuestionsClientSection topics={topics} user={user} />
       </div>
 
-      {/* Story Grid - now with pre-loaded data */}
-      <div className="mx-auto max-w-7xl px-6 py-12">
-        <Suspense
-          fallback={<StoriesGridSkeleton cardsCount={stories.length} />}
-        >
-          <StoriesGrid stories={stories} />
-        </Suspense>
+      {/* Stories section */}
+      <div id="stories">
+        <div className="border-b border-gray-200/30 bg-white/60 backdrop-blur-sm">
+          <div className="mx-auto max-w-7xl px-6 py-12">
+            <div className="text-center">
+              <h1 className="mb-4 text-5xl font-bold tracking-tight text-gray-900">
+                რაში არ ეთანხმები გირჩს?
+              </h1>
+              <p className="mx-auto max-w-2xl text-lg text-gray-600">
+                გირჩის საზოგადოებაში აზრთა სხვადასხვაობა ბუნებრივია — ლიდერებიც
+                კი ყველაფერზე არ თანხმდებიან. მაგრამ ვცხოვრობთ ერთად, რადგან
+                მთავარში ვთანხმდებით. რაც არ უნდა გეზიზღებოდეთ, დარწმუნებულები
+                ვართ, რომ რაღაცაში დაგვეთანხმები. სცადე გზები, რომელიც ბევრმა
+                გირჩელმა გაიარა.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Story Grid - now with pre-loaded data */}
+        <div className="mx-auto max-w-7xl px-6 py-12">
+          <Suspense
+            fallback={<StoriesGridSkeleton cardsCount={stories.length} />}
+          >
+            <StoriesGrid stories={stories} />
+          </Suspense>
+        </div>
       </div>
     </div>
   );
