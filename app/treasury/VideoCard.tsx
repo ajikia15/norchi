@@ -38,7 +38,7 @@ export default function VideoCard({
   const getTypeConfig = () => {
     const configs = {
       fun: {
-        aspectRatio: "aspect-[4/3]",
+        aspectRatio: "aspect-[16/9]",
         bgColor: "bg-white",
         needsTimeControl: true,
       },
@@ -48,7 +48,7 @@ export default function VideoCard({
         needsTimeControl: false,
       },
       "best-moments": {
-        aspectRatio: "aspect-[4/3]",
+        aspectRatio: "aspect-[16/9]",
         bgColor: "bg-green-50",
         needsTimeControl: true,
       },

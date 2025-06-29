@@ -9,8 +9,9 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["var(--font-outfit)", "ui-sans-serif", "system-ui"],
-        firago: ["var(--font-firago)", "sans-serif"],
+        sans: ["var(--font-contractica)", "ui-sans-serif", "system-ui"],
+        contractica: ["var(--font-contractica)", "sans-serif"],
+        "contractica-caps": ["var(--font-contractica-caps)", "sans-serif"],
       },
     },
   },
