@@ -1,10 +1,16 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ArrowUp, Share2, Play } from "lucide-react";
 import { Video } from "@/app/types";
 import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 
 interface VideoCardProps {
@@ -33,6 +39,17 @@ export default function VideoCard({
   const [localUpvoteCount, setLocalUpvoteCount] = useState(
     video.upvoteCount + video.algorithmPoints
   );
+  const [isTooltipOpen, setIsTooltipOpen] = useState(false);
+  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    // Clear the timeout when the component unmounts
+    return () => {
+      if (tooltipTimeoutRef.current) {
+        clearTimeout(tooltipTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Type-specific configurations (merged from EnhancedVideoCard)
   const getTypeConfig = () => {
@@ -155,7 +172,8 @@ export default function VideoCard({
     }
   };
 
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     try {
       await navigator.clipboard.writeText(
         `https://www.youtube.com/watch?v=${video.ytVideoId}`
@@ -166,17 +184,29 @@ export default function VideoCard({
     }
   };
 
+  const handleUpvoteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    handleUpvote();
+
+    // Show tooltip for 1.5s to confirm action
+    setIsTooltipOpen(true);
+    if (tooltipTimeoutRef.current) {
+      clearTimeout(tooltipTimeoutRef.current);
+    }
+    tooltipTimeoutRef.current = setTimeout(() => {
+      setIsTooltipOpen(false);
+    }, 1500);
+  };
+
   return (
     <div
-      className={`relative flex h-full flex-col overflow-hidden rounded-xl shadow-sm`}
+      className={`relative overflow-hidden rounded-xl shadow-lg ${getAspectRatio()}`}
+      onClick={handlePosterClick}
     >
-      <div className={`relative ${getAspectRatio()}`}>
+      {/* Video/Thumbnail Container */}
+      <div className="h-full w-full">
         {showPoster ? (
-          // Show poster image with UNIFIED custom play button
-          <div
-            className="group relative h-full w-full cursor-pointer"
-            onClick={handlePosterClick}
-          >
+          <div className="group relative h-full w-full cursor-pointer">
             <Image
               src={getPosterUrl()}
               alt={video.title}
@@ -184,8 +214,8 @@ export default function VideoCard({
               fill
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <Play className="h-10 w-10 text-gray-100 opacity-80" />
+            <div className="absolute inset-0 flex items-center justify-center bg-black/10 transition-colors group-hover:bg-black/20">
+              <Play className="h-12 w-12 text-white drop-shadow-lg" />
             </div>
           </div>
         ) : (
@@ -200,72 +230,74 @@ export default function VideoCard({
           />
         )}
       </div>
-      <div className="flex flex-1 flex-col p-4">
-        <h4 className="mb-3 h-12 overflow-hidden font-medium leading-snug text-gray-900">
-          {video.title}
-        </h4>
 
-        {/* Show time info for time-controlled videos (merged from EnhancedVideoCard) */}
-        {config.needsTimeControl && (video.startTime || video.endTime) && (
-          <div className="mb-2 text-xs text-gray-500">
-            {video.startTime && (
-              <span>
-                Start: {Math.floor(video.startTime / 3600)}:
-                {Math.floor((video.startTime % 3600) / 60)
-                  .toString()
-                  .padStart(2, "0")}
-                :{(video.startTime % 60).toString().padStart(2, "0")}
-              </span>
+      {/* Information Overlay - Only shows when poster is visible */}
+      {showPoster && (
+        <div className="absolute inset-x-0 bottom-0 flex items-end justify-between gap-4 bg-gradient-to-t from-black/80 to-transparent p-3 text-white">
+          {/* Left side: Title and time */}
+          <div className="min-w-0 flex-1">
+            {config.needsTimeControl && (video.startTime || video.endTime) && (
+              <div className="mb-1 text-xs text-gray-300">
+                {video.startTime && (
+                  <span>
+                    {Math.floor(video.startTime / 60)}:
+                    {(video.startTime % 60).toString().padStart(2, "0")}
+                  </span>
+                )}
+                {video.startTime && video.endTime && <span> - </span>}
+                {video.endTime && (
+                  <span>
+                    {Math.floor(video.endTime / 60)}:
+                    {(video.endTime % 60).toString().padStart(2, "0")}
+                  </span>
+                )}
+              </div>
             )}
-            {video.startTime && video.endTime && <span> • </span>}
-            {video.endTime && (
-              <span>
-                End: {Math.floor(video.endTime / 3600)}:
-                {Math.floor((video.endTime % 3600) / 60)
-                  .toString()
-                  .padStart(2, "0")}
-                :{(video.endTime % 60).toString().padStart(2, "0")}
-              </span>
+            {type !== "promises" && (
+              <div
+                className="font-semibold leading-tight [-webkit-box-orient:vertical] [-webkit-line-clamp:2] [display:-webkit-box] [overflow:hidden]"
+                title={video.title}
+              >
+                {video.title}
+              </div>
             )}
           </div>
-        )}
 
-        <div className="mt-auto flex items-center justify-between gap-2">
-          <button
-            className="group flex h-8 flex-row-reverse items-center justify-end gap-x-2 overflow-hidden rounded-lg bg-gray-100 pl-2 transition-all duration-300 hover:bg-gray-200 hover:pr-2"
-            onClick={handleUpvote}
-          >
-            <span
-              className={`mr-0 text-sm text-gray-900 whitespace-nowrap overflow-hidden transition-all duration-300 ${
-                localIsUpvoted
-                  ? "max-w-[120px] opacity-100 pr-2"
-                  : "max-w-0 opacity-0 group-hover:max-w-[120px] group-hover:opacity-100"
-              }`}
-              style={{ transitionProperty: "max-width, opacity" }}
+          {/* Right side: Actions */}
+          <div className="flex flex-shrink-0 items-center gap-2">
+            <TooltipProvider>
+              <Tooltip open={isTooltipOpen} onOpenChange={setIsTooltipOpen}>
+                <TooltipTrigger asChild>
+                  <button
+                    className="group flex h-9 items-center justify-center rounded-full bg-white/20 px-3 transition-all duration-300 hover:bg-white/30"
+                    onClick={handleUpvoteClick}
+                  >
+                    <ArrowUp
+                      className={`h-5 w-5 shrink-0 transition-all duration-200 ${
+                        localIsUpvoted ? "text-green-400" : "text-white"
+                      }`}
+                    />
+                    <span className="min-w-[2ch] pl-1 text-left text-sm font-semibold tabular-nums">
+                      {localUpvoteCount}
+                    </span>
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{localIsUpvoted ? "მეტმა ნახოს!" : "მეტმა ნახოს?"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleShare}
+              className="h-9 w-9 rounded-full bg-white/20 text-white transition-colors hover:bg-white/30"
             >
-              {localIsUpvoted ? "მეტმა ნახოს!" : "მეტმა ნახოს?"}
-            </span>
-            <ArrowUp
-              className={`h-4 w-4 shrink-0 transition-colors duration-200 ${
-                localIsUpvoted
-                  ? "text-green-600"
-                  : "text-gray-700 group-hover:text-gray-900"
-              }`}
-            />
-            <span className="ml-0 text-xs font-medium text-gray-700">
-              {localUpvoteCount}
-            </span>
-          </button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleShare}
-            className="h-8 w-8 text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-          >
-            <Share2 className="h-4 w-4" />
-          </Button>
+              <Share2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
