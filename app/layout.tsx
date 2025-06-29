@@ -1,14 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Outfit } from "next/font/google";
 import "./globals.css";
 import NavbarWrapper from "./components/NavbarWrapper";
-import { contractica, contracticaCaps } from "./lib/fonts";
+import { contractica } from "./lib/fonts";
 import { Toaster } from "@/components/ui/sonner";
-const outfit = Outfit({
-  variable: "--font-outfit",
-  subsets: ["latin"],
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "ნორჩი",
@@ -31,11 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ka">
-      <body
-        className={` ${outfit.variable} ${contractica.variable} ${contracticaCaps.variable} antialiased`}
-      >
+      <body className={`${contractica.className} antialiased`}>
         <NavbarWrapper />
-        <main className="relative font-contractica">{children}</main>
+        <main className="relative">{children}</main>
         <Toaster />
       </body>
     </html>

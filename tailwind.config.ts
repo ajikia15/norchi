@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import plugin from "tailwindcss/plugin";
 
 const config: Config = {
   content: [
@@ -15,7 +16,15 @@ const config: Config = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function ({ addBase, theme }) {
+      addBase({
+        "h1, h2, h3, h4, h5, h6": {
+          fontFamily: theme("fontFamily.contractica-caps"),
+        },
+      });
+    }),
+  ],
 };
 
 export default config;
