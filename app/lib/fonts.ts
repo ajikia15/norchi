@@ -34,5 +34,41 @@ export const contractica = localFont({
     },
   ],
   display: "swap",
-  preload: true,
+});
+
+export const contracticaCaps = localFont({
+  src: [
+    {
+      path: "../fonts/tbccontracticacaps-light-webfont.woff2",
+      weight: "300",
+      style: "normal",
+    },
+    {
+      path: "../fonts/tbccontracticacaps-book-webfont.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/tbccontracticacaps-regular-webfont.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../fonts/tbccontracticacaps-medium-webfont.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../fonts/tbccontracticacaps-bold-webfont.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../fonts/tbccontracticacaps-black-webfont.woff2",
+      weight: "900",
+      style: "normal",
+    },
+  ],
+  variable: "--font-contractica-caps",
+  display: "swap",
 });

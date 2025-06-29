@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import NavbarWrapper from "./components/NavbarWrapper";
-import { contractica } from "./lib/fonts";
+import { contractica, contracticaCaps } from "./lib/fonts";
 import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
@@ -25,7 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ka">
-      <body className={`${contractica.className} antialiased`}>
+      <body
+        className={`${contractica.className} ${contracticaCaps.variable} antialiased`}
+      >
         <NavbarWrapper />
         <main className="relative">{children}</main>
         <Toaster />
