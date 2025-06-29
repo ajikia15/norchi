@@ -11,11 +11,7 @@ import {
   Shield,
   Search,
   Zap,
-  Users,
-  ArrowRight,
-  Sword,
   Target,
-  Eye,
   ChevronRight,
 } from "lucide-react";
 
@@ -72,6 +68,58 @@ const floatingElements: FloatingElement[] = [
     preview: "გადამოწმე შენი რწმენა",
   },
 ];
+
+// Shared content structure with minimal variations
+const getContent = (userType: UserType) => {
+  if (userType === "supporter") {
+    return {
+      badge: "შენი არსენალი",
+      title: "გირჩელ მეგობარო!",
+      subtitle:
+        "აქ შენ იპოვი ყველაფერს რაც გჭირდება იმისთვის, რომ ეფექტურად წარმოადგინო შენი რწმენა",
+      features: [
+        {
+          icon: <Zap className="h-5 w-5" />,
+          text: "ცხელი კითხვების არსენალი - მოამზადე შენი არგუმენტები",
+        },
+        {
+          icon: <Target className="h-5 w-5" />,
+          text: "სოკრატული სტორები - დახვეწე შენი დებატების ხელოვნება",
+        },
+        {
+          icon: <VideoIcon className="h-5 w-5" />,
+          text: "საუნჯე - გააზიარე საზოგადოების საყვარელი მომენტები",
+        },
+      ],
+      primaryButtonText: "დაიწყე მართამაშე",
+      accentColor: "emerald",
+    };
+  } else if (userType === "skeptic") {
+    return {
+      badge: "გამოწვევა მიიღე",
+      title: "ეჭვის მქონე მეგობარო!",
+      subtitle:
+        "ჩვენ აქ არ ვართ ქადაგებისთვის — ჩვენ აქ ვართ დებატისთვის. შეამოწმე შენი რწმენა ჩვენს წინააღმდეგ",
+      features: [
+        {
+          icon: <Zap className="h-5 w-5" />,
+          text: "ცხელი კითხვები - პირდაპირი, ფილტრისგარეშე პასუხები",
+        },
+        {
+          icon: <Target className="h-5 w-5" />,
+          text: "სოკრატული სტორები - ლოგიკური გამოწვევა შენი რწმენისთვის",
+        },
+        {
+          icon: <VideoIcon className="h-5 w-5" />,
+          text: "საუნჯე - ნახე რა ახალისებს ჩვენს მხარდამჭერებს",
+        },
+      ],
+      primaryButtonText: "მიიღე გამოწვევა",
+      accentColor: "red",
+    };
+  }
+  return null;
+};
 
 // Particle animation component
 function ParticleField() {
@@ -186,80 +234,30 @@ function FloatingPreview({
 export default function HeroSection() {
   const [userType, setUserType] = useState<UserType>(null);
   const [showFloatingElements, setShowFloatingElements] = useState(false);
+  const [activeFeature, setActiveFeature] = useState<number | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowFloatingElements(true), 1000);
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    if (userType) {
+      // Animate the initial selection after the other elements have appeared.
+      const timer = setTimeout(() => {
+        setActiveFeature(0);
+      }, 500); // Corresponds to the feature list animation delay
+      return () => clearTimeout(timer);
+    } else {
+      setActiveFeature(null); // Reset when returning to the main choice
+    }
+  }, [userType]);
+
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const supporterContent = {
-    badge: "შენი არსენალი",
-    title: "გირჩელ მეგობარო!",
-    subtitle:
-      "აქ შენ იპოვი ყველაფერს რაც გჭირდება იმისთვის, რომ ეფექტურად წარმოადგინო შენი რწმენა",
-    features: [
-      {
-        icon: <Zap className="h-5 w-5" />,
-        text: "ცხელი კითხვების არსენალი ონლაინ დებატებისთვის",
-      },
-      {
-        icon: <VideoIcon className="h-5 w-5" />,
-        text: "საზოგადოების მიერ კურირებული საუნჯე",
-      },
-      {
-        icon: <Target className="h-5 w-5" />,
-        text: "სოკრატული ხელოვნების დახვეწა",
-      },
-    ],
-    primaryButton: {
-      text: "დაიწყე მართამაშე",
-      icon: <Sword className="h-4 w-4" />,
-    },
-    secondaryButton: {
-      text: "საუნჯე",
-      icon: <VideoIcon className="h-4 w-4" />,
-    },
-  };
-
-  const skepticContent = {
-    badge: "გამოწვევა მიიღე",
-    title: "ეჭვის მქონე მეგობარო!",
-    subtitle:
-      "ჩვენ აქ არ ვართ ქადაგებისთვის — ჩვენ აქ ვართ დებატისთვის. შეამოწმე შენი რწმენა ჩვენი წინააღმდეგ",
-    features: [
-      {
-        icon: <Eye className="h-5 w-5" />,
-        text: "პირდაპირი, ფილტრისგარეშე პასუხები",
-      },
-      {
-        icon: <Target className="h-5 w-5" />,
-        text: "ლოგიკური ბავშვი შენი რწმენისთვის",
-      },
-      {
-        icon: <Users className="h-5 w-5" />,
-        text: "ნახე რა ახალისებს ჩვენს მხარდამჭერებს",
-      },
-    ],
-    primaryButton: {
-      text: "მიიღე გამოწვევა",
-      icon: <Target className="h-4 w-4" />,
-    },
-    secondaryButton: {
-      text: "გზების მიღმა",
-      icon: <ArrowRight className="h-4 w-4" />,
-    },
-  };
-
-  const currentContent =
-    userType === "supporter"
-      ? supporterContent
-      : userType === "skeptic"
-      ? skepticContent
-      : null;
+  const content = getContent(userType);
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-gradient-to-br from-gray-900 via-gray-800 to-black">
@@ -358,7 +356,7 @@ export default function HeroSection() {
               </motion.div>
             </motion.div>
           ) : (
-            // Selected user type content
+            // Selected user type content - now unified with minimal variations
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -381,12 +379,12 @@ export default function HeroSection() {
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: "spring" }}
                   className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${
-                    userType === "supporter"
+                    content?.accentColor === "emerald"
                       ? "bg-emerald-600/30 text-emerald-300 border border-emerald-400/30"
                       : "bg-red-600/30 text-red-300 border border-red-400/30"
                   }`}
                 >
-                  {currentContent?.badge}
+                  {content?.badge}
                 </motion.div>
 
                 {/* Title */}
@@ -396,7 +394,7 @@ export default function HeroSection() {
                   transition={{ delay: 0.3 }}
                   className="mb-6 text-4xl font-bold md:text-6xl"
                 >
-                  {currentContent?.title}
+                  {content?.title}
                 </motion.h1>
 
                 {/* Subtitle */}
@@ -406,36 +404,57 @@ export default function HeroSection() {
                   transition={{ delay: 0.4 }}
                   className="mx-auto mb-8 max-w-3xl text-lg text-gray-300 md:text-xl"
                 >
-                  {currentContent?.subtitle}
+                  {content?.subtitle}
                 </motion.p>
 
-                {/* Features */}
+                {/* Features - now using shared structure */}
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.5 }}
-                  className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-3"
+                  className="relative mb-10 grid grid-cols-1 gap-2 md:grid-cols-3"
                 >
-                  {currentContent?.features.map((feature, index) => (
+                  {activeFeature === null && (
+                    <motion.div
+                      layoutId="feature-hover"
+                      className="absolute inset-0 z-0 rounded-xl"
+                      // No background, just an invisible placeholder for the animation
+                    />
+                  )}
+                  {content?.features.map((feature, index) => (
                     <div
                       key={index}
-                      className="flex items-center space-x-3 text-left"
+                      className="relative cursor-pointer rounded-xl p-4 text-left"
+                      onMouseEnter={() => setActiveFeature(index)}
                     >
-                      <div
-                        className={`p-2 rounded-full ${
-                          userType === "supporter"
-                            ? "bg-emerald-600/30"
-                            : "bg-red-600/30"
-                        }`}
-                      >
-                        {feature.icon}
+                      {activeFeature === index && (
+                        <motion.div
+                          layoutId="feature-hover"
+                          className="absolute inset-0 z-0 rounded-xl bg-white/10"
+                          transition={{
+                            type: "spring",
+                            stiffness: 400,
+                            damping: 30,
+                          }}
+                        />
+                      )}
+                      <div className="relative z-10 flex items-center space-x-3">
+                        <div
+                          className={`flex-shrink-0 rounded-full p-2 ${
+                            content.accentColor === "emerald"
+                              ? "bg-emerald-600/30"
+                              : "bg-red-600/30"
+                          }`}
+                        >
+                          {feature.icon}
+                        </div>
+                        <span className="text-gray-300">{feature.text}</span>
                       </div>
-                      <span className="text-gray-300">{feature.text}</span>
                     </div>
                   ))}
                 </motion.div>
 
-                {/* Action buttons */}
+                {/* Action buttons - now unified destinations */}
                 <motion.div
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
@@ -446,13 +465,13 @@ export default function HeroSection() {
                     size="lg"
                     onClick={() => scrollTo("hot-questions")}
                     className={`${
-                      userType === "supporter"
+                      content?.accentColor === "emerald"
                         ? "bg-emerald-600 hover:bg-emerald-700"
                         : "bg-red-600 hover:bg-red-700"
                     } text-white px-8 py-3`}
                   >
-                    {currentContent?.primaryButton.icon}
-                    {currentContent?.primaryButton.text}
+                    <Zap className="mr-2 h-4 w-4" />
+                    {content?.primaryButtonText}
                   </Button>
                   <Button
                     asChild
@@ -461,8 +480,8 @@ export default function HeroSection() {
                     className="border-white/30 px-8 py-3 text-white hover:bg-white/10"
                   >
                     <Link href="/treasury">
-                      {currentContent?.secondaryButton.icon}
-                      {currentContent?.secondaryButton.text}
+                      <VideoIcon className="mr-2 h-4 w-4" />
+                      საუნჯე
                     </Link>
                   </Button>
                 </motion.div>
