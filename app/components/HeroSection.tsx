@@ -46,11 +46,11 @@ export default function HeroSection() {
         </div>
         <div className="hidden lg:flex mt-16 sm:mt-24 lg:mt-0 lg:flex-shrink-0 lg:flex-grow items-center justify-center">
           <Image
-            src="/norchi2.png"
-            alt="Norchi"
-            width={400}
-            height={400}
-            className="rounded-xl shadow-2xl ring-1 ring-gray-900/10"
+            src="/logo36.png"
+            alt="Girchi 36 Logo"
+            width={500}
+            height={500}
+            className="rounded-xl"
           />
         </div>
       </div>
