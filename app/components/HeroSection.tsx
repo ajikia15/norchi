@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
@@ -185,19 +186,11 @@ function FloatingPreview({
 export default function HeroSection() {
   const [userType, setUserType] = useState<UserType>(null);
   const [showFloatingElements, setShowFloatingElements] = useState(false);
-  const [showMainText, setShowMainText] = useState(true);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowFloatingElements(true), 1000);
     return () => clearTimeout(timer);
   }, []);
-
-  useEffect(() => {
-    if (userType !== null) {
-      const timer = setTimeout(() => setShowMainText(false), 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [userType]);
 
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
@@ -289,12 +282,12 @@ export default function HeroSection() {
         <FloatingPreview
           key={element.id}
           element={element}
-          isVisible={showFloatingElements && userType !== null && showMainText}
+          isVisible={showFloatingElements && userType !== null}
         />
       ))}
 
       {/* Main content */}
-      <div className="relative z-20 h-screen w-full">
+      <div className="relative z-20 mx-auto h-screen max-w-7xl">
         <AnimatePresence mode="wait">
           {userType === null ? (
             // Initial choice screen
@@ -306,8 +299,10 @@ export default function HeroSection() {
             >
               {/* Supporter side */}
               <motion.div
-                className="relative flex cursor-pointer items-center justify-center bg-gradient-to-br from-emerald-600/20 to-blue-600/20 p-8 backdrop-blur-sm"
+                className="relative flex items-center justify-center bg-gradient-to-br from-emerald-600/20 to-blue-600/20 p-8 backdrop-blur-sm"
+                whileHover={{ scale: 1.02 }}
                 onClick={() => setUserType("supporter")}
+                style={{ cursor: "pointer" }}
               >
                 <div className="text-center text-white">
                   <motion.div
@@ -337,8 +332,10 @@ export default function HeroSection() {
 
               {/* Skeptic side */}
               <motion.div
-                className="relative flex cursor-pointer items-center justify-center bg-gradient-to-br from-red-600/20 to-purple-600/20 p-8 backdrop-blur-sm"
+                className="relative flex items-center justify-center bg-gradient-to-br from-red-600/20 to-purple-600/20 p-8 backdrop-blur-sm"
+                whileHover={{ scale: 1.02 }}
                 onClick={() => setUserType("skeptic")}
+                style={{ cursor: "pointer" }}
               >
                 <div className="text-center text-white">
                   <motion.div
@@ -365,155 +362,111 @@ export default function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative h-full w-full"
+              className="flex h-full items-center justify-center"
             >
-              {/* Back button */}
-              <motion.button
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                onClick={() => setUserType(null)}
-                className="absolute left-8 top-8 z-50 text-white/70 transition-colors hover:text-white"
-              >
-                ← უკან
-              </motion.button>
+              <div className="mx-auto max-w-4xl px-6 text-center text-white">
+                {/* Back button */}
+                <motion.button
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  onClick={() => setUserType(null)}
+                  className="absolute left-8 top-8 text-white/70 transition-colors hover:text-white"
+                >
+                  ← უკან
+                </motion.button>
 
-              {/* Main intro text - disappears after 5 seconds */}
-              <AnimatePresence>
-                {showMainText && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{
-                      opacity: 0,
-                      scale: 0.5,
-                      transition: { duration: 1.5, ease: "easeInOut" },
-                    }}
-                    className="absolute inset-0 z-40 flex items-center justify-center"
-                  >
-                    <div className="max-w-4xl px-6 text-center text-white">
-                      {/* Badge */}
-                      <motion.div
-                        initial={{ scale: 0 }}
-                        animate={{ scale: 1 }}
-                        transition={{ delay: 0.2, type: "spring" }}
-                        className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${
-                          userType === "supporter"
-                            ? "bg-emerald-600/30 text-emerald-300 border border-emerald-400/30"
-                            : "bg-red-600/30 text-red-300 border border-red-400/30"
-                        }`}
-                      >
-                        {currentContent?.badge}
-                      </motion.div>
+                {/* Badge */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                  className={`inline-block px-4 py-2 rounded-full text-sm font-semibold mb-6 ${
+                    userType === "supporter"
+                      ? "bg-emerald-600/30 text-emerald-300 border border-emerald-400/30"
+                      : "bg-red-600/30 text-red-300 border border-red-400/30"
+                  }`}
+                >
+                  {currentContent?.badge}
+                </motion.div>
 
-                      {/* Title */}
-                      <motion.h1
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.3 }}
-                        className="mb-6 text-4xl font-bold md:text-6xl"
-                      >
-                        {currentContent?.title}
-                      </motion.h1>
+                {/* Title */}
+                <motion.h1
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="mb-6 text-4xl font-bold md:text-6xl"
+                >
+                  {currentContent?.title}
+                </motion.h1>
 
-                      {/* Subtitle */}
-                      <motion.p
-                        initial={{ y: 20, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.4 }}
-                        className="mx-auto max-w-3xl text-lg text-gray-300 md:text-xl"
-                      >
-                        {currentContent?.subtitle}
-                      </motion.p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                {/* Subtitle */}
+                <motion.p
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.4 }}
+                  className="mx-auto mb-8 max-w-3xl text-lg text-gray-300 md:text-xl"
+                >
+                  {currentContent?.subtitle}
+                </motion.p>
 
-              {/* Three column layout - appears after main text disappears */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: showMainText ? 0 : 1 }}
-                transition={{ delay: showMainText ? 0 : 1, duration: 1 }}
-                className="grid h-full grid-cols-3"
-              >
-                {currentContent?.features.map((feature, index) => (
-                  <motion.div
-                    key={index}
-                    className="relative flex cursor-pointer flex-col items-center justify-center p-8"
-                    initial={{
-                      y: -100,
-                      opacity: 0,
-                    }}
-                    animate={{
-                      y: 0,
-                      opacity: showMainText ? 0 : 1,
-                    }}
-                    transition={{
-                      delay: showMainText ? 0 : 1.2 + index * 0.3,
-                      duration: 0.8,
-                      type: "spring",
-                      stiffness: 80,
-                      damping: 12,
-                    }}
-                  >
-                    {/* Column content */}
-                    <div className="max-w-sm text-center text-white">
-                      <motion.div
-                        className={`p-4 rounded-full mb-6 mx-auto w-16 h-16 flex items-center justify-center ${
+                {/* Features */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.5 }}
+                  className="mb-10 grid grid-cols-1 gap-6 md:grid-cols-3"
+                >
+                  {currentContent?.features.map((feature, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-3 text-left"
+                    >
+                      <div
+                        className={`p-2 rounded-full ${
                           userType === "supporter"
                             ? "bg-emerald-600/30"
                             : "bg-red-600/30"
                         }`}
                       >
                         {feature.icon}
-                      </motion.div>
-                      <h3 className="mb-4 text-xl font-bold">{feature.text}</h3>
+                      </div>
+                      <span className="text-gray-300">{feature.text}</span>
                     </div>
+                  ))}
+                </motion.div>
 
-                    {/* Action button always visible */}
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{
-                        opacity: showMainText ? 0 : 1,
-                        y: 0,
-                      }}
-                      transition={{
-                        delay: showMainText ? 0 : 1.5 + index * 0.3,
-                        duration: 0.6,
-                      }}
-                      className="mt-6"
-                    >
-                      <Button
-                        size="lg"
-                        onClick={() => {
-                          if (index === 0) scrollTo("hot-questions");
-                          else if (index === 1)
-                            window.location.href = "/treasury";
-                          else scrollTo("stories");
-                        }}
-                        className={`${
-                          userType === "supporter"
-                            ? "bg-emerald-600 hover:bg-emerald-700"
-                            : "bg-red-600 hover:bg-red-700"
-                        } text-white`}
-                      >
-                        {index === 0 ? (
-                          <Zap className="mr-2 h-4 w-4" />
-                        ) : index === 1 ? (
-                          <VideoIcon className="mr-2 h-4 w-4" />
-                        ) : (
-                          <Target className="mr-2 h-4 w-4" />
-                        )}
-                        {index === 0
-                          ? "ცხელი კითხვები"
-                          : index === 1
-                          ? "საუნჯე"
-                          : "სოკრატული გზები"}
-                      </Button>
-                    </motion.div>
-                  </motion.div>
-                ))}
-              </motion.div>
+                {/* Action buttons */}
+                <motion.div
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.6 }}
+                  className="flex flex-col items-center justify-center gap-4 sm:flex-row"
+                >
+                  <Button
+                    size="lg"
+                    onClick={() => scrollTo("hot-questions")}
+                    className={`${
+                      userType === "supporter"
+                        ? "bg-emerald-600 hover:bg-emerald-700"
+                        : "bg-red-600 hover:bg-red-700"
+                    } text-white px-8 py-3`}
+                  >
+                    {currentContent?.primaryButton.icon}
+                    {currentContent?.primaryButton.text}
+                  </Button>
+                  <Button
+                    asChild
+                    size="lg"
+                    variant="outline"
+                    className="border-white/30 px-8 py-3 text-white hover:bg-white/10"
+                  >
+                    <Link href="/treasury">
+                      {currentContent?.secondaryButton.icon}
+                      {currentContent?.secondaryButton.text}
+                    </Link>
+                  </Button>
+                </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
