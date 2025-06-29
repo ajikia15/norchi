@@ -194,6 +194,8 @@ h4,
 h5,
 h6 {
   font-family: var(--font-contractica-caps);
+  position: relative;
+  top: 2px;
 }
 
 /* Prevent any scrolling when game is active */

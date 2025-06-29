@@ -73,7 +73,7 @@ export default function Navbar({ user, isAdmin = false }: NavbarProps = {}) {
   ];
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-gray-200/50 bg-white/95 font-firago backdrop-blur-sm">
+    <nav className="font-firago sticky top-0 z-50 border-b border-gray-200/50 bg-white/95 backdrop-blur-sm">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex h-16 items-center justify-between">
           {/* Logo/Brand */}
